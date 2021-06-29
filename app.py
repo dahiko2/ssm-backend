@@ -11,6 +11,7 @@ class MyDict(dict):
     def add(self, key, value):
         self[key] = value
 
+
 AUTH = False
 mydb = None
 fhost = ""
@@ -308,13 +309,13 @@ def get_releases_between(date1, date2):
 @app.route("/ssm/kpi_<year>_<country>")
 def get_kpi_by_country_year(year, country):
     mycursor = ssm_connection()
-    query = "SELECT idkpi, value, month FROM kpi_mao where year = %s and country = %s;"
+    query = "SELECT idkpi, value, target, month FROM kpi_mao where year = %s and country = %s;"
     val = (year, country)
     mycursor.execute(query, val)
     query_result = mycursor.fetchall()
     mydict = MyDict()
     for row in query_result:
-        mydict.add(row[0], ({"value": row[1], "month": row[2]}))
+        mydict.add(row[0], ({"value": row[1], "target": row[2], "month": row[3]}))
     result = json.dumps(mydict, indent=4)
     return result
 
