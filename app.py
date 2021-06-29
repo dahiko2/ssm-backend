@@ -1,6 +1,7 @@
 import json
 import mysql.connector
-from flask import Flask
+import flask
+from datetime import datetime
 
 
 class MyDict(dict):
@@ -10,20 +11,23 @@ class MyDict(dict):
     def add(self, key, value):
         self[key] = value
 
-
-app = Flask(__name__)
+AUTH = False
 mydb = None
 fhost = ""
 fuser = ""
 fpass = ""
+fauth = ""
 
+app = flask.Flask(__name__)
 
 def read_creds():
-    global fhost, fuser, fpass
+    global fhost, fuser, fpass, fauth
     with open("credentials.txt") as f:
         fhost = f.readline()
         fuser = f.readline()
         fpass = f.readline()
+        fauth = f.readline()
+    fpass = fpass.strip()
 
 
 def instagram_connection():
@@ -34,8 +38,7 @@ def instagram_connection():
         password=fpass,
         database="instagram"
     )
-    mycursor = mydb.cursor()
-    return mycursor
+    return mydb.cursor()
 
 
 def ssm_connection():
@@ -46,8 +49,7 @@ def ssm_connection():
         password=fpass,
         database="ssm"
     )
-    mycursor = mydb.cursor()
-    return mycursor
+    return mydb.cursor()
 
 
 @app.route("/instagram/<account>")
@@ -264,7 +266,7 @@ def get_releases_by_period(period, n):
         return "{}"
     mycursor = ssm_connection()
     query = "SELECT releaseID, ProjectName, EpisodesName, UniqUser, Traffic, ReleaseDate, Tail, TrafficPerDay, TrafficPerTail, YoutubeViews," \
-            "AverageViewsByUser, Shows, CTR, UniqUserYoutube, Subscribers FROM ssm.releases, ssm.project " \
+            "AverageViewsByUser, Shows, CTR, UniqUserYoutube, Subscribers, Price FROM ssm.releases, ssm.project " \
             "WHERE ReleaseDate > DATE_SUB(CURDATE(), INTERVAL %s " + period + ") and releases.ProjectID = project.projectID;"
     val = (n,)
     mycursor.execute(query, val)
@@ -287,7 +289,7 @@ def get_releases_between(date1, date2):
     date1 = date1.replace(".", "/")
     date2 = date2.replace(".", "/")
     query = "SELECT releaseID, ProjectName, EpisodesName, UniqUser, Traffic, ReleaseDate, Tail, TrafficPerDay, TrafficPerTail, YoutubeViews," \
-            "AverageViewsByUser, Shows, CTR, UniqUserYoutube, Subscribers FROM releases, project where releases.ProjectID = project.projectID and (ReleaseDate between %s and %s);"
+            "AverageViewsByUser, Shows, CTR, UniqUserYoutube, Subscribers, Price FROM releases, project where releases.ProjectID = project.projectID and (ReleaseDate between %s and %s);"
     val = (date1, date2)
     mycursor.execute(query, val)
     query_result = mycursor.fetchall()
@@ -301,5 +303,43 @@ def get_releases_between(date1, date2):
              "subscribers": row[14]}))
     result = json.dumps(mydict, indent=4)
     return result
+
+
+@app.route("/ssm/kpi_<year>_<country>")
+def get_kpi_by_country_year(year, country):
+    mycursor = ssm_connection()
+    query = "SELECT idkpi, value, month FROM kpi_mao where year = %s and country = %s;"
+    val = (year, country)
+    mycursor.execute(query, val)
+    query_result = mycursor.fetchall()
+    mydict = MyDict()
+    for row in query_result:
+        mydict.add(row[0], ({"value": row[1], "month": row[2]}))
+    result = json.dumps(mydict, indent=4)
+    return result
+
+
+def calculate_cpa(price, aitube, youtube):
+    return price / (aitube+youtube)
+
+
+def calculate_cpc(price, traffic):
+    return price/traffic
+
+
+def calculate_cpu(price, uniq_user):
+    return price/uniq_user
+
+
+@app.before_request
+def validate_auth():
+    if AUTH:
+        body = flask.request.get_json()
+        try:
+            if body is None or body["auth"] != fauth:
+                flask.abort(401)
+        except KeyError:
+            flask.abort(401)
+
 
 read_creds()
