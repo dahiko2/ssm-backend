@@ -4,6 +4,7 @@ from datetime import datetime
 import mysql.connector
 import flask
 from urllib.parse import urlparse, parse_qs
+from flask_cors import CORS
 
 class MyDict(dict):
     def __init__(self):
@@ -21,7 +22,12 @@ fpass = ""
 fauth = ""
 
 app = flask.Flask(__name__)
-
+CORS(app)
+cors = CORS(app, resources={
+    r"/*": {
+        "origins": "https://salemsocial.kz/"
+    }
+})
 
 def read_creds():
     global fhost, fuser, fpass, fauth
@@ -316,7 +322,7 @@ def update_kpi_mao(value, country):
         password=fpass,
         database="ssm"
     )
-    months = [0, "JANUARY", "FEBRUARY", "MARCH", "APRIL", "MAY", "JUNE", "JULE", "AUGUST", "SEPTEMBER", "OCTOBER", "NOVEMBER", "DECEMBER"]
+    months = [0, "Январь", "Февраль", "Март", "Апрель", "Май", "Июнь", "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"]
     mycursor = mydb1.cursor()
     now = datetime.today()
     query = "INSERT INTO kpi_mao (value, country, month, year, month_year) VALUES (%s, %s, %s, %s, %s);"
