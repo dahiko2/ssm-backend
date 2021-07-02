@@ -1,8 +1,9 @@
 import json
-import mysql.connector
-import flask
 from datetime import datetime
 
+import mysql.connector
+import flask
+from urllib.parse import urlparse, parse_qs
 
 class MyDict(dict):
     def __init__(self):
@@ -20,6 +21,7 @@ fpass = ""
 fauth = ""
 
 app = flask.Flask(__name__)
+
 
 def read_creds():
     global fhost, fuser, fpass, fauth
@@ -205,21 +207,7 @@ def get_top_by_comments(n):
     return result
 
 
-@app.route("/ssm/uniq_byprojectid=<int:project_id>")
-def get_unique_users_by_projectid(project_id):
-    mycursor = ssm_connection()
-    query = "SELECT ReleaseID, EpisodesName, UniqUser, Traffic FROM ssm.releases where projectID = %s"
-    val = (project_id,)
-    mycursor.execute(query, val)
-    query_result = mycursor.fetchall()
-    mydict = MyDict()
-    for row in query_result:
-        mydict.add(row[0], ({"episode_name": row[1], "unique_count": row[2], "traffic": row[3]}))
-    result = json.dumps(mydict, indent=4)
-    return result
-
-
-@app.route("/ssm/fullinfo_byprojectid=<int:project_id>")
+@app.route("/ssm/info_byprojectid=<int:project_id>")
 def get_fullinfo_by_projectid(project_id):
     mycursor = ssm_connection()
     query = "SELECT * FROM ssm.releases where projectID = %s"
@@ -233,12 +221,12 @@ def get_fullinfo_by_projectid(project_id):
              "tail": row[5],
              "traffic_per_day": row[6], "traffic_per_tail": row[7], "youtube_views": row[8],
              "avg_view_by_user": row[9], "shows": row[10], "ctr": row[11], "uniq_users_youtube": row[12],
-             "subscribers": row[13]}))
+             "subscribers": row[13], "price": row[15], "cpv": calculate_cpv(row[15], row[8]), "cpu": calculate_cpu(row[15], row[2]), "cpc": calculate_cpc(row[15], row[3])}))
     result = json.dumps(mydict, indent=4)
     return result
 
 
-@app.route("/ssm/fullinfo_byprojectname=<project>")
+@app.route("/ssm/info_byprojectname=<project>")
 def get_fullinfo_by_projectname(project):
     project = str(project) + "%"
     mycursor = ssm_connection()
@@ -253,7 +241,7 @@ def get_fullinfo_by_projectname(project):
              "tail": row[5],
              "traffic_per_day": row[6], "traffic_per_tail": row[7], "youtube_views": row[8],
              "avg_view_by_user": row[9], "shows": row[10], "ctr": row[11], "uniq_users_youtube": row[12],
-             "subscribers": row[13]}))
+             "subscribers": row[13], "price": row[14]}))
     result = json.dumps(mydict, indent=4)
     return result
 
@@ -264,7 +252,7 @@ def get_releases_by_period(period, n):
     periods = ["DAY", "WEEK", "MONTH", "YEAR"]
     period = period.upper()
     if period not in periods:
-        return "{}"
+        return "{Wrong period, acceptable values is DAY, WEEK, MONTH, YEAR}"
     mycursor = ssm_connection()
     query = "SELECT releaseID, ProjectName, EpisodesName, UniqUser, Traffic, ReleaseDate, Tail, TrafficPerDay, TrafficPerTail, YoutubeViews," \
             "AverageViewsByUser, Shows, CTR, UniqUserYoutube, Subscribers, Price FROM ssm.releases, ssm.project " \
@@ -279,7 +267,7 @@ def get_releases_by_period(period, n):
              "release_date": str(row[5]), "tail": row[6],
              "traffic_per_day": row[7], "traffic_per_tail": row[8], "youtube_views": row[9],
              "avg_view_by_user": row[10], "shows": row[11], "ctr": row[12], "uniq_users_youtube": row[13],
-             "subscribers": row[14]}))
+             "subscribers": row[14], "price": row[15]}))
     result = json.dumps(mydict, indent=4)
     return result
 
@@ -301,7 +289,7 @@ def get_releases_between(date1, date2):
              "release_date": str(row[5]), "tail": row[6],
              "traffic_per_day": row[7], "traffic_per_tail": row[8], "youtube_views": row[9],
              "avg_view_by_user": row[10], "shows": row[11], "ctr": row[12], "uniq_users_youtube": row[13],
-             "subscribers": row[14]}))
+             "subscribers": row[14], "price": row[15]}))
     result = json.dumps(mydict, indent=4)
     return result
 
@@ -320,16 +308,71 @@ def get_kpi_by_country_year(year, country):
     return result
 
 
-def calculate_cpa(price, aitube, youtube):
-    return price / (aitube+youtube)
+@app.route("/ssm/updatekpi_<value>_<country>")
+def update_kpi_mao(value, country):
+    mydb1 = mysql.connector.connect(
+        host=fhost,
+        user=fuser,
+        password=fpass,
+        database="ssm"
+    )
+    months = [0, "JANUARY", "FEBRUARY", "MARCH", "APRIL", "MAY", "JUNE", "JULE", "AUGUST", "SEPTEMBER", "OCTOBER", "NOVEMBER", "DECEMBER"]
+    mycursor = mydb1.cursor()
+    now = datetime.today()
+    query = "INSERT INTO kpi_mao (value, country, month, year, month_year) VALUES (%s, %s, %s, %s, %s);"
+    if now.month < 10:
+        month = '0' + str(now.month)
+    else:
+        month = str(now.month)
+    val = (value, country, months[now.month], now.year, month+str(now.year)+str(country))
+    try:
+        mycursor.execute(query, val)
+    except mysql.connector.errors.IntegrityError:
+        query = "UPDATE kpi_mao SET value = %s where country = %s and month = %s and year = %s and month_year = %s;"
+        mycursor.execute(query, val)
+    mydb1.commit()
+    return "ok"
+
+
+def calculate_cpv(price, youtube_view):
+    if price is None or youtube_view is None or youtube_view == 0:
+        return 0
+    return price / youtube_view
 
 
 def calculate_cpc(price, traffic):
+    if price is None or traffic is None or traffic == 0:
+        return 0
     return price/traffic
 
 
 def calculate_cpu(price, uniq_user):
+    if price is None or uniq_user is None or uniq_user == 0:
+        return 0
     return price/uniq_user
+
+
+def get_yt_id(url):
+    res = ""
+    doNext = True
+    u_pars = urlparse(url)
+    quer_v = parse_qs(u_pars.query).get('v')
+    if quer_v:
+        res = quer_v[0]
+        doNext = False
+    if doNext:
+        pth = u_pars.path.split('/')
+        if pth:
+            res = pth[-1]
+    temp = res
+    if temp[:2] == 'v=':
+        temp = res[2:]
+    elif res[0] == '=':
+        temp = res[1:]
+    n = temp.find("&")
+    if n != -1:
+        return temp[:n]
+    return temp
 
 
 @app.before_request
