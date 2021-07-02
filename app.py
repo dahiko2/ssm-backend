@@ -1,10 +1,10 @@
 import json
-from datetime import datetime
-
 import mysql.connector
 import flask
+from datetime import datetime
 from urllib.parse import urlparse, parse_qs
 from flask_cors import CORS
+
 
 class MyDict(dict):
     def __init__(self):
@@ -15,11 +15,13 @@ class MyDict(dict):
 
 
 AUTH = False
-mydb = None
+mydb = mysql.connector.connect()
 fhost = ""
 fuser = ""
 fpass = ""
 fauth = ""
+fdbname_insta = ""
+fdbname_ssm = ""
 
 app = flask.Flask(__name__)
 CORS(app)
@@ -29,14 +31,16 @@ cors = CORS(app, resources={
     }
 })
 
+
 def read_creds():
-    global fhost, fuser, fpass, fauth
+    global fhost, fuser, fpass, fauth, fdbname_insta, fdbname_ssm
     with open("credentials.txt") as f:
         fhost = f.readline()
         fuser = f.readline()
-        fpass = f.readline()
+        fpass = f.readline().strip()
         fauth = f.readline()
-    fpass = fpass.strip()
+        fdbname_insta = f.readline().strip()
+        fdbname_ssm = f.readline().strip()
 
 
 def instagram_connection():
@@ -45,7 +49,7 @@ def instagram_connection():
         host=fhost,
         user=fuser,
         password=fpass,
-        database="instagram"
+        database=fdbname_insta
     )
     return mydb.cursor()
 
@@ -56,9 +60,50 @@ def ssm_connection():
         host=fhost,
         user=fuser,
         password=fpass,
-        database="ssm"
+        database=fdbname_ssm
     )
     return mydb.cursor()
+
+
+def calculate_cpv(price, youtube_view):
+    if price is None or youtube_view is None or youtube_view == 0:
+        return 0
+    return price / youtube_view
+
+
+def calculate_cpc(price, traffic):
+    if price is None or traffic is None or traffic == 0:
+        return 0
+    return price/traffic
+
+
+def calculate_cpu(price, uniq_user):
+    if price is None or uniq_user is None or uniq_user == 0:
+        return 0
+    return price/uniq_user
+
+
+def get_yt_id(url):
+    res = ""
+    doNext = True
+    u_pars = urlparse(url)
+    quer_v = parse_qs(u_pars.query).get('v')
+    if quer_v:
+        res = quer_v[0]
+        doNext = False
+    if doNext:
+        pth = u_pars.path.split('/')
+        if pth:
+            res = pth[-1]
+    temp = res
+    if temp[:2] == 'v=':
+        temp = res[2:]
+    elif res[0] == '=':
+        temp = res[1:]
+    n = temp.find("&")
+    if n != -1:
+        return temp[:n]
+    return temp
 
 
 @app.route("/instagram/<account>")
@@ -316,14 +361,9 @@ def get_kpi_by_country_year(year, country):
 
 @app.route("/ssm/updatekpi_<value>_<country>")
 def update_kpi_mao(value, country):
-    mydb1 = mysql.connector.connect(
-        host=fhost,
-        user=fuser,
-        password=fpass,
-        database="ssm"
-    )
+    global mydb
+    mycursor = ssm_connection()
     months = [0, "Январь", "Февраль", "Март", "Апрель", "Май", "Июнь", "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"]
-    mycursor = mydb1.cursor()
     now = datetime.today()
     query = "INSERT INTO kpi_mao (value, country, month, year, month_year) VALUES (%s, %s, %s, %s, %s);"
     if now.month < 10:
@@ -336,49 +376,8 @@ def update_kpi_mao(value, country):
     except mysql.connector.errors.IntegrityError:
         query = "UPDATE kpi_mao SET value = %s where country = %s and month = %s and year = %s and month_year = %s;"
         mycursor.execute(query, val)
-    mydb1.commit()
-    return "ok"
-
-
-def calculate_cpv(price, youtube_view):
-    if price is None or youtube_view is None or youtube_view == 0:
-        return 0
-    return price / youtube_view
-
-
-def calculate_cpc(price, traffic):
-    if price is None or traffic is None or traffic == 0:
-        return 0
-    return price/traffic
-
-
-def calculate_cpu(price, uniq_user):
-    if price is None or uniq_user is None or uniq_user == 0:
-        return 0
-    return price/uniq_user
-
-
-def get_yt_id(url):
-    res = ""
-    doNext = True
-    u_pars = urlparse(url)
-    quer_v = parse_qs(u_pars.query).get('v')
-    if quer_v:
-        res = quer_v[0]
-        doNext = False
-    if doNext:
-        pth = u_pars.path.split('/')
-        if pth:
-            res = pth[-1]
-    temp = res
-    if temp[:2] == 'v=':
-        temp = res[2:]
-    elif res[0] == '=':
-        temp = res[1:]
-    n = temp.find("&")
-    if n != -1:
-        return temp[:n]
-    return temp
+    mydb.commit()
+    return flask.Response(status=200)
 
 
 @app.before_request
