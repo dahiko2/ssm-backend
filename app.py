@@ -285,18 +285,30 @@ def get_fullinfo_by_projectid(project_id):
     val = (project_id,)
     mycursor.execute(query, val)
     query_result = mycursor.fetchall()
-    mydict = MyDict()
+    itemlist = []
     for row in query_result:
-        mydict.add(row[0], (
-            {"episode_name": row[1], "unique_count": row[2], "traffic": row[3], "release_date": str(row[4]),
-             "tail": row[5],
-             "traffic_per_day": row[6], "traffic_per_tail": row[7], "youtube_views": row[8],
-             "avg_view_by_user": row[9], "shows": row[10], "ctr": row[11], "uniq_users_youtube": row[12],
-             "subscribers": row[13], "price": row[15], "cpv": calculate_cpv(row[15], row[8]), "cpu": calculate_cpu(row[15], row[2]), "cpc": calculate_cpc(row[15], row[3])}))
-    temp = json.dumps(mydict, indent=4)
-    result = "["+temp[1:-1]+"]"
+        item = dict()
+        item["episode_name"] = row[1]
+        item["unique_count"] = row[2]
+        item["traffic"] = row[3]
+        item["release_date"] = str(row[4])
+        item["tail"] = row[5]
+        item["traffic_per_day"] = row[6]
+        item["traffic_per_tail"] = row[7]
+        item["youtube_views"] = row[8]
+        item["avg_view_by_user"] = row[9]
+        item["shows"] = row[10]
+        item["ctr"] = row[11]
+        item["uniq_users_youtube"] = row[12]
+        item["subscribers"] = row[13]
+        item["price"] = row[15]
+        item["cpv"] = calculate_cpv(row[15], row[8])
+        item["cpu"] = calculate_cpu(row[15], row[2])
+        item["cpc"] = calculate_cpc(row[15], row[3])
+        itemlist.append(item)
+    result = json.dumps(itemlist, indent=4)
     return result
-
+        
 
 @app.route("/ssm/info_byprojectname=<project>")
 def get_fullinfo_by_projectname(project):
@@ -306,15 +318,28 @@ def get_fullinfo_by_projectname(project):
     val = (project,)
     mycursor.execute(query, val)
     query_result = mycursor.fetchall()
-    mydict = MyDict()
+    itemlist = []
     for row in query_result:
-        mydict.add(row[0], (
-            {"episode_name": row[1], "unique_count": row[2], "traffic": row[3], "release_date": str(row[4]),
-             "tail": row[5],
-             "traffic_per_day": row[6], "traffic_per_tail": row[7], "youtube_views": row[8],
-             "avg_view_by_user": row[9], "shows": row[10], "ctr": row[11], "uniq_users_youtube": row[12],
-             "subscribers": row[13], "price": row[14]}))
-    result = json.dumps(mydict, indent=4)
+        item = dict()
+        item["episode_name"] = row[1]
+        item["unique_count"] = row[2]
+        item["traffic"] = row[3]
+        item["release_date"] = str(row[4])
+        item["tail"] = row[5]
+        item["traffic_per_day"] = row[6]
+        item["traffic_per_tail"] = row[7]
+        item["youtube_views"] = row[8]
+        item["avg_view_by_user"] = row[9]
+        item["shows"] = row[10]
+        item["ctr"] = row[11]
+        item["uniq_users_youtube"] = row[12]
+        item["subscribers"] = row[13]
+        item["price"] = row[15]
+        item["cpv"] = calculate_cpv(row[15], row[8])
+        item["cpu"] = calculate_cpu(row[15], row[2])
+        item["cpc"] = calculate_cpc(row[15], row[3])
+        itemlist.append(item)
+    result = json.dumps(itemlist, indent=4)
     return result
 
 
@@ -324,7 +349,7 @@ def get_releases_by_period(period, n):
     periods = ["DAY", "WEEK", "MONTH", "YEAR"]
     period = period.upper()
     if period not in periods:
-        return "{Wrong period, acceptable values is DAY, WEEK, MONTH, YEAR}"
+        return "{\"Error\": Wrong period, acceptable values is DAY, WEEK, MONTH, YEAR}"
     mycursor = ssm_connection()
     query = "SELECT releaseID, ProjectName, EpisodesName, UniqUser, Traffic, ReleaseDate, Tail, TrafficPerDay, TrafficPerTail, YoutubeViews," \
             "AverageViewsByUser, Shows, CTR, UniqUserYoutube, Subscribers, Price FROM ssm.releases, ssm.project " \
@@ -332,19 +357,33 @@ def get_releases_by_period(period, n):
     val = (n,)
     mycursor.execute(query, val)
     query_result = mycursor.fetchall()
-    mydict = MyDict()
+    itemlist = []
     for row in query_result:
-        mydict.add(row[0], (
-            {"project_name": row[1], "episode_name": row[2], "unique_count": row[3], "traffic": row[4],
-             "release_date": str(row[5]), "tail": row[6],
-             "traffic_per_day": row[7], "traffic_per_tail": row[8], "youtube_views": row[9],
-             "avg_view_by_user": row[10], "shows": row[11], "ctr": row[12], "uniq_users_youtube": row[13],
-             "subscribers": row[14], "price": row[15]}))
-    result = json.dumps(mydict, indent=4)
+        item = dict()
+        item["project_name"] = row[1]
+        item["episode_name"] = row[2]
+        item["unique_count"] = row[3]
+        item["traffic"] = row[4]
+        item["release_date"] = str(row[5])
+        item["tail"] = row[6]
+        item["traffic_per_day"] = row[7]
+        item["traffic_per_tail"] = row[8]
+        item["youtube_views"] = row[9]
+        item["avg_view_by_user"] = row[10]
+        item["shows"] = row[11]
+        item["ctr"] = row[12]
+        item["uniq_users_youtube"] = row[13]
+        item["subscribers"] = row[14]
+        item["price"] = row[15]
+        item["cpv"] = calculate_cpv(row[15], row[9])
+        item["cpu"] = calculate_cpu(row[15], row[3])
+        item["cpc"] = calculate_cpc(row[15], row[4])
+        itemlist.append(item)
+    result = json.dumps(itemlist, indent=4)
     return result
 
 
-@app.route("/ssm/release_between_<date1>_and_<date2>")
+@app.route("/ssm/releases_between_<date1>_and_<date2>")
 def get_releases_between(date1, date2):
     mycursor = ssm_connection()
     date1 = date1.replace(".", "/")
@@ -354,15 +393,29 @@ def get_releases_between(date1, date2):
     val = (date1, date2)
     mycursor.execute(query, val)
     query_result = mycursor.fetchall()
-    mydict = MyDict()
+    itemlist = []
     for row in query_result:
-        mydict.add(row[0], (
-            {"project_name": row[1], "episode_name": row[2], "unique_count": row[3], "traffic": row[4],
-             "release_date": str(row[5]), "tail": row[6],
-             "traffic_per_day": row[7], "traffic_per_tail": row[8], "youtube_views": row[9],
-             "avg_view_by_user": row[10], "shows": row[11], "ctr": row[12], "uniq_users_youtube": row[13],
-             "subscribers": row[14], "price": row[15]}))
-    result = json.dumps(mydict, indent=4)
+        item = dict()
+        item["project_name"] = row[1]
+        item["episode_name"] = row[2]
+        item["unique_count"] = row[3]
+        item["traffic"] = row[4]
+        item["release_date"] = str(row[5])
+        item["tail"] = row[6]
+        item["traffic_per_day"] = row[7]
+        item["traffic_per_tail"] = row[8]
+        item["youtube_views"] = row[9]
+        item["avg_view_by_user"] = row[10]
+        item["shows"] = row[11]
+        item["ctr"] = row[12]
+        item["uniq_users_youtube"] = row[13]
+        item["subscribers"] = row[14]
+        item["price"] = row[15]
+        item["cpv"] = calculate_cpv(row[15], row[9])
+        item["cpu"] = calculate_cpu(row[15], row[3])
+        item["cpc"] = calculate_cpc(row[15], row[4])
+        itemlist.append(item)
+    result = json.dumps(itemlist, indent=4)
     return result
 
 
@@ -434,10 +487,15 @@ def get_yt_trends():
     query = "SELECT id, video_name, channel, views, place FROM youtube_trends WHERE DATE(date) = CURDATE() ORDER BY date DESC;"
     mycursor.execute(query)
     query_result = mycursor.fetchall()
-    mydict = MyDict()
+    itemlist = []
     for row in query_result:
-        mydict.add(row[0], ({"video_name": row[1], "channel": row[2], "views": row[3], "place": row[4]}))
-    result = json.dumps(mydict, indent=4)
+        item = dict()
+        item["video_name"] = row[1]
+        item["channel"] = row[2]
+        item["views"] = row[3]
+        item["place"] = row[4]
+        itemlist.append(item)
+    result = json.dumps(itemlist, indent=4)
     return result
 
 
