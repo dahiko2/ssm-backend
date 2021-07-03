@@ -421,15 +421,26 @@ def get_releases_between(date1, date2):
 
 @app.route("/ssm/kpi_<year>_<country>")
 def get_kpi_by_country_year(year, country):
+    old_response = True
     mycursor = ssm_connection()
     query = "SELECT idkpi, value, target, month FROM kpi_mao where year = %s and country = %s;"
     val = (year, country)
     mycursor.execute(query, val)
     query_result = mycursor.fetchall()
-    mydict = MyDict()
-    for row in query_result:
-        mydict.add(row[0], ({"value": row[1], "target": row[2], "month": row[3]}))
-    result = json.dumps(mydict, indent=4)
+    if old_response:
+        mydict = MyDict()
+        for row in query_result:
+            mydict.add(row[0], ({"value": row[1], "target": row[2], "month": row[3]}))
+        result = json.dumps(mydict, indent=4)
+    else:
+        itemlist = []
+        for row in query_result:
+            item = dict()
+            item["value"] = row[1]
+            item["target"] = row[2]
+            item["month"] = row[3]
+            itemlist.append(item)
+        result = json.dumps(itemlist, indent=4)
     return result
 
 
