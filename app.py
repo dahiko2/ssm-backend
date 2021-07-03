@@ -106,6 +106,26 @@ def get_yt_id(url):
     return temp
 
 
+def get_youtube_channels(mycursor):
+    youtube_channels = []
+    query = "SELECT name FROM channels;"
+    mycursor.execute(query)
+    query_result = mycursor.fetchall()
+    for row in query_result:
+        youtube_channels.append(row[0])
+    return youtube_channels
+
+
+def get_today_trends_videos(mycursor):
+    today_videos = []
+    query = "SELECT video_name FROM youtube_trends WHERE DATE(date) = CURDATE();"
+    mycursor.execute(query)
+    query_result = mycursor.fetchall()
+    for row in query_result:
+        today_videos.append(row[0])
+    return today_videos
+
+
 @app.route("/instagram/<account>")
 def get_instagram_profile(account):
     mycursor = instagram_connection()
@@ -273,7 +293,8 @@ def get_fullinfo_by_projectid(project_id):
              "traffic_per_day": row[6], "traffic_per_tail": row[7], "youtube_views": row[8],
              "avg_view_by_user": row[9], "shows": row[10], "ctr": row[11], "uniq_users_youtube": row[12],
              "subscribers": row[13], "price": row[15], "cpv": calculate_cpv(row[15], row[8]), "cpu": calculate_cpu(row[15], row[2]), "cpc": calculate_cpc(row[15], row[3])}))
-    result = json.dumps(mydict, indent=4)
+    temp = json.dumps(mydict, indent=4)
+    result = "["+temp[1:-1]+"]"
     return result
 
 
@@ -378,6 +399,46 @@ def update_kpi_mao(value, country):
         mycursor.execute(query, val)
     mydb.commit()
     return flask.Response(status=200)
+
+
+@app.route("/ssm/update_yt_trends")
+def update_yt_trends():
+    body = flask.request.get_json()
+    if body is None:
+        flask.abort(403)
+
+    global mydb
+    mycursor = ssm_connection()
+
+    count = 0
+    video_list = json.loads(str(body).replace("'", '"'))
+    youtube_channels = get_youtube_channels(mycursor)
+    today_videos = get_today_trends_videos(mycursor)
+    for video in video_list:
+        if youtube_channels.count(video['channel']) > 0:
+            count += 1
+            if today_videos.count(video['video_name']) > 0:
+                query = "UPDATE youtube_trends SET place = %s WHERE video_name = %s and DATE(date) = CURDATE();"
+                values = (video['place'], video['video_name'])
+            else:
+                query = "INSERT INTO youtube_trends (video_name, channel, views, place, date) VALUES (%s, %s, %s, %s, NOW());"
+                values = (video['video_name'], video['channel'], video['views'], video['place'])
+            mycursor.execute(query, values)
+    mydb.commit()
+    return str(count)+" videos added."
+
+
+@app.route("/ssm/get_yt_trends")
+def get_yt_trends():
+    mycursor = ssm_connection()
+    query = "SELECT id, video_name, channel, views, place FROM youtube_trends WHERE DATE(date) = CURDATE() ORDER BY date DESC;"
+    mycursor.execute(query)
+    query_result = mycursor.fetchall()
+    mydict = MyDict()
+    for row in query_result:
+        mydict.add(row[0], ({"video_name": row[1], "channel": row[2], "views": row[3], "place": row[4]}))
+    result = json.dumps(mydict, indent=4)
+    return result
 
 
 @app.before_request
