@@ -465,6 +465,38 @@ def update_kpi_mao(value, country):
     return flask.Response(status=200)
 
 
+@app.route("/ssm/updatekpi", methods=['POST'])
+def update_kpi_mao2():
+    body = flask.request.get_json()
+    if body is None:
+        flask.abort(403)
+    data = json.loads(str(body).replace("'", '"'))
+    try:
+        value = data['value']
+        country = data['country']
+    except KeyError:
+        flask.abort(403)
+
+    global mydb
+    mycursor = ssm_connection()
+    months = [0, "Январь", "Февраль", "Март", "Апрель", "Май", "Июнь", "Июль", "Август", "Сентябрь", "Октябрь",
+              "Ноябрь", "Декабрь"]
+    now = datetime.today()
+    query = "INSERT INTO kpi_mao (value, country, month, year, month_year) VALUES (%s, %s, %s, %s, %s);"
+    if now.month < 10:
+        month = '0' + str(now.month)
+    else:
+        month = str(now.month)
+    val = (value, country, months[now.month], now.year, month + str(now.year) + str(country))
+    try:
+        mycursor.execute(query, val)
+    except mysql.connector.errors.IntegrityError:
+        query = "UPDATE kpi_mao SET value = %s where country = %s and month = %s and year = %s and month_year = %s;"
+        mycursor.execute(query, val)
+    mydb.commit()
+    return flask.Response(status=200)
+
+
 @app.route("/ssm/update_yt_trends", methods=['POST'])
 def update_yt_trends():
     body = flask.request.get_json()
@@ -510,10 +542,20 @@ def get_yt_trends():
     return result
 
 
-@app.route("/ssm/add_yt_channel_<channel>")
-def add_yt_channel(channel):
+@app.route("/ssm/add_yt_channel", methods=['POST'])
+def add_yt_channel():
+    body = flask.request.get_json()
+    if body is None:
+        flask.abort(403)
+    channels = json.loads(str(body).replace("'", '"'))
+    try:
+        channel = channels['channel']
+    except KeyError:
+        flask.abort(403)
+
     mycursor = ssm_connection()
     global mydb
+
     query = "INSERT INTO channels (name) VALUES (%s);"
     values = (channel, )
     mycursor.execute(query, values)
