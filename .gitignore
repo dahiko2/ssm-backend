@@ -114,3 +114,4 @@ dmypy.json
 .pyre/
 start.bat
 credentials.txt
+chromedriver.exe
