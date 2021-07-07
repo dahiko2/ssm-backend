@@ -465,7 +465,7 @@ def update_kpi_mao(value, country):
     return flask.Response(status=200)
 
 
-@app.route("/ssm/update_yt_trends")
+@app.route("/ssm/update_yt_trends", methods=['POST'])
 def update_yt_trends():
     body = flask.request.get_json()
     if body is None:
@@ -508,6 +508,17 @@ def get_yt_trends():
         itemlist.append(item)
     result = json.dumps(itemlist, indent=4)
     return result
+
+
+@app.route("/ssm/add_yt_channel_<channel>")
+def add_yt_channel(channel):
+    mycursor = ssm_connection()
+    global mydb
+    query = "INSERT INTO channels (name) VALUES (%s);"
+    values = (channel, )
+    mycursor.execute(query, values)
+    mydb.commit()
+    return "Channel "+channel+" added."
 
 
 @app.before_request
