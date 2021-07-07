@@ -563,6 +563,56 @@ def add_yt_channel():
     return "Channel "+channel+" added."
 
 
+@app.route("/ssm/get_kpi_aitu")
+def get_kpi_aitu():
+    mycursor = ssm_connection()
+    sql = "SELECT target, `left`, top_50, top_100, quiz, releases, today, `quarter`, quarterleft from kpi_aitu;"
+    mycursor.execute(sql)
+    query_result = mycursor.fetchall()
+    itemlist = []
+    for row in query_result:
+        item = dict()
+        item["target"] = row[0]
+        item["left"] = row[1]
+        item["top_50"] = row[2]
+        item["top_100"] = row[3]
+        item["quiz"] = row[4]
+        item["releases"] = row[5]
+        item["today"] = row[6]
+        item["quarter"] = row[7]
+        item["quarterleft"] = row[8]
+        itemlist.append(item)
+    result = json.dumps(itemlist, indent=4)
+    return result
+
+
+@app.route("/ssm/update_kpi_aitu", methods=['POST'])
+def update_kpi_aitu():
+    body = flask.request.get_json()
+    if body is None:
+        flask.abort(403)
+    data = json.loads(str(body).replace("'", '"'))
+    mycursor = ssm_connection()
+    items = []
+    try:
+        items.append(data['target'])
+        items.append(data['left'])
+        items.append(data['top_50'])
+        items.append(data['top_100'])
+        items.append(data['quiz'])
+        items.append(data['releases'])
+        items.append(data['today'])
+        items.append(data['quarter'])
+        items.append(data['quarterleft'])
+    except KeyError:
+        flask.abort(403)
+    query = 'UPDATE kpi_aitu set target = %s, `left` = %s, top_50 = %s, top_100 = %s, quiz = %s, releases = %s, today = %s, `quarter` = %s, quarterleft = %s WHERE id = 2'
+    val = (int(items[0]), int(items[1]), int(items[2]), int(items[3]), int(items[4]), int(items[5]), int(items[6]), int(items[7]), int(items[8]))
+    mycursor.execute(query, val)
+    mydb.commit()
+    return "ok."
+
+
 @app.before_request
 def validate_auth():
     if AUTH:
