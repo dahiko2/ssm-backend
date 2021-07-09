@@ -566,7 +566,7 @@ def add_yt_channel():
 @app.route("/ssm/get_kpi_aitu")
 def get_kpi_aitu():
     mycursor = ssm_connection()
-    sql = "SELECT target, `left`, top_50, top_100, quiz, releases, today, `quarter`, quarterleft from kpi_aitu;"
+    sql = "SELECT target, `left`, top_50, top_100, quiz, releases, today, `quarter`, quarter_left from kpi_aitu;"
     mycursor.execute(sql)
     query_result = mycursor.fetchall()
     itemlist = []
@@ -580,7 +580,7 @@ def get_kpi_aitu():
         item["releases"] = row[5]
         item["today"] = row[6]
         item["quarter"] = row[7]
-        item["quarterleft"] = row[8]
+        item["quarter_left"] = row[8]
         itemlist.append(item)
     result = json.dumps(itemlist, indent=4)
     return result
@@ -603,14 +603,75 @@ def update_kpi_aitu():
         items.append(data['releases'])
         items.append(data['today'])
         items.append(data['quarter'])
-        items.append(data['quarterleft'])
+        items.append(data['quarter_left'])
     except KeyError:
         flask.abort(403)
-    query = 'UPDATE kpi_aitu set target = %s, `left` = %s, top_50 = %s, top_100 = %s, quiz = %s, releases = %s, today = %s, `quarter` = %s, quarterleft = %s WHERE id = 2'
+    query = 'UPDATE kpi_aitu set target = %s, `left` = %s, top_50 = %s, top_100 = %s, quiz = %s, releases = %s, today = %s, `quarter` = %s, quarter_left = %s WHERE id = 2'
     val = (int(items[0]), int(items[1]), int(items[2]), int(items[3]), int(items[4]), int(items[5]), int(items[6]), int(items[7]), int(items[8]))
     mycursor.execute(query, val)
     mydb.commit()
     return "ok."
+
+
+@app.route("/ssm/update_logs", methods=['POST'])
+def update_logging():
+    body = flask.request.get_json()
+    if body is None:
+        flask.abort(403)
+    data = json.loads(str(body).replace("'", '"'))
+    types = [{"kpi_mao": 1}, {"kpi_aitu": 2}, {"aitube_utm": 3}]
+    try:
+        for item in types:
+            if data["type"] == list(item.keys())[0]:
+                query = "UPDATE log SET date = %s WHERE idlog = %s"
+                value = (data["date"], item[list(item.keys())[0]])
+                break
+    except KeyError:
+        flask.abort(403)
+    else:
+        mycursor = ssm_connection()
+        mycursor.execute(query, value)
+        return "ok"
+
+
+@app.route("/ssm/get_logs_<logtype>", methods=['GET'])
+def get_logs(logtype):
+    types = [{"kpi_mao": 1}, {"kpi_aitu": 2}, {"aitube_utm": 3}]
+    mycursor = ssm_connection()
+    try:
+        for item in types:
+            if logtype == list(item.keys())[0]:
+                value = (item[list(item.keys())[0]],)
+                query = "SELECT date FROM log WHERE idlog = %s"
+                mycursor.execute(query, value)
+                break
+    except KeyError:
+        flask.abort(403)
+    else:
+        query_result = mycursor.fetchall()
+        for row in query_result:
+            result = {"date": str(row[0])}
+        return json.dumps(result, indent=4)
+    flask.abort(403)
+
+
+@app.route("/ssm/get_dashb_params", methods=['GET'])
+def get_dashboard_params():
+    itemlist = []
+    keys = ["color", "position", "cpv_youtube_m", "cpv_youtube_f", "cpv_youtube_mid", "cpu_aitube_m", "cpu_aitube_f", "cpu_aitube_mid", "youtube_ud"]
+    items_1 = ["red", "bad", 12.5, 23.25, 17.88, 213.2, 396, 304.6, 20]
+    items_2 = ["yellow", "middle", 5, 9.3, 7.15, 85.3, 158.4, 121.85, 40]
+    items_3 = ["green", "great", 1, 1.86, 1.43, 17.1, 31.6, 24.35, 60]
+    item_list = [items_1, items_2, items_3]
+
+    for j in range(0, 3):
+        item = dict()
+        for i in range(0, 9):
+            item[keys[i]] = item_list[j][i]
+        itemlist.append(item)
+
+    result = json.dumps(itemlist, indent=4)
+    return result
 
 
 @app.before_request
