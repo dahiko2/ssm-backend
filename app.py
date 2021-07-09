@@ -51,6 +51,7 @@ def instagram_connection():
         password=fpass,
         database=fdbname_insta
     )
+    mydb.time_zone = "+06:00"
     return mydb.cursor()
 
 
@@ -62,6 +63,7 @@ def ssm_connection():
         password=fpass,
         database=fdbname_ssm
     )
+    mydb.time_zone = "+06:00"
     return mydb.cursor()
 
 
@@ -619,24 +621,25 @@ def update_logging():
     if body is None:
         flask.abort(403)
     data = json.loads(str(body).replace("'", '"'))
-    types = [{"kpi_mao": 1}, {"kpi_aitu": 2}, {"aitube_utm": 3}]
+    types = [{"kpi_mao": 1}, {"kpi_aitu": 2}, {"aitube_utm": 3}, {"yt_trends": 4}]
     try:
         for item in types:
             if data["type"] == list(item.keys())[0]:
-                query = "UPDATE log SET date = %s WHERE idlog = %s"
-                value = (data["date"], item[list(item.keys())[0]])
-                break
+                query = "UPDATE log SET date = NOW() WHERE idlog = %s"
+                value = (item[list(item.keys())[0]],)
+                mycursor = ssm_connection()
+                global mydb
+                mycursor.execute(query, value)
+                mydb.commit()
+                return "ok"
     except KeyError:
         flask.abort(403)
-    else:
-        mycursor = ssm_connection()
-        mycursor.execute(query, value)
-        return "ok"
+    flask.abort(403)
 
 
 @app.route("/ssm/get_logs_<logtype>", methods=['GET'])
 def get_logs(logtype):
-    types = [{"kpi_mao": 1}, {"kpi_aitu": 2}, {"aitube_utm": 3}]
+    types = [{"kpi_mao": 1}, {"kpi_aitu": 2}, {"aitube_utm": 3}, {"yt_trends": 4}]
     mycursor = ssm_connection()
     try:
         for item in types:
@@ -644,14 +647,12 @@ def get_logs(logtype):
                 value = (item[list(item.keys())[0]],)
                 query = "SELECT date FROM log WHERE idlog = %s"
                 mycursor.execute(query, value)
-                break
+                query_result = mycursor.fetchall()
+                for row in query_result:
+                    result = {"date": str(row[0])}
+                return json.dumps(result, indent=4)
     except KeyError:
         flask.abort(403)
-    else:
-        query_result = mycursor.fetchall()
-        for row in query_result:
-            result = {"date": str(row[0])}
-        return json.dumps(result, indent=4)
     flask.abort(403)
 
 
@@ -684,5 +685,5 @@ def validate_auth():
         except KeyError:
             flask.abort(401)
 
-
+    
 read_creds()
