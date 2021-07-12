@@ -280,39 +280,47 @@ def get_top_by_comments(n):
     return result
 
 
-@app.route("/ssm/info_byprojectid=<int:project_id>")
+# Used if query is - SELECT * FROM releases
+def form_proj_info_dict(row):
+    item = dict()
+    item["YouTubeID"] = row[0]
+    item["episode_name"] = row[1]
+    item["uniq_year"] = row[2]
+    item["traffic"] = row[3]
+    item["release_date"] = str(row[4])
+    item["tail"] = row[5]
+    item["traffic_per_day"] = row[6]
+    item["traffic_per_tail"] = row[7]
+    item["youtube_views"] = row[8]
+    item["avg_view_by_user"] = row[9]
+    item["shows"] = row[10]
+    item["ctr"] = row[11]
+    item["uniq_users_youtube"] = row[12]
+    item["subscribers"] = row[13]
+    item["price"] = row[15]
+    item["uniq_release_month"] = row[17]
+    item["uniq_second_month"] = row[18]
+    item["cpv"] = calculate_cpv(row[15], row[8])
+    item["cpu"] = calculate_cpu(row[15], row[2])
+    item["cpc"] = calculate_cpc(row[15], row[3])
+    return item
+
+
+@app.route("/ssm/info_byprojectid=<int:project_id>", methods=['GET'])
 def get_fullinfo_by_projectid(project_id):
     mycursor = ssm_connection()
-    query = "SELECT * FROM ssm.releases where projectID = %s"
+    query = "SELECT * FROM releases where projectID = %s"
     val = (project_id,)
     mycursor.execute(query, val)
     query_result = mycursor.fetchall()
     itemlist = []
     for row in query_result:
-        item = dict()
-        item["episode_name"] = row[1]
-        item["unique_count"] = row[2]
-        item["traffic"] = row[3]
-        item["release_date"] = str(row[4])
-        item["tail"] = row[5]
-        item["traffic_per_day"] = row[6]
-        item["traffic_per_tail"] = row[7]
-        item["youtube_views"] = row[8]
-        item["avg_view_by_user"] = row[9]
-        item["shows"] = row[10]
-        item["ctr"] = row[11]
-        item["uniq_users_youtube"] = row[12]
-        item["subscribers"] = row[13]
-        item["price"] = row[15]
-        item["cpv"] = calculate_cpv(row[15], row[8])
-        item["cpu"] = calculate_cpu(row[15], row[2])
-        item["cpc"] = calculate_cpc(row[15], row[3])
-        itemlist.append(item)
+        itemlist.append(form_proj_info_dict(row))
     result = json.dumps(itemlist, indent=4)
     return result
         
 
-@app.route("/ssm/info_byprojectname=<project>")
+@app.route("/ssm/info_byprojectname=<project>", methods=['GET'])
 def get_fullinfo_by_projectname(project):
     project = str(project) + "%"
     mycursor = ssm_connection()
@@ -322,106 +330,48 @@ def get_fullinfo_by_projectname(project):
     query_result = mycursor.fetchall()
     itemlist = []
     for row in query_result:
-        item = dict()
-        item["episode_name"] = row[1]
-        item["unique_count"] = row[2]
-        item["traffic"] = row[3]
-        item["release_date"] = str(row[4])
-        item["tail"] = row[5]
-        item["traffic_per_day"] = row[6]
-        item["traffic_per_tail"] = row[7]
-        item["youtube_views"] = row[8]
-        item["avg_view_by_user"] = row[9]
-        item["shows"] = row[10]
-        item["ctr"] = row[11]
-        item["uniq_users_youtube"] = row[12]
-        item["subscribers"] = row[13]
-        item["price"] = row[15]
-        item["cpv"] = calculate_cpv(row[15], row[8])
-        item["cpu"] = calculate_cpu(row[15], row[2])
-        item["cpc"] = calculate_cpc(row[15], row[3])
-        itemlist.append(item)
+        itemlist.append(form_proj_info_dict(row))
     result = json.dumps(itemlist, indent=4)
     return result
 
 
-@app.route("/ssm/releases_for_<int:n>_<period>")
+@app.route("/ssm/releases_for_<int:n>_<period>", methods=['GET'])
 def get_releases_by_period(period, n):
     # CURDATE - INTERVAL N PERIOD
     periods = ["DAY", "WEEK", "MONTH", "YEAR"]
     period = period.upper()
     if period not in periods:
-        return "{\"Error\": Wrong period, acceptable values is DAY, WEEK, MONTH, YEAR}"
+        flask.abort(403)
     mycursor = ssm_connection()
-    query = "SELECT releaseID, ProjectName, EpisodesName, UniqUser, Traffic, ReleaseDate, Tail, TrafficPerDay, TrafficPerTail, YoutubeViews," \
-            "AverageViewsByUser, Shows, CTR, UniqUserYoutube, Subscribers, Price FROM ssm.releases, ssm.project " \
-            "WHERE ReleaseDate > DATE_SUB(CURDATE(), INTERVAL %s " + period + ") and releases.ProjectID = project.projectID;"
+    query = "SELECT * FROM releases " \
+            "WHERE ReleaseDate > DATE_SUB(CURDATE(), INTERVAL %s " + period + ");"
     val = (n,)
     mycursor.execute(query, val)
     query_result = mycursor.fetchall()
     itemlist = []
     for row in query_result:
-        item = dict()
-        item["project_name"] = row[1]
-        item["episode_name"] = row[2]
-        item["unique_count"] = row[3]
-        item["traffic"] = row[4]
-        item["release_date"] = str(row[5])
-        item["tail"] = row[6]
-        item["traffic_per_day"] = row[7]
-        item["traffic_per_tail"] = row[8]
-        item["youtube_views"] = row[9]
-        item["avg_view_by_user"] = row[10]
-        item["shows"] = row[11]
-        item["ctr"] = row[12]
-        item["uniq_users_youtube"] = row[13]
-        item["subscribers"] = row[14]
-        item["price"] = row[15]
-        item["cpv"] = calculate_cpv(row[15], row[9])
-        item["cpu"] = calculate_cpu(row[15], row[3])
-        item["cpc"] = calculate_cpc(row[15], row[4])
-        itemlist.append(item)
+        itemlist.append(form_proj_info_dict(row))
     result = json.dumps(itemlist, indent=4)
     return result
 
 
-@app.route("/ssm/releases_between_<date1>_and_<date2>")
+@app.route("/ssm/releases_between_<date1>_and_<date2>", methods=['GET'])
 def get_releases_between(date1, date2):
     mycursor = ssm_connection()
     date1 = date1.replace(".", "/")
     date2 = date2.replace(".", "/")
-    query = "SELECT releaseID, ProjectName, EpisodesName, UniqUser, Traffic, ReleaseDate, Tail, TrafficPerDay, TrafficPerTail, YoutubeViews," \
-            "AverageViewsByUser, Shows, CTR, UniqUserYoutube, Subscribers, Price FROM releases, project where releases.ProjectID = project.projectID and (ReleaseDate between %s and %s);"
+    query = "SELECT * FROM releases where (ReleaseDate between %s and %s);"
     val = (date1, date2)
     mycursor.execute(query, val)
     query_result = mycursor.fetchall()
     itemlist = []
     for row in query_result:
-        item = dict()
-        item["project_name"] = row[1]
-        item["episode_name"] = row[2]
-        item["unique_count"] = row[3]
-        item["traffic"] = row[4]
-        item["release_date"] = str(row[5])
-        item["tail"] = row[6]
-        item["traffic_per_day"] = row[7]
-        item["traffic_per_tail"] = row[8]
-        item["youtube_views"] = row[9]
-        item["avg_view_by_user"] = row[10]
-        item["shows"] = row[11]
-        item["ctr"] = row[12]
-        item["uniq_users_youtube"] = row[13]
-        item["subscribers"] = row[14]
-        item["price"] = row[15]
-        item["cpv"] = calculate_cpv(row[15], row[9])
-        item["cpu"] = calculate_cpu(row[15], row[3])
-        item["cpc"] = calculate_cpc(row[15], row[4])
-        itemlist.append(item)
+        itemlist.append(form_proj_info_dict(row))
     result = json.dumps(itemlist, indent=4)
     return result
 
 
-@app.route("/ssm/kpi_<year>_<country>")
+@app.route("/ssm/kpi_<year>_<country>", methods=['GET'])
 def get_kpi_by_country_year(year, country):
     old_response = True
     mycursor = ssm_connection()
@@ -464,11 +414,11 @@ def update_kpi_mao(value, country):
         query = "UPDATE kpi_mao SET value = %s where country = %s and month = %s and year = %s and month_year = %s;"
         mycursor.execute(query, val)
     mydb.commit()
-    return flask.Response(status=200)
+    return "Mau kpi updated."
 
 
-@app.route("/ssm/updatekpi", methods=['POST'])
-def update_kpi_mao2():
+@app.route("/ssm/updatekpimau", methods=['POST'])
+def update_kpi_mau():
     body = flask.request.get_json()
     if body is None:
         flask.abort(403)
@@ -478,25 +428,25 @@ def update_kpi_mao2():
         country = data['country']
     except KeyError:
         flask.abort(403)
-
-    global mydb
-    mycursor = ssm_connection()
-    months = [0, "Январь", "Февраль", "Март", "Апрель", "Май", "Июнь", "Июль", "Август", "Сентябрь", "Октябрь",
-              "Ноябрь", "Декабрь"]
-    now = datetime.today()
-    query = "INSERT INTO kpi_mao (value, country, month, year, month_year) VALUES (%s, %s, %s, %s, %s);"
-    if now.month < 10:
-        month = '0' + str(now.month)
     else:
-        month = str(now.month)
-    val = (value, country, months[now.month], now.year, month + str(now.year) + str(country))
-    try:
-        mycursor.execute(query, val)
-    except mysql.connector.errors.IntegrityError:
-        query = "UPDATE kpi_mao SET value = %s where country = %s and month = %s and year = %s and month_year = %s;"
-        mycursor.execute(query, val)
-    mydb.commit()
-    return flask.Response(status=200)
+        global mydb
+        mycursor = ssm_connection()
+        months = [0, "Январь", "Февраль", "Март", "Апрель", "Май", "Июнь", "Июль", "Август", "Сентябрь", "Октябрь",
+                  "Ноябрь", "Декабрь"]
+        now = datetime.today()
+        query = "INSERT INTO kpi_mao (value, country, month, year, month_year) VALUES (%s, %s, %s, %s, %s);"
+        if now.month < 10:
+            month = '0' + str(now.month)
+        else:
+            month = str(now.month)
+        val = (value, country, months[now.month], now.year, month + str(now.year) + str(country))
+        try:
+            mycursor.execute(query, val)
+        except mysql.connector.errors.IntegrityError:
+            query = "UPDATE kpi_mao SET value = %s where country = %s and month = %s and year = %s and month_year = %s;"
+            mycursor.execute(query, val)
+        mydb.commit()
+    return "MAU KPI updated."
 
 
 @app.route("/ssm/update_yt_trends", methods=['POST'])
@@ -526,7 +476,7 @@ def update_yt_trends():
     return str(count)+" videos added."
 
 
-@app.route("/ssm/get_yt_trends")
+@app.route("/ssm/get_yt_trends", methods=['GET'])
 def get_yt_trends():
     mycursor = ssm_connection()
     query = "SELECT id, video_name, channel, views, place FROM youtube_trends WHERE DATE(date) = CURDATE() ORDER BY date DESC;"
@@ -554,18 +504,18 @@ def add_yt_channel():
         channel = channels['channel']
     except KeyError:
         flask.abort(403)
+    else:
+        mycursor = ssm_connection()
+        global mydb
 
-    mycursor = ssm_connection()
-    global mydb
-
-    query = "INSERT INTO channels (name) VALUES (%s);"
-    values = (channel, )
-    mycursor.execute(query, values)
-    mydb.commit()
-    return "Channel "+channel+" added."
+        query = "INSERT INTO channels (name) VALUES (%s);"
+        values = (channel, )
+        mycursor.execute(query, values)
+        mydb.commit()
+        return "Channel "+channel+" added."
 
 
-@app.route("/ssm/get_kpi_aitu")
+@app.route("/ssm/get_kpi_aitu", methods=['GET'])
 def get_kpi_aitu():
     mycursor = ssm_connection()
     sql = "SELECT target, `left`, top_50, top_100, quiz, releases, today, `quarter`, quarter_left from kpi_aitu;"
@@ -675,6 +625,22 @@ def get_dashboard_params():
     return result
 
 
+@app.route("/ssm/get_utm_projects", methods=['GET'])
+def get_utm_projects():
+    mycursor = ssm_connection()
+    query = "select ProjectName, UtmName from project;"
+    mycursor.execute(query)
+    itemlist = []
+    query_result = mycursor.fetchall()
+    for row in query_result:
+        item = dict()
+        item["project_name"] = row[0]
+        item["utm_name"] = row[1]
+        itemlist.append(item)
+    result = json.dumps(itemlist, indent=4)
+    return result
+
+
 @app.before_request
 def validate_auth():
     if AUTH:
@@ -685,5 +651,5 @@ def validate_auth():
         except KeyError:
             flask.abort(401)
 
-    
+
 read_creds()
