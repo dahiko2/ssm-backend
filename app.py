@@ -283,7 +283,7 @@ def get_top_by_comments(n):
 # Used if query is - SELECT * FROM releases
 def form_proj_info_dict(row):
     item = dict()
-    item["YouTubeID"] = row[0]
+    item["yt_id"] = row[0]
     item["episode_name"] = row[1]
     item["uniq_year"] = row[2]
     item["traffic"] = row[3]
@@ -304,6 +304,22 @@ def form_proj_info_dict(row):
     item["cpu"] = calculate_cpu(row[15], row[2])
     item["cpc"] = calculate_cpc(row[15], row[3])
     return item
+
+
+@app.route("/ssm/get_projects", methods=['GET'])
+def get_projects():
+    mycursor = ssm_connection()
+    query = "SELECT ProjectID, ProjectName from project;"
+    mycursor.execute(query)
+    query_result = mycursor.fetchall()
+    itemlist = []
+    for row in query_result:
+        item = dict()
+        item["id"] = row[0]
+        item["name"] = row[1]
+        itemlist.append(item)
+    result = json.dumps(itemlist, indent=4)
+    return result
 
 
 @app.route("/ssm/info_byprojectid=<int:project_id>", methods=['GET'])
@@ -481,6 +497,9 @@ def get_yt_trends():
     mycursor = ssm_connection()
     query = "SELECT id, video_name, channel, views, place FROM youtube_trends WHERE DATE(date) = CURDATE() ORDER BY date DESC;"
     mycursor.execute(query)
+    if mycursor.rowcount == 0:
+        query = "SELECT id, video_name, channel, views, place FROM youtube_trends WHERE DATE(date) = DATE_SUB(CURDATE(), INTERVAL 1 DAY) ORDER BY date DESC;"
+        mycursor.execute(query)
     query_result = mycursor.fetchall()
     itemlist = []
     for row in query_result:
@@ -558,7 +577,7 @@ def update_kpi_aitu():
         items.append(data['quarter_left'])
     except KeyError:
         flask.abort(403)
-    query = 'UPDATE kpi_aitu set target = %s, `left` = %s, top_50 = %s, top_100 = %s, quiz = %s, releases = %s, today = %s, `quarter` = %s, quarter_left = %s WHERE id = 2'
+    query = 'UPDATE kpi_aitu set target = %s, `left` = %s, top_50 = %s, top_100 = %s, quiz = %s, releases = %s, today = %s, `quarter` = %s, quarter_left = %s WHERE id = 1'
     val = (int(items[0]), int(items[1]), int(items[2]), int(items[3]), int(items[4]), int(items[5]), int(items[6]), int(items[7]), int(items[8]))
     mycursor.execute(query, val)
     mydb.commit()
@@ -614,13 +633,11 @@ def get_dashboard_params():
     items_2 = ["yellow", "middle", 5, 9.3, 7.15, 85.3, 158.4, 121.85, 40]
     items_3 = ["green", "great", 1, 1.86, 1.43, 17.1, 31.6, 24.35, 60]
     item_list = [items_1, items_2, items_3]
-
     for j in range(0, 3):
         item = dict()
         for i in range(0, 9):
             item[keys[i]] = item_list[j][i]
         itemlist.append(item)
-
     result = json.dumps(itemlist, indent=4)
     return result
 
@@ -637,6 +654,18 @@ def get_utm_projects():
         item["project_name"] = row[0]
         item["utm_name"] = row[1]
         itemlist.append(item)
+    result = json.dumps(itemlist, indent=4)
+    return result
+
+
+@app.route("/ssm/", methods=['GET'])
+def get_ssm_routes():
+    itemlist = []
+    for obj in app.url_map.iter_rules():
+        if "ssm" in obj.__str__():
+            item = dict()
+            item["path"] = obj.__str__().replace('<', '"').replace('>', '"')
+            itemlist.append(item)
     result = json.dumps(itemlist, indent=4)
     return result
 
