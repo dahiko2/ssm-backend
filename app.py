@@ -303,6 +303,9 @@ def form_proj_info_dict(row):
     item["cpv"] = calculate_cpv(row[15], row[8])
     item["cpu"] = calculate_cpu(row[15], row[2])
     item["cpc"] = calculate_cpc(row[15], row[3])
+    item["male"] = row[19]
+    item["female"] = row[20]
+    item["gender"] = "M" if row[19] >= row[20] else "F"
     return item
 
 
