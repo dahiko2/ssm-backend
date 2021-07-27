@@ -84,7 +84,7 @@ def ssm_connection():
     return mydb.cursor()
 
 
-@app.route("/update_server/")
+@app.route("/update_server/", methods=['GET', 'POST'])
 def git_webhook():
     if request.method == 'POST':
         repo = git.Repo('D:/Media/Documents/GitHub/ssm-backend')
