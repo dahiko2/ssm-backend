@@ -50,6 +50,7 @@ def read_creds():
         fauth = f.readline().strip()
         fdbname_insta = f.readline().strip()
         fdbname_ssm = f.readline().strip()
+        f
 
 
 def instagram_connection():
@@ -87,7 +88,7 @@ def ssm_connection():
 @app.route("/update_server", methods=['GET', 'POST'])
 def git_webhook():
     if request.method == 'POST':
-        repo = git.Repo('D:/Media/Documents/GitHub/ssm-backend') # testing this
+        repo = git.Repo('/home/maksimsalnikov/mysite/flask_app.py')
         origin = repo.remotes.origin
         origin.pull()
         return 'Updated PythonAnywhere successfully', 200
