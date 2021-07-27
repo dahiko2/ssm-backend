@@ -115,3 +115,4 @@ dmypy.json
 start.bat
 credentials.txt
 chromedriver.exe
+.idea
