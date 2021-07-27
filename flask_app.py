@@ -920,10 +920,6 @@ def get_utm_projects():
     result = json.dumps(itemlist, indent=4)
     return result
 
-@app.route("/test/")
-def test():
-    return "testing still"
-
 
 @app.route("/ssm/", methods=['GET'])
 def get_ssm_routes():
