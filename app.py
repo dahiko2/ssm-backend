@@ -1,3 +1,11 @@
+"""
+Пакеты.
+json, datetime - стандартная библиотека питона.
+mysql-connector-python 8.0.17 - подключение к базе данных.
+flask 2.0.1 - серверная часть API.
+flask-cors 3.0.10 - CORS, для выполнения запросов со сторонних сайтов.
+urllib3 1.25.11 - работа с URL.
+"""
 import json
 import mysql.connector
 import flask
@@ -6,14 +14,9 @@ from urllib.parse import urlparse, parse_qs
 from flask_cors import CORS
 
 
-class MyDict(dict):
-    def __init__(self):
-        self = dict()
-
-    def add(self, key, value):
-        self[key] = value
-
-
+"""
+Глобальные переменные. AUTH - аутентификация. mydb - создание пустого подключения к бд. f% - реквизиты для аутентификации и подключения к бд.
+"""
 AUTH = False
 mydb = mysql.connector.connect()
 fhost = ""
@@ -22,28 +25,35 @@ fpass = ""
 fauth = ""
 fdbname_insta = ""
 fdbname_ssm = ""
-
+"""
+Создание базового объекта Flask и обертка его в CORS.
+"""
 app = flask.Flask(__name__)
 CORS(app)
 cors = CORS(app, resources={
     r"/*": {
-        "origins": "https://salemsocial.kz/"
+        "origins": "https://salemsocial.kz/"  # origins - список сайтов с которых можно делать запрос игнорируя CORS, поставить * для любых сайтов
     }
 })
 
 
 def read_creds():
+    """Построчно считывает данные для подключения и аутентификации из файла credentials.txt."""
     global fhost, fuser, fpass, fauth, fdbname_insta, fdbname_ssm
     with open("credentials.txt") as f:
-        fhost = f.readline()
-        fuser = f.readline()
+        fhost = f.readline().strip()
+        fuser = f.readline().strip()
         fpass = f.readline().strip()
-        fauth = f.readline()
+        fauth = f.readline().strip()
         fdbname_insta = f.readline().strip()
         fdbname_ssm = f.readline().strip()
 
 
 def instagram_connection():
+    """
+    Подключается к базе данных - к схеме insta и выставляет для курсора тайм-зону Алматы (UTC+6).
+    :return: mysql.connection.cursor
+    """
     global mydb
     mydb = mysql.connector.connect(
         host=fhost,
@@ -56,6 +66,10 @@ def instagram_connection():
 
 
 def ssm_connection():
+    """
+    Подключается к базе данных - к схеме ssm и выставляет для курсора тайм-зону Алматы (UTC+6).
+    :return: mysql.connection.cursor
+    """
     global mydb
     mydb = mysql.connector.connect(
         host=fhost,
@@ -68,24 +82,47 @@ def ssm_connection():
 
 
 def calculate_cpv(price, youtube_view):
+    """
+    Считает стоимость за просмотр, если параметры пустые (None) то возвращает 0.
+    :param price: int
+    :param youtube_view: int
+    :return: float
+    """
     if price is None or youtube_view is None or youtube_view == 0:
         return 0
     return price / youtube_view
 
 
 def calculate_cpc(price, traffic):
+    """
+    Считает стоимость за переход, если параметры пустые (None) то возвращает 0.
+    :param price: int
+    :param traffic: int
+    :return: float
+    """
     if price is None or traffic is None or traffic == 0:
         return 0
     return price/traffic
 
 
 def calculate_cpu(price, uniq_user):
+    """
+    Считает стоимость за уника, если параметры пустые (None) то возвращает 0.
+    :param price: int
+    :param uniq_user: int
+    :return: float
+    """
     if price is None or uniq_user is None or uniq_user == 0:
         return 0
     return price/uniq_user
 
 
 def get_yt_id(url):
+    """
+    Принимает ссылку на видео ютуба или его id, очищает его от всего лишнего и возвращает только youtube id.
+    :param url: str
+    :return: str
+    """
     res = ""
     doNext = True
     u_pars = urlparse(url)
@@ -109,6 +146,11 @@ def get_yt_id(url):
 
 
 def get_youtube_channels(mycursor):
+    """
+    Возвращает список всех ютуб каналов из бд.
+    :param mycursor: mysql.connector.cursor
+    :return: list
+    """
     youtube_channels = []
     query = "SELECT name FROM channels;"
     mycursor.execute(query)
@@ -119,6 +161,11 @@ def get_youtube_channels(mycursor):
 
 
 def get_today_trends_videos(mycursor):
+    """
+    Возвращает список названий всех видео в трендах за сегодняшний день.
+    :param mycursor: mysql.connector.cursor
+    :return: list
+    """
     today_videos = []
     query = "SELECT video_name FROM youtube_trends WHERE DATE(date) = CURDATE();"
     mycursor.execute(query)
@@ -128,160 +175,277 @@ def get_today_trends_videos(mycursor):
     return today_videos
 
 
-@app.route("/instagram/<account>")
+def form_insta_post_dict(row):
+    """
+    Принимает row - результат запроса в бд.
+    Возвращает словарь с данными о посте.
+    :param row: list
+    :return: dict
+    """
+    temp = dict()
+    temp["id"] = row[0]
+    temp["shortlink"] = row[1]
+    temp["isvideo"] = row[2]
+    temp["comments"] = row[3]
+    temp["likes"] = row[4]
+    temp["video_views"] = row[6]
+    temp["upload_date"] = str(row[5])
+    return temp
+
+
+@app.route("/instagram/<account>", methods=['GET'])
 def get_instagram_profile(account):
+    """
+    Принимает str - название существующего аккаунта в бд.
+    Если постов нет, то сумма лайков и комметариев равняется 0.
+    Если аккаунта нет, возвращает пустой json-объект.
+    Если есть возвращает всю информацию об аккаунте из бд и считает сумму лайков, комментариев по постам, которые хранятся в табличке.
+    :param account: str
+    :return: json
+    """
+    account = str(account)
     mycursor = instagram_connection()
     query = "SELECT * FROM profile WHERE profilename = %s;"
-    val = (str(account),)
+    val = (account,)
     mycursor.execute(query, val)
     query_result_info = mycursor.fetchall()
     if query_result_info is None:
         return "{}"
-
     query = "SELECT SUM(likes) from posts where profileID in (select idprofile from profile where profilename = %s);"
-    val = (str(account),)
+    val = (account,)
     mycursor.execute(query, val)
     query_result_likes = mycursor.fetchone()
-
-    query = "SELECT SUM(comments) from posts where profileID in (select idprofile from profile where profilename = %s);"
-    val = (str(account),)
-    mycursor.execute(query, val)
-    query_result_comments = mycursor.fetchone()
-
-    mydict = MyDict()
+    if query_result_likes is None:
+        query_result_likes = [0]
+        query_result_comments = [0]
+    else:
+        query = "SELECT SUM(comments) from posts where profileID in (select idprofile from profile where profilename = %s);"
+        val = (account,)
+        mycursor.execute(query, val)
+        query_result_comments = mycursor.fetchone()
+    temp = dict()
     for row in query_result_info:
-        # engagement = ((float(query_result_likes[0]) + float(query_result_comments[0])) / float(row[2])) / float(row[3]) * 100
-        # print(engagement)
-        mydict.add(row[0], ({"name": row[1], "posts": row[2], "followers": row[3], "likes": str(query_result_likes[0]),
-                             "comments": str(query_result_comments[0])}))
-    result = json.dumps(mydict, indent=4)
+        temp["id"] = row[0]
+        temp["name"] = row[1]
+        temp["posts"] = row[2]
+        temp["followers"] = row[3]
+        temp["likes"] = str(query_result_likes[0])
+        temp["comments"] = str(query_result_comments[0])
+        temp["engagement"] = ((float(query_result_likes[0]) + float(query_result_comments[0])) / float(row[2])) / float(row[3]) * 100
+    result = json.dumps(temp, indent=4)
     return result
 
 
-@app.route("/instagram/<account>/posts")
+@app.route("/instagram/<account>/posts", methods=['GET'])
 def get_instagram_posts(account):
+    """
+    Принимает str - название существующего аккаунта в бд.
+    Выводит все посты аккаунта с названием <account>.
+    Если постов нет, возвращает пустой json объект.
+    Если есть возвращает json объект - список словарей с информацией о постах.
+    :param account: str
+    :return: json
+    """
     mycursor = instagram_connection()
     query = "select * from posts where profileID in (select idprofile from profile where profilename = %s);"
     val = (str(account),)
     mycursor.execute(query, val)
     query_result = mycursor.fetchall()
-    mydict = MyDict()
+    if query_result is None:
+        return "{}"
+    itemlist = []
     for row in query_result:
-        mydict.add(row[0], (
-            {"shortlink": row[1], "isvideo": row[2], "comments": row[3], "likes": row[4], "uploaddate": str(row[5]),
-             "video_views": row[6]}))
-    result = json.dumps(mydict, indent=4)
+        itemlist.append(form_insta_post_dict(row))
+    result = json.dumps(itemlist, indent=4)
     return result
 
 
-@app.route("/instagram/<account>/posts/top_likes<int:n>")
+@app.route("/instagram/<account>/posts/top_likes<int:n>", methods=['GET'])
 def get_instagram_posts_top_by_likes(account, n):
+    """
+    Принимает str - название существующего аккаунта в бд и int - кол-во постов для вывода.
+    Выводит топ <n> постов по лайкам из бд (отсортированные по убыванию).
+    Если постов нет возвращает пустой json-объект.
+    Если есть возвращает json объект - список словарей с информацией о постах.
+    :param account: str
+    :param n: int
+    :return: json
+    """
     mycursor = instagram_connection()
     query = "select * from posts where profileID in (select idprofile from profile where profilename = %s) ORDER BY likes DESC LIMIT %s;"
     val = (str(account), n)
     mycursor.execute(query, val)
     query_result = mycursor.fetchall()
-    mydict = MyDict()
+    if query_result is None:
+        return "{}"
+    itemlist = []
     for row in query_result:
-        mydict.add(row[0], (
-            {"shortlink": row[1], "isvideo": row[2], "comments": row[3], "likes": row[4], "uploaddate": str(row[5]),
-             "video_views": row[6]}))
-    result = json.dumps(mydict, indent=4)
+        itemlist.append(form_insta_post_dict(row))
+    result = json.dumps(itemlist, indent=4)
     return result
 
 
-@app.route("/instagram/<account>/posts/top_comments<int:n>")
+@app.route("/instagram/<account>/posts/top_comments<int:n>", methods=['GET'])
 def get_instagram_posts_top_by_comments(account, n):
+    """
+    Принимает str - название существующего аккаунта в бд и int - кол-во постов для вывода.
+    Выводит топ <n> постов по комментариям из бд (отсортированные по убыванию).
+    Если постов нет возвращает пустой json-объект.
+    Если есть возвращает json объект - список словарей с информацией о постах.
+    :param account: str
+    :param n: int
+    :return: json
+    """
     mycursor = instagram_connection()
     query = "select * from posts where profileID in (select idprofile from profile where profilename = %s) ORDER BY comments DESC LIMIT %s;"
     val = (str(account), n)
     mycursor.execute(query, val)
     query_result = mycursor.fetchall()
-    mydict = MyDict()
+    if query_result is None:
+        return "{}"
+    itemlist = []
     for row in query_result:
-        mydict.add(row[0], (
-            {"shortlink": row[1], "isvideo": row[2], "comments": row[3], "likes": row[4], "uploaddate": str(row[5]),
-             "video_views": row[6]}))
-    result = json.dumps(mydict, indent=4)
+        itemlist.append(form_insta_post_dict(row))
+    result = json.dumps(itemlist, indent=4)
     return result
 
 
-@app.route("/instagram/<account>/posts/top_videos<int:n>")
+@app.route("/instagram/<account>/posts/top_videos<int:n>", methods=['GET'])
 def get_instagram_posts_top_by_videos(account, n):
+    """
+    Принимает str - название существующего аккаунта в бд и int - кол-во постов для вывода.
+    Выводит топ <n> видео-постов по просмотрам из бд (отсортированные по убыванию).
+    Если постов нет возвращает пустой json-объект.
+    Если есть возвращает json объект - список словарей с информацией о постах.
+    :param account: str
+    :param n: int
+    :return: json
+    """
     mycursor = instagram_connection()
     query = "select * from posts where profileID in (select idprofile from profile where profilename = %s) ORDER BY video_views DESC LIMIT %s;"
     val = (str(account), n)
     mycursor.execute(query, val)
     query_result = mycursor.fetchall()
-    mydict = MyDict()
+    if query_result is None:
+        return "{}"
+    itemlist = []
     for row in query_result:
-        mydict.add(row[0], (
-            {"shortlink": row[1], "comments": row[3], "likes": row[4], "uploaddate": str(row[5]),
-             "video_views": row[6]}))
-    result = json.dumps(mydict, indent=4)
+        itemlist.append(form_insta_post_dict(row))
+    result = json.dumps(itemlist, indent=4)
     return result
 
 
-@app.route("/instagram/top_followers")
+@app.route("/instagram/top_followers", methods=['GET'])
 def get_top_by_followers():
+    """
+    Собирает список инстаграмм аккаунтов, отсортированных по убыванию, по кол-ву подписчиков.
+    Возвращает json объект - список словарей с информацией об аккаунтах.
+    :return: json
+    """
     mycursor = instagram_connection()
     query = "SELECT idprofile, profilename, followers FROM profile ORDER BY followers DESC"
     mycursor.execute(query)
     query_result = mycursor.fetchall()
-    mydict = MyDict()
+    itemlist = []
     for row in query_result:
-        mydict.add(row[0], ({"profilename": row[1], "followers": row[2]}))
-    result = json.dumps(mydict, indent=4)
+        temp = dict()
+        temp["id"] = row[0]
+        temp["profilename"] = row[1]
+        temp["followers"] = row[2]
+        itemlist.append(temp)
+    result = json.dumps(itemlist, indent=4)
     return result
 
 
-@app.route("/instagram/top_video<int:n>")
+@app.route("/instagram/top_video<int:n>", methods=['GET'])
 def get_top_by_video_views(n):
+    """
+    Собирает список топ <n> постов, отсортированных по убыванию, по просмотрам видео.
+    Возвращает json объект - список словарей с информацией о постах.
+    :param n: int
+    :return: json
+    """
     mycursor = instagram_connection()
     query = "select idposts, shortlink, comments, likes, video_views,  profilename from posts, profile where profileID = idprofile ORDER BY video_views DESC LIMIT %s;"
     val = (n,)
     mycursor.execute(query, val)
     query_result = mycursor.fetchall()
-    mydict = MyDict()
+    itemlist = []
     for row in query_result:
-        mydict.add(row[0], (
-            {"shortlink": row[1], "comments": row[2], "likes": row[3], "video_views": row[4], "profilename": row[5]}))
-    result = json.dumps(mydict, indent=4)
+        temp = dict()
+        temp["id"] = row[0]
+        temp["shortlink"] = row[1]
+        temp["comments"] = row[2]
+        temp["likes"] = row[3]
+        temp["video_views"] = row[4]
+        temp["profilename"] = row[5]
+        itemlist.append(temp)
+    result = json.dumps(itemlist, indent=4)
     return result
 
 
-@app.route("/instagram/top_likes<int:n>")
+@app.route("/instagram/top_likes<int:n>", methods=['GET'])
 def get_top_by_likes(n):
+    """
+    Собирает список топ <n> постов, отсортированных по убыванию, по лайкам.
+    Возвращает json объект - список словарей с информацией о постах.
+    :param n: int
+    :return: json
+    """
     mycursor = instagram_connection()
     query = "select idposts, shortlink, comments, likes, video_views,  profilename from posts, profile where profileID = idprofile ORDER BY likes DESC LIMIT %s;"
     val = (n,)
     mycursor.execute(query, val)
     query_result = mycursor.fetchall()
-    mydict = MyDict()
+    itemlist = []
     for row in query_result:
-        mydict.add(row[0], (
-            {"shortlink": row[1], "comments": row[2], "likes": row[3], "video_views": row[4], "profilename": row[5]}))
-    result = json.dumps(mydict, indent=4)
+        temp = dict()
+        temp["id"] = row[0]
+        temp["shortlink"] = row[1]
+        temp["comments"] = row[2]
+        temp["likes"] = row[3]
+        temp["video_views"] = row[4]
+        temp["profilename"] = row[5]
+        itemlist.append(temp)
+    result = json.dumps(itemlist, indent=4)
     return result
 
 
-@app.route("/instagram/top_comments<int:n>")
+@app.route("/instagram/top_comments<int:n>", methods=['GET'])
 def get_top_by_comments(n):
+    """
+    Собирает список топ <n> постов, отсортированных по убыванию, по кол-ву комментариев.
+    Возвращает json объект - список словарей с информацией о постах.
+    :param n: int
+    :return: json
+    """
     mycursor = instagram_connection()
     query = "select idposts, shortlink, comments, likes, video_views,  profilename from posts, profile where profileID = idprofile ORDER BY comments DESC LIMIT %s;"
     val = (n,)
     mycursor.execute(query, val)
     query_result = mycursor.fetchall()
-    mydict = MyDict()
+    itemlist = []
     for row in query_result:
-        mydict.add(row[0], (
-            {"shortlink": row[1], "comments": row[2], "likes": row[3], "video_views": row[4], "profilename": row[5]}))
-    result = json.dumps(mydict, indent=4)
+        temp = dict()
+        temp["id"] = row[0]
+        temp["shortlink"] = row[1]
+        temp["comments"] = row[2]
+        temp["likes"] = row[3]
+        temp["video_views"] = row[4]
+        temp["profilename"] = row[5]
+        itemlist.append(temp)
+    result = json.dumps(itemlist, indent=4)
     return result
 
 
-# Used if query is - SELECT * FROM releases
 def form_proj_info_dict(row):
+    """
+    Принимает row - результат запроса в бд.
+    Возвращает словарь с данными о релизе.
+    Используется чтобы обрабатывать результат запроса 'SELECT * FROM releases'.
+    :param row: list
+    :return: dict
+    """
     item = dict()
     item["yt_id"] = row[0]
     item["episode_name"] = row[1]
@@ -305,12 +469,23 @@ def form_proj_info_dict(row):
     item["cpc"] = calculate_cpc(row[15], row[3])
     item["male"] = row[19]
     item["female"] = row[20]
-    item["gender"] = "M" if row[19] >= row[20] else "F"
+    gender = "M-F"
+    if row[19] is not None:
+        if float(row[19]) > 60.0:
+            gender = "M"
+        elif float(row[20]) > 60.0:
+            gender = "F"
+    item["gender"] = gender
     return item
 
 
 @app.route("/ssm/get_projects", methods=['GET'])
 def get_projects():
+    """
+    Собирает ID проекта в базе и его название в список.
+    Возвращает json-объект, список проектов.
+    :return: json
+    """
     mycursor = ssm_connection()
     query = "SELECT ProjectID, ProjectName from project;"
     mycursor.execute(query)
@@ -327,8 +502,14 @@ def get_projects():
 
 @app.route("/ssm/info_byprojectid=<int:project_id>", methods=['GET'])
 def get_fullinfo_by_projectid(project_id):
+    """
+    Собирает список релизов определенного проекта, заданного через project_id
+    Возвращает json-объект, список релизов.
+    :param project_id: int
+    :return: json
+    """
     mycursor = ssm_connection()
-    query = "SELECT * FROM releases where projectID = %s"
+    query = "SELECT * FROM releases where projectID = %s ORDER BY projectID DESC;"
     val = (project_id,)
     mycursor.execute(query, val)
     query_result = mycursor.fetchall()
@@ -341,9 +522,15 @@ def get_fullinfo_by_projectid(project_id):
 
 @app.route("/ssm/info_byprojectname=<project>", methods=['GET'])
 def get_fullinfo_by_projectname(project):
+    """
+    Собирает список релизов определенного проекта, заданного через название проекта (полное или частичное)
+    Возвращает json-объект, список релизов.
+    :param project: int
+    :return: json
+    """
     project = str(project) + "%"
     mycursor = ssm_connection()
-    query = "SELECT * FROM releases where projectID in (select ProjectID from project where ProjectName like %s);"
+    query = "SELECT * FROM releases where projectID in (select ProjectID from project where ProjectName like %s) ORDER BY projectID DESC;"
     val = (project,)
     mycursor.execute(query, val)
     query_result = mycursor.fetchall()
@@ -355,7 +542,15 @@ def get_fullinfo_by_projectname(project):
 
 
 @app.route("/ssm/releases_for_<int:n>_<period>", methods=['GET'])
-def get_releases_by_period(period, n):
+def get_releases_by_period(n, period):
+    """
+    Собирает список релизов за определенный период, указанный в параметрах, где
+    n - кол-во выбранных периодов, period - период 1 из ниже перечисленных.
+    Возвращает json-объект, список релизов.
+    :param period: enum (DAY, WEEK, MONTH, YEAR)
+    :param n: int
+    :return: json
+    """
     # CURDATE - INTERVAL N PERIOD
     periods = ["DAY", "WEEK", "MONTH", "YEAR"]
     period = period.upper()
@@ -363,7 +558,7 @@ def get_releases_by_period(period, n):
         flask.abort(403)
     mycursor = ssm_connection()
     query = "SELECT * FROM releases " \
-            "WHERE ReleaseDate > DATE_SUB(CURDATE(), INTERVAL %s " + period + ");"
+            "WHERE ReleaseDate > DATE_SUB(CURDATE(), INTERVAL %s " + period + ") ORDER BY projectID DESC;"
     val = (n,)
     mycursor.execute(query, val)
     query_result = mycursor.fetchall()
@@ -376,10 +571,17 @@ def get_releases_by_period(period, n):
 
 @app.route("/ssm/releases_between_<date1>_and_<date2>", methods=['GET'])
 def get_releases_between(date1, date2):
+    """
+    Собирает список релизов за определенные даты, указанные в параметрах.
+    Возвращает json-объект, список релизов.
+    :param date1: str (date format yyyy.mm.dd)
+    :param date2: str (date format yyyy.mm.dd)
+    :return: json
+    """
     mycursor = ssm_connection()
     date1 = date1.replace(".", "/")
     date2 = date2.replace(".", "/")
-    query = "SELECT * FROM releases where (ReleaseDate between %s and %s);"
+    query = "SELECT * FROM releases where (ReleaseDate between %s and %s) ORDER BY projectID DESC;"
     val = (date1, date2)
     mycursor.execute(query, val)
     query_result = mycursor.fetchall()
@@ -392,52 +594,40 @@ def get_releases_between(date1, date2):
 
 @app.route("/ssm/kpi_<year>_<country>", methods=['GET'])
 def get_kpi_by_country_year(year, country):
-    old_response = True
+    """
+    Собирает данные по KPI с значениемя за указанный год и страну.
+    Возвращает json-объект, список словарей.
+    :param year: int
+    :param country: str
+    :return: json
+    """
+    country = country.upper()
     mycursor = ssm_connection()
     query = "SELECT idkpi, value, target, month FROM kpi_mao where year = %s and country = %s;"
     val = (year, country)
     mycursor.execute(query, val)
     query_result = mycursor.fetchall()
-    if old_response:
-        mydict = MyDict()
-        for row in query_result:
-            mydict.add(row[0], ({"value": row[1], "target": row[2], "month": row[3]}))
-        result = json.dumps(mydict, indent=4)
-    else:
-        itemlist = []
-        for row in query_result:
-            item = dict()
-            item["value"] = row[1]
-            item["target"] = row[2]
-            item["month"] = row[3]
-            itemlist.append(item)
-        result = json.dumps(itemlist, indent=4)
+    itemlist = []
+    for row in query_result:
+        item = dict()
+        item["value"] = row[1]
+        item["target"] = row[2]
+        item["month"] = row[3]
+        itemlist.append(item)
+    result = json.dumps(itemlist, indent=4)
     return result
-
-
-@app.route("/ssm/updatekpi_<value>_<country>")
-def update_kpi_mao(value, country):
-    global mydb
-    mycursor = ssm_connection()
-    months = [0, "Январь", "Февраль", "Март", "Апрель", "Май", "Июнь", "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"]
-    now = datetime.today()
-    query = "INSERT INTO kpi_mao (value, country, month, year, month_year) VALUES (%s, %s, %s, %s, %s);"
-    if now.month < 10:
-        month = '0' + str(now.month)
-    else:
-        month = str(now.month)
-    val = (value, country, months[now.month], now.year, month+str(now.year)+str(country))
-    try:
-        mycursor.execute(query, val)
-    except mysql.connector.errors.IntegrityError:
-        query = "UPDATE kpi_mao SET value = %s where country = %s and month = %s and year = %s and month_year = %s;"
-        mycursor.execute(query, val)
-    mydb.commit()
-    return "Mau kpi updated."
 
 
 @app.route("/ssm/updatekpimau", methods=['POST'])
 def update_kpi_mau():
+    """
+    POST метод. Обновляет таблицу с MAU KPI.
+    Параметры считываются через тело запроса как json объект.
+    Пример тела запроса:
+    {"value": 123456, "country": "KAZAKHSTAN"}
+    Возвращает код 200 и сообщение о успешном выполнении. В любом другом случае отдает код 403.
+    :return: str
+    """
     body = flask.request.get_json()
     if body is None:
         flask.abort(403)
@@ -461,22 +651,30 @@ def update_kpi_mau():
         val = (value, country, months[now.month], now.year, month + str(now.year) + str(country))
         try:
             mycursor.execute(query, val)
-        except mysql.connector.errors.IntegrityError:
+        except mysql.connector.errors.IntegrityError:  # если данные по стране уже заполнены, то просто обновляет их
             query = "UPDATE kpi_mao SET value = %s where country = %s and month = %s and year = %s and month_year = %s;"
             mycursor.execute(query, val)
         mydb.commit()
-    return "MAU KPI updated."
+        return "MAU KPI of" + country + " updated."
 
 
 @app.route("/ssm/update_yt_trends", methods=['POST'])
 def update_yt_trends():
+    """
+    POST метод. Обновляет таблицу с трендами ютуба.
+    Добавляет видео в таблицу и записывает дату обновления.
+    Если видео за сегоднящную дату уже есть в базе, то просто обновляет его место.
+    Параметры считываются через тело запроса как json объект.
+    Пример тела запроса:
+    {"video_name": "asdfzxcv", "channel": "SALEM", "views": 12345678, "place": 1}
+    Возвращает код 200 и сообщение о кол-во добавленных или обновленных видео. В любом другом случае отдает код 403.
+    :return: str
+    """
     body = flask.request.get_json()
     if body is None:
         flask.abort(403)
-
     global mydb
     mycursor = ssm_connection()
-
     count = 0
     video_list = json.loads(str(body).replace("'", '"'))
     youtube_channels = get_youtube_channels(mycursor)
@@ -497,10 +695,15 @@ def update_yt_trends():
 
 @app.route("/ssm/get_yt_trends", methods=['GET'])
 def get_yt_trends():
+    """
+    Получает ютуб тренды за текущую дату.
+    Возвращает их в виде json-объекта, списка словарей.
+    :return: json
+    """
     mycursor = ssm_connection()
     query = "SELECT id, video_name, channel, views, place FROM youtube_trends WHERE DATE(date) = CURDATE() ORDER BY date DESC;"
     mycursor.execute(query)
-    if mycursor.rowcount == 0:
+    if mycursor.rowcount == 0:  # Костыль. Фиксит ошибку которая не показывает никакие видосы ночью нового дня.
         query = "SELECT id, video_name, channel, views, place FROM youtube_trends WHERE DATE(date) = DATE_SUB(CURDATE(), INTERVAL 1 DAY) ORDER BY date DESC;"
         mycursor.execute(query)
     query_result = mycursor.fetchall()
@@ -518,18 +721,25 @@ def get_yt_trends():
 
 @app.route("/ssm/add_yt_channel", methods=['POST'])
 def add_yt_channel():
+    """
+    POST метод. Добавляет новую запись в таблицу с Ютуб Каналами.
+    Параметры считываются через тело запроса как json объект.
+    Пример тела запроса:
+    {"channel": "SALEM"}
+    Возвращает код 200 и сообщение о успешном выполнении. В любом другом случае отдает код 403.
+    :return: str
+    """
     body = flask.request.get_json()
     if body is None:
         flask.abort(403)
-    channels = json.loads(str(body).replace("'", '"'))
+    body_input = json.loads(str(body).replace("'", '"'))
     try:
-        channel = channels['channel']
+        channel = body_input['channel']
     except KeyError:
         flask.abort(403)
     else:
         mycursor = ssm_connection()
         global mydb
-
         query = "INSERT INTO channels (name) VALUES (%s);"
         values = (channel, )
         mycursor.execute(query, values)
@@ -539,8 +749,13 @@ def add_yt_channel():
 
 @app.route("/ssm/get_kpi_aitu", methods=['GET'])
 def get_kpi_aitu():
+    """
+    Получает значения KPI Aitu.
+    Возвращает json-объект, список словарей.
+    :return: json
+    """
     mycursor = ssm_connection()
-    sql = "SELECT target, `left`, top_50, top_100, quiz, releases, today, `quarter`, quarter_left from kpi_aitu;"
+    sql = "SELECT target, `left`, top_50, top_100, quiz, releases, today, `quarter`, quarter_left from kpi_aitu;"   # Кавычки в запросе не убирать, иначе сломает запрос.
     mycursor.execute(sql)
     query_result = mycursor.fetchall()
     itemlist = []
@@ -562,6 +777,14 @@ def get_kpi_aitu():
 
 @app.route("/ssm/update_kpi_aitu", methods=['POST'])
 def update_kpi_aitu():
+    """
+    POST метод. Обновляет значения в таблице KPI Aitu
+    Параметры считываются через тело запроса как json объект.
+    Пример тела запроса:
+    { "target": 11111111, "left": 123456, "top_50": 1, "top_100": 3, "quiz": 0, "releases": 567890, "today": 1234, "quarter": 1337, "quarter_left": 90 }
+    Возвращает код 200 и сообщение о успешном выполнении. В любом другом случае отдает код 403.
+    :return: str
+    """
     body = flask.request.get_json()
     if body is None:
         flask.abort(403)
@@ -581,14 +804,22 @@ def update_kpi_aitu():
     except KeyError:
         flask.abort(403)
     query = 'UPDATE kpi_aitu set target = %s, `left` = %s, top_50 = %s, top_100 = %s, quiz = %s, releases = %s, today = %s, `quarter` = %s, quarter_left = %s WHERE id = 1'
+    # Кавычки в запросе не убирать, иначе сломает запрос.
     val = (int(items[0]), int(items[1]), int(items[2]), int(items[3]), int(items[4]), int(items[5]), int(items[6]), int(items[7]), int(items[8]))
     mycursor.execute(query, val)
     mydb.commit()
-    return "ok."
+    return "AITU KPI updated."
 
 
 @app.route("/ssm/update_logs", methods=['POST'])
 def update_logging():
+    """
+    POST метод. Обновляет логи (дата последнего успешного запуска скрипта).
+    Параметры считываются через тело запроса как json объект.
+    Пример тела запроса:
+    {"type": "kpi_mao"}
+    :return: str
+    """
     body = flask.request.get_json()
     if body is None:
         flask.abort(403)
@@ -603,14 +834,19 @@ def update_logging():
                 global mydb
                 mycursor.execute(query, value)
                 mydb.commit()
-                return "ok"
+                return data["type"] + " log updated."
     except KeyError:
         flask.abort(403)
-    flask.abort(403)
 
 
 @app.route("/ssm/get_logs_<logtype>", methods=['GET'])
 def get_logs(logtype):
+    """
+    Получает значение даты определенного лога.
+    Возвращает json-объект, словарь.
+    :param logtype: str
+    :return: json
+    """
     types = [{"kpi_mao": 1}, {"kpi_aitu": 2}, {"aitube_utm": 3}, {"yt_trends": 4}]
     mycursor = ssm_connection()
     try:
@@ -620,16 +856,21 @@ def get_logs(logtype):
                 query = "SELECT date FROM log WHERE idlog = %s"
                 mycursor.execute(query, value)
                 query_result = mycursor.fetchall()
-                for row in query_result:
-                    result = {"date": str(row[0])}
+                if query_result is None:
+                    flask.abort(403)
+                result = {"date": str(query_result[0][0])}
                 return json.dumps(result, indent=4)
     except KeyError:
         flask.abort(403)
-    flask.abort(403)
 
 
 @app.route("/ssm/get_dashb_params", methods=['GET'])
 def get_dashboard_params():
+    """
+    Получает параметры для дэшборда. Параметры заданы в коде.
+    Возвращает json-объект, список словарей.
+    :return: json
+    """
     itemlist = []
     keys = ["color", "position", "cpv_youtube_m", "cpv_youtube_f", "cpv_youtube_mid", "cpu_aitube_m", "cpu_aitube_f", "cpu_aitube_mid", "youtube_ud"]
     items_1 = ["red", "bad", 12.5, 23.25, 17.88, 213.2, 396, 304.6, 20]
@@ -647,6 +888,11 @@ def get_dashboard_params():
 
 @app.route("/ssm/get_utm_projects", methods=['GET'])
 def get_utm_projects():
+    """
+    Получает названия проектов и соответсвующие названия UTM кампаний.
+    Возвращает json-объект, список словарей.
+    :return:
+    """
     mycursor = ssm_connection()
     query = "select ProjectName, UtmName from project;"
     mycursor.execute(query)
@@ -663,6 +909,12 @@ def get_utm_projects():
 
 @app.route("/ssm/", methods=['GET'])
 def get_ssm_routes():
+    """
+    Выводит все доступные пути сервера (api endpoints).
+    Возвращает json объект, список словарей
+    todo: описание методов
+    :return: json
+    """
     itemlist = []
     for obj in app.url_map.iter_rules():
         if "ssm" in obj.__str__():
@@ -675,6 +927,11 @@ def get_ssm_routes():
 
 @app.before_request
 def validate_auth():
+    """
+    Если аутентификация включена, сравнивает переменную fauth с полем auth из тела запроса, присланного на сервер.
+    Если они не совпадают, то сервер отвечает '401' клиенту.
+    :return:
+    """
     if AUTH:
         body = flask.request.get_json()
         try:
@@ -684,4 +941,4 @@ def validate_auth():
             flask.abort(401)
 
 
-read_creds()
+read_creds()  # Считывает данные для входа при запуске скрипта
