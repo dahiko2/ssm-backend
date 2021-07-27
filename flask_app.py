@@ -922,7 +922,7 @@ def get_utm_projects():
 
 @app.route("/test/")
 def test():
-    return "test"
+    return "testing still"
 
 
 @app.route("/ssm/", methods=['GET'])
