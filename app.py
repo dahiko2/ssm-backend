@@ -87,7 +87,7 @@ def ssm_connection():
 @app.route("/update_server", methods=['GET', 'POST'])
 def git_webhook():
     if request.method == 'POST':
-        repo = git.Repo('/home/maksimsalnikov/mysite/flask_app.py')
+        repo = git.Repo('/home/maksimsalnikov/mysite/flask_app.py') # some test
         origin = repo.remotes.origin
         origin.pull()
         return 'Updated PythonAnywhere successfully', 200
