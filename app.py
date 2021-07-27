@@ -50,7 +50,6 @@ def read_creds():
         fauth = f.readline().strip()
         fdbname_insta = f.readline().strip()
         fdbname_ssm = f.readline().strip()
-        f
 
 
 def instagram_connection():
