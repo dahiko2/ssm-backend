@@ -5,10 +5,13 @@ mysql-connector-python 8.0.17 - подключение к базе данных.
 flask 2.0.1 - серверная часть API.
 flask-cors 3.0.10 - CORS, для выполнения запросов со сторонних сайтов.
 urllib3 1.25.11 - работа с URL.
+GitPython 3.1.18 - обновление сервера на PythonAnywhere при push в git-репозиторий.
 """
 import json
 import mysql.connector
 import flask
+import git
+from flask import request
 from datetime import datetime
 from urllib.parse import urlparse, parse_qs
 from flask_cors import CORS
@@ -79,6 +82,17 @@ def ssm_connection():
     )
     mydb.time_zone = "+06:00"
     return mydb.cursor()
+
+
+@app.route("/update_server/", methods=[''])
+def git_webhook():
+    if request.method == 'POST':
+        repo = git.Repo('D:/Media/Documents/GitHub/ssm-backend')
+        origin = repo.remotes.origin
+        origin.pull()
+        return 'Updated PythonAnywhere successfully', 200
+    else:
+        return 'Wrong event type', 400
 
 
 def calculate_cpv(price, youtube_view):
