@@ -1,6 +1,7 @@
 """
 Пакеты.
-json, datetime - стандартная библиотека питона.
+json, datetime, os, hmac, hashlib - стандартная библиотека питона.
+os - получение переменных из среды. hmac и hashlib для сравнения secret_key от гитхаба с переменной в ОС.
 mysql-connector-python 8.0.17 - подключение к базе данных.
 flask 2.0.1 - серверная часть API.
 flask-cors 3.0.10 - CORS, для выполнения запросов со сторонних сайтов.
@@ -11,6 +12,9 @@ import json
 import mysql.connector
 import flask
 import git
+import os
+import hmac
+import hashlib
 from flask import request
 from datetime import datetime
 from urllib.parse import urlparse, parse_qs
@@ -18,14 +22,13 @@ from flask_cors import CORS
 
 
 """
-Глобальные переменные. AUTH - аутентификация. mydb - создание пустого подключения к бд. f% - реквизиты для аутентификации и подключения к бд.
+Глобальные переменные. mydb - создание пустого подключения к бд. f% - реквизиты для аутентификации и подключения к бд.
 """
 AUTH = False
-mydb = mysql.connector.connect()
+mydb = mysql.connector.connect() 
 fhost = ""
 fuser = ""
 fpass = ""
-fauth = ""
 fdbname_insta = ""
 fdbname_ssm = ""
 """
@@ -41,15 +44,25 @@ cors = CORS(app, resources={
 
 
 def read_creds():
-    """Построчно считывает данные для подключения и аутентификации из файла credentials.txt."""
+    """Построчно считывает данные для подключения к бд из файла credentials.txt."""
     global fhost, fuser, fpass, fauth, fdbname_insta, fdbname_ssm
     with open("credentials.txt") as f:
         fhost = f.readline().strip()
         fuser = f.readline().strip()
         fpass = f.readline().strip()
-        fauth = f.readline().strip()
         fdbname_insta = f.readline().strip()
         fdbname_ssm = f.readline().strip()
+
+
+def is_valid_signature(x_hub_signature, data, private_key):
+    """
+    Проверка Secret Key на валидность (честно спизжено с гитхаба)
+    """
+    hash_algorithm, github_signature = x_hub_signature.split('=', 1)
+    algorithm = hashlib.__dict__.get(hash_algorithm)
+    encoded_key = bytes(private_key, 'latin-1')
+    mac = hmac.new(encoded_key, msg=data, digestmod=algorithm)
+    return hmac.compare_digest(mac.hexdigest(), github_signature)
 
 
 def instagram_connection():
@@ -86,13 +99,37 @@ def ssm_connection():
 
 @app.route("/update_server", methods=['GET', 'POST'])
 def git_webhook():
-    if request.method == 'POST':
+    """
+    Webhook, который вызывается когда происходит push в мастер ветку в github'e
+    Он защищен проверкой Secret поля и отсеивает нежелательные запросы
+    :return: flask.Response
+    """
+    if request.method != 'POST':
+        return "OK"
+    else:
+        abort_code = 418
+        if 'X-Github-Event' not in request.headers:
+            flask.abort(abort_code)
+        if 'X-Github-Delivery' not in request.headers:
+            flask.abort(abort_code)
+        if 'X-Hub-Signature' not in request.headers:
+            flask.abort(abort_code)
+        if not request.is_json:
+            flask.abort(abort_code)
+        if 'User-Agent' not in request.headers:
+            flask.abort(abort_code)
+        ua = request.headers.get('User-Agent')
+        if not ua.startswith('GitHub-Hookshot/'):
+            flask.abort(abort_code)
+        x_hub_signature = request.headers.get('X-Hub-Signature')
+        w_secret = os.getenv('SECRET_KEY')
+        if not is_valid_signature(x_hub_signature, request.data, w_secret):
+            print('Deploy signature failed: {sig}'.format(sig=x_hub_signature))
+            flask.abort(abort_code)
         repo = git.Repo('/home/maksimsalnikov/ssm-backend/')
         origin = repo.remotes.origin
         origin.pull()
         return 'Updated PythonAnywhere successfully', 200
-    else:
-        return 'Wrong event type', 400
 
 
 def calculate_cpv(price, youtube_view):
@@ -942,14 +979,14 @@ def get_ssm_routes():
 @app.before_request
 def validate_auth():
     """
-    Если аутентификация включена, сравнивает переменную fauth с полем auth из тела запроса, присланного на сервер.
+    Если аутентификация включена, сравнивает enviroment variable AUTH с полем auth из тела запроса, присланного на сервер.
     Если они не совпадают, то сервер отвечает '401' клиенту.
     :return:
     """
     if AUTH:
         body = flask.request.get_json()
         try:
-            if body is None or body["auth"] != fauth:
+            if body is None or body["auth"] != os.getenv('AUTH'):
                 flask.abort(401)
         except KeyError:
             flask.abort(401)
