@@ -497,6 +497,7 @@ def form_proj_info_dict(row):
     :param row: list
     :return: dict
     """
+
     item = dict()
     item["yt_id"] = row[0]
     item["episode_name"] = row[1]
@@ -512,6 +513,7 @@ def form_proj_info_dict(row):
     item["ctr"] = row[11]
     item["uniq_users_youtube"] = row[12]
     item["subscribers"] = row[13]
+    item["project_id"] = row[14]
     item["price"] = row[15]
     item["uniq_release_month"] = row[17]
     item["uniq_second_month"] = row[18]
@@ -546,6 +548,28 @@ def get_projects():
         item = dict()
         item["id"] = row[0]
         item["name"] = row[1]
+        itemlist.append(item)
+    result = json.dumps(itemlist, indent=4)
+    return result
+
+
+@app.route("/ssm/get_project_avgtail_<int:pid>", methods=['GET'])
+def get_project_info(pid):
+    """
+    Выводит
+    :param pid: int - id проекта
+    :return:
+    """
+    mycursor = ssm_connection()
+    query = "select AVG(tail) from (select EpisodesName, tail, ReleaseDate from releases where ProjectID = %s and Tail is not null ORDER BY ReleaseDate ASC LIMIT 1, 100) as T;"
+    val = (pid, )
+    mycursor.execute(query, val)
+    query_result = mycursor.fetchall()
+    itemlist = []
+    for row in query_result:
+        item = dict()
+        item["project_id"] = pid
+        item["avg_tail"] = float(row[0])
         itemlist.append(item)
     result = json.dumps(itemlist, indent=4)
     return result
