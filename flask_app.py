@@ -521,7 +521,7 @@ def form_proj_info_dict(row):
     item["male"] = row[19]
     item["female"] = row[20]
     gender = "M-F"
-    if row[19] is not None:
+    if row[19] is not None and row[19] != '0%':
         if float(row[19]) > 60.0:
             gender = "M"
         elif float(row[20]) > 60.0:
