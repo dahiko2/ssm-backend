@@ -45,7 +45,7 @@ cors = CORS(app, resources={
 
 def read_creds():
     """Построчно считывает данные для подключения к бд из файла credentials.txt."""
-    global fhost, fuser, fpass, fauth, fdbname_insta, fdbname_ssm
+    global fhost, fuser, fpass, fdbname_insta, fdbname_ssm
     with open("credentials.txt") as f:
         fhost = f.readline().strip()
         fuser = f.readline().strip()
@@ -993,4 +993,3 @@ def validate_auth():
 
 
 read_creds()  # Считывает данные для входа при запуске скрипта
-# for test
