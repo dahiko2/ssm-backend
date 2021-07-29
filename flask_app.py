@@ -569,7 +569,10 @@ def get_project_info(pid):
     for row in query_result:
         item = dict()
         item["project_id"] = pid
-        item["avg_tail"] = float(row[0])
+        if row[0] is None:
+            item["avg_tail"] = 0
+        else:
+            item["avg_tail"] = float(row[0])
         itemlist.append(item)
     result = json.dumps(itemlist, indent=4)
     return result
