@@ -524,6 +524,7 @@ def form_proj_info_dict(row):
     item["male"] = row[19]
     item["female"] = row[20]
     item["retention"] = row[21]
+    item["avg_tail"], item["avg_retention"] = get_project_averages(row[14])
     gender = "M-F"
     if row[19] is not None and row[19] != '0%':
         if float(row[19]) > 60.0:
@@ -555,8 +556,7 @@ def get_projects():
     return result
 
 
-@app.route("/ssm/get_project_avgs_<int:pid>", methods=['GET'])
-def get_project_info(pid):
+def get_project_averages(pid):
     """
     Выводит
     :param pid: int - id проекта
@@ -567,14 +567,11 @@ def get_project_info(pid):
     val = (pid, )
     mycursor.execute(query, val)
     query_result = mycursor.fetchall()
-    itemlist = []
-    item = dict()
+    avg_tail = 0
     for row in query_result:
-        item["project_id"] = pid
-        if row[0] is None:
-            item["avg_tail"] = 0
-        else:
-            item["avg_tail"] = float(row[0])
+        avg_tail = 0
+        if row[0] is not None:
+            avg_tail = float(row[0])
     query = "select AudienceRetention from releases where ProjectID = %s ORDER BY ReleaseDate ASC;"
     val = (pid, )
     mycursor.execute(query, val)
@@ -587,13 +584,11 @@ def get_project_info(pid):
         count += 1
         summary += float(row[0][:-1].replace(",", "."))
     if count == 0:
-        avg = 0
+        avg_retention = 0
     else:
-        avg = summary / count
-    item["avg_retention"] = avg
-    itemlist.append(item)
-    result = json.dumps(itemlist, indent=4)
-    return result
+        avg_retention = summary / count
+
+    return avg_tail, avg_retention
 
 
 @app.route("/ssm/info_byprojectid=<int:project_id>", methods=['GET'])
