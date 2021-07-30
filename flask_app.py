@@ -102,6 +102,7 @@ def git_webhook():
     """
     Webhook, который вызывается когда происходит push в мастер ветку в github'e
     Он защищен проверкой Secret поля и отсеивает нежелательные запросы
+    плз начни работать заебал
     :return: flask.Response
     """
     if request.method != 'POST':
