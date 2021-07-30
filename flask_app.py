@@ -554,7 +554,7 @@ def get_projects():
     return result
 
 
-@app.route("/ssm/get_project_avgtail_<int:pid>", methods=['GET'])
+@app.route("/ssm/get_project_avgs_<int:pid>", methods=['GET'])
 def get_project_info(pid):
     """
     Выводит
@@ -567,14 +567,30 @@ def get_project_info(pid):
     mycursor.execute(query, val)
     query_result = mycursor.fetchall()
     itemlist = []
+    item = dict()
     for row in query_result:
-        item = dict()
         item["project_id"] = pid
         if row[0] is None:
             item["avg_tail"] = 0
         else:
             item["avg_tail"] = float(row[0])
-        itemlist.append(item)
+    query = "select AudienceRetention from releases where ProjectID = %s ORDER BY ReleaseDate ASC;"
+    val = (pid, )
+    mycursor.execute(query, val)
+    query_result = mycursor.fetchall()
+    summary = 0
+    count = 0
+    for row in query_result:
+        if row[0] == "0%":
+            break
+        count += 1
+        summary += float(row[0][:-1].replace(",", "."))
+    if count == 0:
+        avg = 0
+    else:
+        avg = summary / count
+    item["avg_retention"] = avg
+    itemlist.append(item)
     result = json.dumps(itemlist, indent=4)
     return result
 
@@ -1021,3 +1037,4 @@ def validate_auth():
 
 
 read_creds()  # Считывает данные для входа при запуске скрипта
+test()
