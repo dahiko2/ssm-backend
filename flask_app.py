@@ -522,6 +522,7 @@ def form_proj_info_dict(row):
     item["cpc"] = calculate_cpc(row[15], row[3])
     item["male"] = row[19]
     item["female"] = row[20]
+    item["retention"] = row[21]
     gender = "M-F"
     if row[19] is not None and row[19] != '0%':
         if float(row[19]) > 60.0:
