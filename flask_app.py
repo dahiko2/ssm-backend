@@ -600,7 +600,7 @@ def get_fullinfo_by_projectid(project_id):
     :return: json
     """
     mycursor = ssm_connection()
-    query = "SELECT * FROM releases where projectID = %s ORDER BY projectID DESC;"
+    query = "SELECT * FROM releases where projectID = %s ORDER BY ReleaseDate ASC;"
     val = (project_id,)
     mycursor.execute(query, val)
     query_result = mycursor.fetchall()
@@ -621,7 +621,7 @@ def get_fullinfo_by_projectname(project):
     """
     project = str(project) + "%"
     mycursor = ssm_connection()
-    query = "SELECT * FROM releases where projectID in (select ProjectID from project where ProjectName like %s) ORDER BY projectID DESC;"
+    query = "SELECT * FROM releases where projectID in (select ProjectID from project where ProjectName like %s) ORDER BY ReleaseDate ASC;"
     val = (project,)
     mycursor.execute(query, val)
     query_result = mycursor.fetchall()
