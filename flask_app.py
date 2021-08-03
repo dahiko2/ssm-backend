@@ -500,6 +500,7 @@ def form_proj_info_dict(row):
     """
 
     item = dict()
+    item["id"] = row[16]
     item["yt_id"] = row[0]
     item["episode_name"] = row[1]
     item["uniq_year"] = row[2]
@@ -1012,6 +1013,24 @@ def get_ssm_routes():
             item = dict()
             item["path"] = obj.__str__().replace('<', '"').replace('>', '"')
             itemlist.append(item)
+    result = json.dumps(itemlist, indent=4)
+    return result
+
+
+@app.route("/ssm/get_milestone_releases", methods=['GET'])
+def get_milestone_releases():
+    """
+    Выводит все релизы, которые приближаются к milestone
+    Возвращает json-объект, список словарей
+    :return: json
+    """
+    mycursor = ssm_connection()
+    query = "select * from releases where ProjectID in (1, 2, 3, 4, 5, 7, 9, 10, 15, 76, 115, 117, 119, 120, 121, 122, 123) and (YouTubeViews between 950000 and 1000000) or (YouTubeViews between 1950000 and 2000000) or (YouTubeViews between 2950000 and 3000000) or (YouTubeViews between 3950000 and 4000000) or (YouTubeViews between 4950000 and 5000000) ORDER BY ReleaseDate Asc;"
+    mycursor.execute(query)
+    query_result = mycursor.fetchall()
+    itemlist = []
+    for row in query_result:
+        itemlist.append(form_proj_info_dict(row))
     result = json.dumps(itemlist, indent=4)
     return result
 
