@@ -133,40 +133,16 @@ def git_webhook():
         return 'Updated PythonAnywhere successfully', 200
 
 
-def calculate_cpv(price, youtube_view):
+def calculate_cp(price, metric):
     """
-    Считает стоимость за просмотр, если параметры пустые (None) то возвращает 0.
+    Считает стоимость за метрику, если параметры пустые (None) то возвращает 0.
     :param price: int
-    :param youtube_view: int
+    :param metric: int
     :return: float
     """
-    if price is None or youtube_view is None or youtube_view == 0:
+    if price is None or metric is None or metric == 0:
         return 0
-    return price / youtube_view
-
-
-def calculate_cpc(price, traffic):
-    """
-    Считает стоимость за переход, если параметры пустые (None) то возвращает 0.
-    :param price: int
-    :param traffic: int
-    :return: float
-    """
-    if price is None or traffic is None or traffic == 0:
-        return 0
-    return price/traffic
-
-
-def calculate_cpu(price, uniq_user):
-    """
-    Считает стоимость за уника, если параметры пустые (None) то возвращает 0.
-    :param price: int
-    :param uniq_user: int
-    :return: float
-    """
-    if price is None or uniq_user is None or uniq_user == 0:
-        return 0
-    return price/uniq_user
+    return price / metric
 
 
 def get_yt_id(url):
@@ -510,6 +486,8 @@ def form_proj_info_dict(row):
     item["traffic_per_day"] = row[6]
     item["traffic_per_tail"] = row[7]
     item["youtube_views"] = row[8]
+    item["youtube_likes"] = row[22]
+    item["youtube_comments"] = row[23]
     item["avg_view_by_user"] = row[9]
     item["shows"] = row[10]
     item["ctr"] = row[11]
@@ -519,9 +497,9 @@ def form_proj_info_dict(row):
     item["price"] = row[15]
     item["uniq_release_month"] = row[17]
     item["uniq_second_month"] = row[18]
-    item["cpv"] = calculate_cpv(row[15], row[8])
-    item["cpu"] = calculate_cpu(row[15], row[2])
-    item["cpc"] = calculate_cpc(row[15], row[3])
+    item["cpv"] = calculate_cp(row[15], row[8])
+    item["cpu"] = calculate_cp(row[15], row[2])
+    item["cpc"] = calculate_cp(row[15], row[3])
     item["male"] = row[19]
     item["female"] = row[20]
     item["retention"] = row[21]
