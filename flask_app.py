@@ -474,7 +474,6 @@ def form_proj_info_dict(row):
     :param row: list
     :return: dict
     """
-
     item = dict()
     item["id"] = row[16]
     item["yt_id"] = row[0]
@@ -503,7 +502,7 @@ def form_proj_info_dict(row):
     item["male"] = row[19]
     item["female"] = row[20]
     item["retention"] = row[21]
-    item["avg_tail"], item["avg_retention"] = get_project_averages(row[14])
+    item["avg_tail"], item["avg_retention"], item["avg_cpc"] = get_project_averages(row[14])
     gender = "M-F"
     if row[19] is not None and row[19] != '0%':
         if float(row[19]) > 60.0:
@@ -537,12 +536,13 @@ def get_projects():
 
 def get_project_averages(pid):
     """
-    Выводит
+    Выводит средние значения для всего проекта по Хвосту, Досматриваемости и CPC.
     :param pid: int - id проекта
-    :return:
+    :return: float, float, float
     """
     mycursor = ssm_connection()
-    query = "select AVG(tail) from (select EpisodesName, tail, ReleaseDate from releases where ProjectID = %s and Tail is not null ORDER BY ReleaseDate ASC LIMIT 1, 100) as T;"
+    # Вытаскиваем среднюю длину хвоста, где значение хвоста задано, и значени хвоста у первой серии не учитывается (для этого нужна сортировка по дате и лимит 1)
+    query = "select AVG(tail) from (select EpisodesName, tail, ReleaseDate from releases where ProjectID = %s and Tail is not null ORDER BY ReleaseDate ASC LIMIT 1, 1000) as T;"
     val = (pid, )
     mycursor.execute(query, val)
     query_result = mycursor.fetchall()
@@ -551,23 +551,32 @@ def get_project_averages(pid):
         avg_tail = 0
         if row[0] is not None:
             avg_tail = float(row[0])
-    query = "select AudienceRetention from releases where ProjectID = %s ORDER BY ReleaseDate ASC;"
+    # Вытаскиваем досматриваемость, цену и переходы.
+    query = "select AudienceRetention, Price, Traffic from releases where ProjectID = %s ORDER BY ReleaseDate ASC;"
     val = (pid, )
     mycursor.execute(query, val)
     query_result = mycursor.fetchall()
-    summary = 0
-    count = 0
+    summary_retention = 0
+    count_retention = 0
+    summary_cpc = 0
+    count_cpc = 0
+    avg_cpc = 0
+    avg_retention = 0
+    # Считаем суммы для СРС и досматриваемости
     for row in query_result:
+        count_cpc += 1
+        summary_cpc += calculate_cp(row[1], row[2])
+        # Пропускаем досматриваемость в 0% как незаполненную (условный костыль пока не пофиксим автозаполнение досматриваемости)
         if row[0] == "0%":
             break
-        count += 1
-        summary += float(row[0][:-1].replace(",", "."))
-    if count == 0:
-        avg_retention = 0
-    else:
-        avg_retention = summary / count
-
-    return avg_tail, avg_retention
+        count_retention += 1
+        summary_retention += float(row[0][:-1].replace(",", "."))
+    # Если досматриваемость незаполнена, ее нет, то средняя отдается как 0, в ином случае считается средняя арифметическая, тоже самое для СРС
+    if count_retention != 0:
+        avg_retention = summary_retention / count_retention
+    if count_cpc != 0:
+        avg_cpc = summary_cpc / count_cpc
+    return avg_tail, avg_retention, avg_cpc
 
 
 @app.route("/ssm/info_byprojectid=<int:project_id>", methods=['GET'])
