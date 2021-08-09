@@ -1022,6 +1022,36 @@ def get_milestone_releases():
     return result
 
 
+@app.route("/ssm/add_release", methods=['POST'])
+def add_release():
+    """
+
+    :return:
+    """
+    body = flask.request.get_json()
+    if body is not None:
+        global mydb
+        mycursor = ssm_connection()
+        keys = []
+        values = []
+        for item in body.keys():  # формирование массивов из ключей словаря и соответствующих значений
+            keys.append(item)
+            values.append(str(body[item]))
+        delimeter = ", "
+        key_string = delimeter.join(keys)  # формирование строки для вставки в поля запроса. Как поля используются ключи словаря.
+        placeholder = '%s'
+        param_subs = ','.join((placeholder,) * len(values))  # формирование строки с определенным кол-вом параметров для запроса (%s, %s) - такого типа.
+        query = "INSERT INTO releases ("+key_string+") VALUES ("+param_subs+")"
+        val = tuple(values)
+        try:
+            mycursor.execute(query, val)
+            mydb.commit()
+        except mysql.connector.errors.Error as e:
+            print("Error: "+e.msg)
+            flask.abort(400)
+    return "Release added."
+
+
 @app.before_request
 def validate_auth():
     """
