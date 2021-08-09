@@ -534,16 +534,16 @@ def get_projects():
     return result
 
 
-def get_project_averages(pid):
+def get_project_averages(project_id):
     """
     Выводит средние значения для всего проекта по Хвосту, Досматриваемости и CPC.
-    :param pid: int - id проекта
+    :param project_id: int - id проекта
     :return: float, float, float
     """
     mycursor = ssm_connection()
     # Вытаскиваем среднюю длину хвоста, где значение хвоста задано, и значени хвоста у первой серии не учитывается (для этого нужна сортировка по дате и лимит 1)
     query = "select AVG(tail) from (select EpisodesName, tail, ReleaseDate from releases where ProjectID = %s and Tail is not null ORDER BY ReleaseDate ASC LIMIT 1, 1000) as T;"
-    val = (pid, )
+    val = (project_id, )
     mycursor.execute(query, val)
     query_result = mycursor.fetchall()
     avg_tail = 0
@@ -553,7 +553,7 @@ def get_project_averages(pid):
             avg_tail = float(row[0])
     # Вытаскиваем досматриваемость, цену и переходы.
     query = "select AudienceRetention, Price, Traffic from releases where ProjectID = %s ORDER BY ReleaseDate ASC;"
-    val = (pid, )
+    val = (project_id, )
     mycursor.execute(query, val)
     query_result = mycursor.fetchall()
     summary_retention = 0
@@ -568,7 +568,7 @@ def get_project_averages(pid):
         summary_cpc += calculate_cp(row[1], row[2])
         # Пропускаем досматриваемость в 0% как незаполненную (условный костыль пока не пофиксим автозаполнение досматриваемости)
         if row[0] == "0%":
-            break
+            pass
         count_retention += 1
         summary_retention += float(row[0][:-1].replace(",", "."))
     # Если досматриваемость незаполнена, ее нет, то средняя отдается как 0, в ином случае считается средняя арифметическая, тоже самое для СРС
