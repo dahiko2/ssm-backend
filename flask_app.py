@@ -566,7 +566,7 @@ def get_project_averages(project_id):
     # Считаем суммы для СРС и досматриваемости
     for row in query_result:
         # Если в названии серии нет строки из списка first_list то считаем среднее срс (Если не первая серия)
-        if not any(substring in str(row[3]).lower() for substring in first_list):
+        if not any(substring in str(row[3]).lower() for substring in first_ep):
             count_cpc += 1
             summary_cpc += calculate_cp(row[1], row[2])
         # Пропускаем досматриваемость в 0% как незаполненную (условный костыль пока не пофиксим автозаполнение досматриваемости)
