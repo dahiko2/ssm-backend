@@ -552,7 +552,7 @@ def get_project_averages(project_id):
         if row[0] is not None:
             avg_tail = float(row[0])
     # Вытаскиваем досматриваемость, цену и переходы.
-    query = "select AudienceRetention, Price, Traffic from releases where ProjectID = %s ORDER BY ReleaseDate ASC;"
+    query = "select AudienceRetention, Price, Traffic, EpisodesName from releases where ProjectID = %s ORDER BY ReleaseDate ASC;"
     val = (project_id, )
     mycursor.execute(query, val)
     query_result = mycursor.fetchall()
@@ -562,10 +562,13 @@ def get_project_averages(project_id):
     count_cpc = 0
     avg_cpc = 0
     avg_retention = 0
+    first_ep = ["1 серия", "1 часть", "серия 1", "#1", "еp.1", "еp. 1", "часть 1", "ep.1", "ep. 1"]
     # Считаем суммы для СРС и досматриваемости
     for row in query_result:
-        count_cpc += 1
-        summary_cpc += calculate_cp(row[1], row[2])
+        # Если в названии серии нет строки из списка first_list то считаем среднее срс (Если не первая серия)
+        if not any(substring in str(row[3]).lower() for substring in first_list):
+            count_cpc += 1
+            summary_cpc += calculate_cp(row[1], row[2])
         # Пропускаем досматриваемость в 0% как незаполненную (условный костыль пока не пофиксим автозаполнение досматриваемости)
         if row[0] == "0%":
             pass
