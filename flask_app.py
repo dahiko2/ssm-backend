@@ -504,7 +504,7 @@ def form_proj_info_dict(row):
     item["male"] = row[19]
     item["female"] = row[20]
     item["retention"] = row[21]
-    item["avg_tail"], item["avg_retention"], item["avg_cpc"] = get_project_averages(row[14])
+    #item["avg_tail"], item["avg_retention"], item["avg_cpc"] = get_project_averages(row[14])
     gender = "M-F"
     if row[19] is not None and row[19] != '0%':
         if float(row[19]) > 60.0:
