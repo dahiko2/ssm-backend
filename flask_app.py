@@ -482,6 +482,7 @@ def form_proj_info_dict(row):
     item["traffic"] = row[3]
     item["release_date"] = str(row[4])
     item["youtube_release_date"] = str(row[24])
+    item["season"] = row[25]
     item["tail"] = row[5]
     item["traffic_per_day"] = row[6]
     item["traffic_per_tail"] = row[7]
