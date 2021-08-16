@@ -1067,7 +1067,7 @@ def get_presentation_json():
     except KeyError:
         flask.abort(401)
     else:
-        with open("data/"+type+'.json') as f:
+        with open("ssm-backend/data/"+type+'.json') as f:
             data = json.load(f)
         if data is not None:
             return data
