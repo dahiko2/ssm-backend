@@ -1,0 +1,18 @@
+{
+	"uniq_user_yt_in_month": "13000000",
+	"uniq_user_yt_in_week": "10000000",
+	"uniq_user_yt_in_day": "6000000",
+	"videos_watch_count_in_month": "1000000000",
+	"female_percent": "49%",
+	"male_percent": "51%",
+	"core_by_social_dem": "25-34",
+	"age_13-17": "6%",
+	"age_18-24": "22%",
+	"age_25-34": "29%",
+	"age_35-44": "17%",
+	"age_45-54": "12%",
+	"age_55-64": "10%",
+	"mobile_percent": "70%",
+	"smart_tv_percent": "20%",
+	"pc_tablet": "10%"
+}

@@ -1057,6 +1057,25 @@ def add_release():
     return "Release added."
 
 
+@app.route("/ssm/get_custom_data", methods=['GET'])
+def get_presentation_json():
+    body = flask.request.get_json()
+    if body is None:
+        flask.abort(401)
+    try:
+        type = body["type"]
+    except KeyError:
+        flask.abort(401)
+    else:
+        with open("data/"+type+'.json') as f:
+            data = json.load(f)
+        if data is not None:
+            return data
+        else:
+            flask.abort(404)
+
+
+
 @app.before_request
 def validate_auth():
     """
