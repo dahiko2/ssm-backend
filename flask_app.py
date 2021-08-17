@@ -518,12 +518,12 @@ def form_proj_info_dict(row):
 @app.route("/ssm/get_projects", methods=['GET'])
 def get_projects():
     """
-    Собирает ID проекта в базе и его название в список.
+    Собирает ID проекта в базе и его название, пол и возраст аудитории в список.
     Возвращает json-объект, список проектов.
     :return: json
     """
     mycursor = ssm_connection()
-    query = "SELECT ProjectID, ProjectName, Gender, Age from project;"
+    query = "SELECT ProjectID, ProjectName, Gender, Age, UtmName from project;"
     mycursor.execute(query)
     query_result = mycursor.fetchall()
     itemlist = []
@@ -533,6 +533,7 @@ def get_projects():
         item["name"] = row[1]
         item["gender"] = row[2]
         item["age"] = row[3]
+        item["utm_name"] = row[4]
         itemlist.append(item)
     result = json.dumps(itemlist, indent=4)
     return result
@@ -636,18 +637,27 @@ def get_releases_by_period(n, period):
     Собирает список релизов за определенный период, указанный в параметрах, где
     n - кол-во выбранных периодов, period - период 1 из ниже перечисленных.
     Возвращает json-объект, список релизов.
+    Автоматом делает выборку по дате релиза в айтубе, если передать в теле запроса {"type":"youtube"}, то выборка будет по дате с ютуба
     :param period: enum (DAY, WEEK, MONTH, YEAR)
     :param n: int
     :return: json
     """
-    # CURDATE - INTERVAL N PERIOD
+    # CURDATE - INTERVAL N PERIOD - вычисление релизов за период
+    datetype = "ReleaseDate"
+    body = flask.request.get_json()
+    if body is not None:
+        try:
+            if body["type"] == "youtube":
+                datetype = "YouTubeReleaseDate"
+        except KeyError:
+            pass
     periods = ["DAY", "WEEK", "MONTH", "YEAR"]
     period = period.upper()
     if period not in periods:
         flask.abort(403)
     mycursor = ssm_connection()
     query = "SELECT * FROM releases " \
-            "WHERE ReleaseDate > DATE_SUB(CURDATE(), INTERVAL %s " + period + ") ORDER BY projectID DESC;"
+            "WHERE " + datetype + " > DATE_SUB(CURDATE(), INTERVAL %s " + period + ") ORDER BY projectID DESC;"
     val = (n,)
     mycursor.execute(query, val)
     query_result = mycursor.fetchall()
@@ -663,14 +673,23 @@ def get_releases_between(date1, date2):
     """
     Собирает список релизов за определенные даты, указанные в параметрах.
     Возвращает json-объект, список релизов.
+    Автоматом делает выборку по дате релиза в айтубе, если передать в теле запроса {"type":"youtube"}, то выборка будет по дате с ютуба
     :param date1: str (date format yyyy.mm.dd)
     :param date2: str (date format yyyy.mm.dd)
     :return: json
     """
+    datetype = "ReleaseDate"
+    body = flask.request.get_json()
+    if body is not None:
+        try:
+            if body["type"] == "youtube":
+                datetype = "YouTubeReleaseDate"
+        except KeyError:
+            pass
     mycursor = ssm_connection()
     date1 = date1.replace(".", "/")
     date2 = date2.replace(".", "/")
-    query = "SELECT * FROM releases where (ReleaseDate between %s and %s) ORDER BY projectID DESC;"
+    query = "SELECT * FROM releases where ("+datetype+" between %s and %s) ORDER BY projectID DESC;"
     val = (date1, date2)
     mycursor.execute(query, val)
     query_result = mycursor.fetchall()
@@ -975,27 +994,6 @@ def get_dashboard_params():
     return result
 
 
-@app.route("/ssm/get_utm_projects", methods=['GET'])
-def get_utm_projects():
-    """
-    Получает названия проектов и соответсвующие названия UTM кампаний.
-    Возвращает json-объект, список словарей.
-    :return:
-    """
-    mycursor = ssm_connection()
-    query = "select ProjectName, UtmName from project;"
-    mycursor.execute(query)
-    itemlist = []
-    query_result = mycursor.fetchall()
-    for row in query_result:
-        item = dict()
-        item["project_name"] = row[0]
-        item["utm_name"] = row[1]
-        itemlist.append(item)
-    result = json.dumps(itemlist, indent=4)
-    return result
-
-
 @app.route("/ssm/", methods=['GET'])
 def get_ssm_routes():
     """
@@ -1017,7 +1015,7 @@ def get_ssm_routes():
 @app.route("/ssm/get_milestone_releases", methods=['GET'])
 def get_milestone_releases():
     """
-    Выводит все релизы, которые приближаются к milestone
+    Выводит все релизы (актуальные), которые приближаются к milestone
     Возвращает json-объект, список словарей
     :return: json
     """
@@ -1035,7 +1033,8 @@ def get_milestone_releases():
 @app.route("/ssm/add_release", methods=['POST'])
 def add_release():
     """
-
+    Добавляет релиз в базу данных, данные принимаются в теле запроса
+    В базу данные записываются в поля, которые соответствуют переданным ключам в запросе.
     :return:
     """
     body = flask.request.get_json()
@@ -1063,16 +1062,22 @@ def add_release():
 
 
 @app.route("/ssm/get_custom_data", methods=['GET'])
-def get_presentation_json():
+def get_custom_json_data():
+    """
+    Выводит данные из json файла, который хранится в директории проекта
+    Название файла, с которого нужно считать, передается в теле запроса как параметр type. {"type":"genesis"}
+    Возвращает json-объект, содержимое файла
+    :return:
+    """
     body = flask.request.get_json()
     if body is None:
         flask.abort(401)
     try:
-        type = body["type"]
+        type_ = body["type"]
     except KeyError:
         flask.abort(401)
     else:
-        with open("ssm-backend/data/"+type+'.json') as f:
+        with open("ssm-backend/data/"+type_+'.json') as f:
             data = json.load(f)
         if data is not None:
             return data
