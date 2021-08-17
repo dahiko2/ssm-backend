@@ -523,7 +523,7 @@ def get_projects():
     :return: json
     """
     mycursor = ssm_connection()
-    query = "SELECT ProjectID, ProjectName from project;"
+    query = "SELECT ProjectID, ProjectName, Gender, Age from project;"
     mycursor.execute(query)
     query_result = mycursor.fetchall()
     itemlist = []
@@ -531,6 +531,8 @@ def get_projects():
         item = dict()
         item["id"] = row[0]
         item["name"] = row[1]
+        item["gender"] = row[2]
+        item["age"] = row[3]
         itemlist.append(item)
     result = json.dumps(itemlist, indent=4)
     return result
@@ -575,7 +577,10 @@ def get_project_averages(project_id):
         if row[0] == "0%":
             pass
         count_retention += 1
-        summary_retention += float(row[0][:-1].replace(",", "."))
+        try:
+            summary_retention += float(row[0][:-1].replace(",", "."))
+        except ValueError:
+            summary_retention += 0
     # Если досматриваемость незаполнена, ее нет, то средняя отдается как 0, в ином случае считается средняя арифметическая, тоже самое для СРС
     if count_retention != 0:
         avg_retention = summary_retention / count_retention
