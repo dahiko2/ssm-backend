@@ -487,6 +487,7 @@ def form_proj_info_dict(row):
     item["traffic_per_day"] = row[6]
     item["traffic_per_tail"] = row[7]
     item["youtube_views"] = row[8]
+    item["aitube_views"] = row[26]
     item["youtube_likes"] = row[22]
     item["youtube_comments"] = row[23]
     item["avg_view_by_user"] = row[9]
