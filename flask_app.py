@@ -1044,6 +1044,8 @@ def add_release():
         keys = []
         values = []
         for item in body.keys():  # формирование массивов из ключей словаря и соответствующих значений
+            if item == "auth":
+                pass
             keys.append(item)
             values.append(str(body[item]))
         delimeter = ", "
@@ -1083,7 +1085,6 @@ def get_custom_json_data():
             return data
         else:
             flask.abort(404)
-
 
 
 @app.before_request
