@@ -18,7 +18,7 @@ import hashlib
 from flask import request
 from datetime import datetime
 from urllib.parse import urlparse, parse_qs
-from flask_cors import CORS
+from flask_cors import CORS, cross_origin
 
 
 """
@@ -35,7 +35,6 @@ fdbname_ssm = ""
 Создание базового объекта Flask и обертка его в CORS.
 """
 app = flask.Flask(__name__)
-CORS(app)
 cors = CORS(app, resources={
     r"/*": {
         "origins": "https://salemsocial.kz/",  # origins - список сайтов с которых можно делать запрос игнорируя CORS, поставить * для любых сайтов
