@@ -1096,11 +1096,11 @@ def validate_auth():
     :return:
     """
     if AUTH:
-        body = flask.request.get_json()
-        try:
-            if body is None or body["auth"] != os.getenv('AUTH'):
+        body = flask.request.headers.get('auth')
+        if body is not None:
+            if body != os.getenv('AUTH'):
                 flask.abort(401)
-        except KeyError:
+        else:
             flask.abort(401)
 
 
