@@ -1096,12 +1096,13 @@ def validate_auth():
     :return:
     """
     if AUTH:
-        body = flask.request.headers.get('auth')
-        if body is not None:
-            if body != os.getenv('AUTH'):
+        if flask.request.endpoint != 'git_webhook':
+            body = flask.request.headers.get('auth')
+            if body is not None:
+                if body != os.getenv('AUTH'):
+                    flask.abort(401)
+            else:
                 flask.abort(401)
-        else:
-            flask.abort(401) #test
 
 
 read_creds()  # Считывает данные для входа при запуске скрипта
