@@ -1102,7 +1102,7 @@ def validate_auth():
                 if body != os.getenv('AUTH'):
                     flask.abort(401)
             else:
-                flask.abort(401)
+                flask.abort(401) #test
 
 
 read_creds()  # Считывает данные для входа при запуске скрипта
