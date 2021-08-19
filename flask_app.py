@@ -38,7 +38,7 @@ app = flask.Flask(__name__)
 CORS(app)
 cors = CORS(app, resources={
     r"/*": {
-        "origins": "https://salemsocial.kz/"  # origins - список сайтов с которых можно делать запрос игнорируя CORS, поставить * для любых сайтов
+        "origins": "*"  # origins - список сайтов с которых можно делать запрос игнорируя CORS, поставить * для любых сайтов
     }
 })
 
