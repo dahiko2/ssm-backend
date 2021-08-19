@@ -24,7 +24,7 @@ from flask_cors import CORS
 """
 Глобальные переменные. mydb - создание пустого подключения к бд. f% - реквизиты для аутентификации и подключения к бд.
 """
-AUTH = False
+AUTH = True
 mydb = mysql.connector.connect() 
 fhost = ""
 fuser = ""
