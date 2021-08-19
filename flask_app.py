@@ -35,6 +35,7 @@ fdbname_ssm = ""
 Создание базового объекта Flask и обертка его в CORS.
 """
 app = flask.Flask(__name__)
+app.config['CORS_HEADERS'] = 'Content-Type'
 cors = CORS(app, resources={
     r"/*": {
         "origins": "https://salemsocial.kz/",  # origins - список сайтов с которых можно делать запрос игнорируя CORS, поставить * для любых сайтов
@@ -974,6 +975,7 @@ def get_logs(logtype):
 
 
 @app.route("/ssm/get_dashb_params", methods=['GET'])
+@cross_origin(origin='https://salemsocial.kz', headers=['Content-Type', 'Authorization'])
 def get_dashboard_params():
     """
     Получает параметры для дэшборда. Параметры заданы в коде.
