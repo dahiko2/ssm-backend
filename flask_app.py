@@ -18,13 +18,13 @@ import hashlib
 from flask import request
 from datetime import datetime
 from urllib.parse import urlparse, parse_qs
-from flask_cors import CORS, cross_origin
+from flask_cors import CORS
 
 
 """
 Глобальные переменные. mydb - создание пустого подключения к бд. f% - реквизиты для аутентификации и подключения к бд.
 """
-AUTH = True
+AUTH = False
 mydb = mysql.connector.connect() 
 fhost = ""
 fuser = ""
@@ -35,11 +35,11 @@ fdbname_ssm = ""
 Создание базового объекта Flask и обертка его в CORS.
 """
 app = flask.Flask(__name__)
-app.config['CORS_HEADERS'] = 'Content-Type'
 cors = CORS(app, resources={
     r"/*": {
         "origins": "https://salemsocial.kz/",  # origins - список сайтов с которых можно делать запрос игнорируя CORS, поставить * для любых сайтов
-        "allow_headers": "*", "expose_headers": "*"
+        "allow_headers": "*",
+        "expose_headers": "*"
     }
 })
 
@@ -975,7 +975,6 @@ def get_logs(logtype):
 
 
 @app.route("/ssm/get_dashb_params", methods=['GET'])
-@cross_origin(origin='https://salemsocial.kz', headers=['Content-Type', 'Authorization'])
 def get_dashboard_params():
     """
     Получает параметры для дэшборда. Параметры заданы в коде.
