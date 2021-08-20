@@ -25,7 +25,7 @@ from flask_cors import CORS
 Глобальные переменные. mydb - создание пустого подключения к бд. f% - реквизиты для аутентификации и подключения к бд.
 """
 AUTH = False
-mydb = mysql.connector.connect() 
+mydb = mysql.connector.connect()
 fhost = ""
 fuser = ""
 fpass = ""
@@ -37,9 +37,7 @@ fdbname_ssm = ""
 app = flask.Flask(__name__)
 cors = CORS(app, resources={
     r"/*": {
-        "origins": "https://salemsocial.kz/",  # origins - список сайтов с которых можно делать запрос игнорируя CORS, поставить * для любых сайтов
-        "allow_headers": "*",
-        "expose_headers": "*"
+        "origins": "*"  # origins - список сайтов с которых можно делать запрос игнорируя CORS, поставить * для любых сайтов
     }
 })
 
@@ -525,7 +523,7 @@ def get_projects():
     :return: json
     """
     mycursor = ssm_connection()
-    query = "SELECT ProjectID, ProjectName, Gender, Age, UtmName from project;"
+    query = "SELECT ProjectID, ProjectName, Gender, Age, UtmName from project ORDER BY ProjectName;"
     mycursor.execute(query)
     query_result = mycursor.fetchall()
     itemlist = []
@@ -610,7 +608,7 @@ def get_fullinfo_by_projectid(project_id):
         itemlist.append(form_proj_info_dict(row))
     result = json.dumps(itemlist, indent=4)
     return result
-        
+
 
 @app.route("/ssm/info_byprojectname=<project>", methods=['GET'])
 def get_fullinfo_by_projectname(project):
