@@ -980,10 +980,10 @@ def get_dashboard_params():
     :return: json
     """
     itemlist = []
-    keys = ["color", "position", "cpv_youtube_m", "cpv_youtube_f", "cpv_youtube_mid", "cpu_aitube_m", "cpu_aitube_f", "cpu_aitube_mid", "youtube_ud"]
-    items_1 = ["red", "bad", 12.5, 23.25, 17.88, 213.2, 396, 304.6, 20]
-    items_2 = ["yellow", "middle", 5, 9.3, 7.15, 85.3, 158.4, 121.85, 40]
-    items_3 = ["green", "great", 1, 1.86, 1.43, 17.1, 31.6, 24.35, 60]
+    keys = ["color", "position", "cpv_youtube_m", "cpv_youtube_f", "cpv_youtube_mid", "cpu_aitube_m", "cpu_aitube_f", "cpu_aitube_mid", "youtube_ud", "cpv_aitube_m", "cpv_aitube_f", "cpv_aitube_mid"]
+    items_1 = ["red", "bad", 12.5, 23.25, 17.88, 213.2, 396, 304.6, 20, 62.5, 116.06, 89.28]
+    items_2 = ["yellow", "middle", 5, 9.3, 7.15, 85.3, 158.4, 121.85, 40, 25, 46.42, 35.71]
+    items_3 = ["green", "great", 1, 1.86, 1.43, 17.1, 31.6, 24.35, 60, 5, 9.28, 7.14]
     item_list = [items_1, items_2, items_3]
     for j in range(0, 3):
         item = dict()
