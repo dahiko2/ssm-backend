@@ -1087,6 +1087,57 @@ def get_custom_json_data():
             flask.abort(404)
 
 
+@app.route("/ssm/get_pr_status", methods=['GET'])
+def get_pr_status():
+    mycursor = ssm_connection()
+    query = "select * from pr_status;"
+    mycursor.execute(query)
+    query_result = mycursor.fetchall()
+    itemlist = []
+    for row in query_result:
+        temp = dict()
+        temp["id"] = row[0]
+        temp["task"] = row[1]
+        temp["accountable"] = row[2]
+        temp["project"] = row[3]
+        temp["project_manager"] = row[4]
+        temp["date_create"] = row[5]
+        temp["deadline"] = row[6]
+        temp["status"] = row[7]
+        temp["channel"] = row[8]
+        itemlist.append(temp)
+    result = json.dumps(itemlist, indent=4)
+    return result
+
+
+@app.route("/ssm/get_pr_mentions", methods=['POST'])
+def get_pr_mentions():
+    body = flask.request.get_json()
+    mycursor = ssm_connection()
+    if body is not None:
+        year = body["year"]
+        query = "Select * from pr_mentions where year(release_date) = %s;"
+        val = (year, )
+        mycursor.execute(query, val)
+    else:
+        query = "select * from pr_mentions;"
+        mycursor.execute(query)
+    query_result = mycursor.fetchall()
+    itemlist = []
+    for row in query_result:
+        temp = dict()
+        temp["id"] = row[0]
+        temp["link"] = row[1]
+        temp["project_name"] = row[2]
+        temp["source"] = row[3]
+        temp["key_msg"] = row[4]
+        temp["tone"] = row[5]
+        temp["release_date"] = row[6]
+        temp["author"] = row[7]
+    result = json.dumps(itemlist, indent=4)
+    return result
+
+
 @app.before_request
 def validate_auth():
     """
