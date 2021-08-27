@@ -1101,8 +1101,8 @@ def get_pr_status():
         temp["accountable"] = row[2]
         temp["project"] = row[3]
         temp["project_manager"] = row[4]
-        temp["date_create"] = row[5]
-        temp["deadline"] = row[6]
+        temp["date_create"] = str(row[5])
+        temp["deadline"] = str(row[6])
         temp["status"] = row[7]
         temp["channel"] = row[8]
         itemlist.append(temp)
@@ -1132,7 +1132,7 @@ def get_pr_mentions():
         temp["source"] = row[3]
         temp["key_msg"] = row[4]
         temp["tone"] = row[5]
-        temp["release_date"] = row[6]
+        temp["release_date"] = str(row[6])
         temp["author"] = row[7]
     result = json.dumps(itemlist, indent=4)
     return result
