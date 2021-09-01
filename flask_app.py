@@ -1116,7 +1116,7 @@ def get_pr_mentions():
     mycursor = ssm_connection()
     if body is not None:
         year = body["year"]
-        query = "Select * from pr_mentions where year(release_date) = %s;"
+        query = "select * from pr_mentions where year(release_date) = %s;"
         val = (year, )
         mycursor.execute(query, val)
     else:
@@ -1134,6 +1134,7 @@ def get_pr_mentions():
         temp["tone"] = row[5]
         temp["release_date"] = str(row[6])
         temp["author"] = row[7]
+        itemlist.append(temp)
     result = json.dumps(itemlist, indent=4)
     return result
 
