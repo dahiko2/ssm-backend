@@ -287,6 +287,72 @@ def get_instagram_posts(account):
     return result
 
 
+@app.route("/instagram/update_post", methods=['POST'])
+def update_insta_post():
+    body = flask.request.get_json()
+    if body is not None:
+        global mydb
+        mycursor = instagram_connection()
+        if body["is_video"] is False:
+            isvideo = 0
+        else:
+            isvideo = 1
+        if isvideo == 0:
+            query = """INSERT INTO posts (shortlink, isvideo, comments, likes, uploaddate, profileID)
+                     SELECT %s, %s, %s, %s, %s, idprofile
+                     from profile WHERE profilename = %s
+                     LIMIT 1;"""
+            val = (body["shortcode"], isvideo, int(body["comments"]),
+                   int(body["likes"]), body["upload_date"], body["username"])
+            try:
+                mycursor.execute(query, val)
+            except mysql.connector.errors.IntegrityError:
+                query = """UPDATE posts SET comments = %s, likes = %s where shortlink = %s;"""
+                val = (int(body["comments"]), int(body["likes"]),
+                       body["shortcode"])
+                mycursor.execute(query, val)
+        else:
+            query = """INSERT INTO posts (shortlink, isvideo, comments, likes, uploaddate, video_views, profileID)
+             SELECT %s, %s, %s, %s, %s, %s, idprofile
+             from profile WHERE profilename = %s
+             LIMIT 1;"""
+            val = (body["shortcode"], isvideo, int(body["comments"]),
+                   int(body["likes"]), body["upload_date"],
+                   body["video_view_count"], body["username"])
+            try:
+                mycursor.execute(query, val)
+            except mysql.connector.errors.IntegrityError:
+                query = """UPDATE posts SET comments = %s, likes = %s, video_views = %s where shortlink = %s;"""
+                val = (int(body["comments"]), int(body["likes"]),
+                       body["video_view_count"], body["shortcode"])
+                mycursor.execute(query, val)
+
+        mydb.commit()
+    else:
+        flask.abort(400)
+
+
+@app.route("/instagram/update_profile", methods=['POST'])
+def update_insta_profile():
+    body = flask.request.get_json()
+    if body is not None:
+        global mydb
+        mycursor = instagram_connection()
+        query = "INSERT INTO profile (profilename, posts, followers) VALUES (%s, %s, %s)"
+        values = (body["username"], body["posts"],
+                  body["followers"])
+        try:
+            mycursor.execute(query, values)
+        except mysql.connector.errors.IntegrityError:
+            query = "UPDATE profile SET posts = %s, followers = %s where profilename = %s;"
+            values = (body["posts"], body["followers"],
+                      body["username"])
+            mycursor.execute(query, values)
+        mydb.commit()
+    else:
+        flask.abort(400)
+
+
 @app.route("/instagram/<account>/posts/top_likes<int:n>", methods=['GET'])
 def get_instagram_posts_top_by_likes(account, n):
     """
