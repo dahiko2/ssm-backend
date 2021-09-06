@@ -43,7 +43,9 @@ cors = CORS(app, resources={
 
 
 def read_creds():
-    """Построчно считывает данные для подключения к бд из файла credentials.txt."""
+    """
+    Построчно считывает данные для подключения к бд из файла credentials.txt.
+    """
     global fhost, fuser, fpass, fdbname_insta, fdbname_ssm
     with open("credentials.txt") as f:
         fhost = f.readline().strip()
@@ -570,7 +572,6 @@ def form_proj_info_dict(row):
     item["male"] = row[19]
     item["female"] = row[20]
     item["retention"] = row[21]
-    # item["avg_tail"], item["avg_retention"], item["avg_cpc"] = get_project_averages(row[14]) расчет avg теперь на front'e
     gender = "M-F"
     if row[19] is not None and row[19] != '0%':
         if float(row[19]) > 60.0:
@@ -1130,7 +1131,7 @@ def add_release():
     return "Release added."
 
 
-@app.route("/ssm/get_custom_data", methods=['GET'])
+@app.route("/ssm/get_custom_data", methods=['POST'])
 def get_custom_json_data():
     """
     Выводит данные из json файла, который хранится в директории проекта
@@ -1186,7 +1187,7 @@ def get_pr_status():
 def get_pr_mentions():
     """
     Выводит данные из таблички упоминаний Salen (pr_mentions).
-    В теле запроса можно передать параметр year, тогда выборка будет только за определенный год.
+    В теле запроса можно передать параметр year, тогда выборка будет только за определенный год. Например, {"year": 2021}
     Возвращает json-объект, список словарей
     :return: json
     """
