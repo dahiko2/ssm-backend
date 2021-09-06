@@ -1086,7 +1086,8 @@ def get_milestone_releases():
     :return: json
     """
     mycursor = ssm_connection()
-    query = "select * from releases where ProjectID in (1, 2, 3, 4, 5, 7, 9, 10, 15, 76, 115, 117, 119, 120, 121, 122, 123) and (YouTubeViews between 950000 and 1000000) or (YouTubeViews between 1950000 and 2000000) or (YouTubeViews between 2950000 and 3000000) or (YouTubeViews between 3950000 and 4000000) or (YouTubeViews between 4950000 and 5000000) ORDER BY ReleaseDate Asc;"
+    milestone_projects = "(1, 2, 3, 4, 5, 7, 9, 10, 15, 76, 115, 117, 119, 120, 121, 122, 123)"
+    query = "select * from releases where ProjectID in "+milestone_projects+" and (YouTubeViews between 950000 and 1000000) or (YouTubeViews between 1950000 and 2000000) or (YouTubeViews between 2950000 and 3000000) or (YouTubeViews between 3950000 and 4000000) or (YouTubeViews between 4950000 and 5000000) ORDER BY ReleaseDate Asc;"
     mycursor.execute(query)
     query_result = mycursor.fetchall()
     itemlist = []
@@ -1101,7 +1102,7 @@ def add_release():
     """
     Добавляет релиз в базу данных, данные принимаются в теле запроса
     В базу данные записываются в поля, которые соответствуют переданным ключам в запросе.
-    :return:
+    :return: str
     """
     body = flask.request.get_json()
     if body is not None:
@@ -1135,7 +1136,7 @@ def get_custom_json_data():
     Выводит данные из json файла, который хранится в директории проекта
     Название файла, с которого нужно считать, передается в теле запроса как параметр type. {"type":"genesis"}
     Возвращает json-объект, содержимое файла
-    :return:
+    :return: json
     """
     body = flask.request.get_json()
     if body is None:
@@ -1155,6 +1156,11 @@ def get_custom_json_data():
 
 @app.route("/ssm/get_pr_status", methods=['GET'])
 def get_pr_status():
+    """
+    Выводит данные из таблички статуса задач пр отдела (pr_status).
+    Возвращает json-объект, список словарей
+    :return: json
+    """
     mycursor = ssm_connection()
     query = "select * from pr_status;"
     mycursor.execute(query)
@@ -1178,6 +1184,12 @@ def get_pr_status():
 
 @app.route("/ssm/get_pr_mentions", methods=['POST'])
 def get_pr_mentions():
+    """
+    Выводит данные из таблички упоминаний Salen (pr_mentions).
+    В теле запроса можно передать параметр year, тогда выборка будет только за определенный год.
+    Возвращает json-объект, список словарей
+    :return: json
+    """
     body = flask.request.get_json()
     mycursor = ssm_connection()
     if body is not None:
@@ -1201,6 +1213,54 @@ def get_pr_mentions():
         temp["release_date"] = str(row[6])
         temp["author"] = row[7]
         itemlist.append(temp)
+    result = json.dumps(itemlist, indent=4)
+    return result
+
+
+@app.route("/ssm/meet", methods=['GET', 'POST'])
+def meeting_schedule():
+    """
+    Если это GET метод, то вызывается функция get_meeting
+    Если это POST метод, то записывает данные из тела запроса в табличку (meet_schedule)
+    :return: GET:json, POST:str
+    """
+    if flask.request.method == 'GET':
+        return get_meeting()
+    body = flask.request.get_json()
+    if body is not None:
+        global mydb
+        mycursor = ssm_connection()
+        query = "INSERT INTO meet_schedule (author, time, room) VALUES (%s, %s, %s)"
+        try:
+            values = (body["author"], body["time"], body["room"])
+        except KeyError:
+            flask.abort(400)
+        else:
+            mycursor.execute(query, values)
+            mydb.commit()
+            return "ok."
+    else:
+        flask.abort(400)
+
+
+def get_meeting():
+    """
+    Выводит данные из таблицы расписания брони переговорок (meet_schedule)
+    Возвращает json-объект, список словарей
+    :return: json
+    """
+    mycursor = ssm_connection()
+    query = "select * from meet_schedule;"
+    mycursor.execute(query)
+    query_result = mycursor.fetchall()
+    itemlist = []
+    for row in query_result:
+        item = dict()
+        item["id"] = row[0]
+        item["author"] = row[1]
+        item["time"] = row[2]
+        item["room"] = row[3]
+        itemlist.append(item)
     result = json.dumps(itemlist, indent=4)
     return result
 
