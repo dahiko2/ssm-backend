@@ -13,6 +13,13 @@ def send_message(chat_id, text):
     data = {"chat_id": chat_id, "text": text}
     requests.post(url, data=data)
 
+@bot.message_handler(commands=['start'])
+def handle_start(message):
+    user_markup = telebot.types.ReplyKeyboardMarkup(resize_keyboard=True)
+    user_markup.row('START')
+    bot.send_message(message.from_user.id, 'Assalomu alaykum!\n'
+                                           'Serialni tanlang, qaysi birini tomosha qilishni istaysiz? Yoki botga serialni nomini yozing.',
+                     reply_markup=user_markup)
 
 @salom_bot.route("/" + token + "/", methods=["POST"])
 def receive_update():
