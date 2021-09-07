@@ -112,7 +112,8 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
-start.bat
+
+# Custom
 credentials.txt
 chromedriver.exe
 .idea

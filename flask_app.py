@@ -31,6 +31,7 @@ fdbname_insta = ""
 fdbname_ssm = ""
 """
 Создание базового объекта Flask и обертка его в CORS.
+Подключение blueprint'ов.
 """
 app = flask.Flask(__name__)
 app.register_blueprint(insta_bp, url_prefix='/instagram')

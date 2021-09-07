@@ -782,15 +782,12 @@ def get_pr_mentions():
     return result
 
 
-@ssm.route("/meet", methods=['GET', 'POST'])
+@ssm.route("/meet", methods=['POST'])
 def meeting_schedule():
     """
-    Если это GET метод, то вызывается функция get_meeting
-    Если это POST метод, то записывает данные из тела запроса в табличку (meet_schedule)
-    :return: GET:json, POST:str
+    Записывает данные из тела запроса в табличку (meet_schedule)
+    :return: str
     """
-    if flask.request.method == 'GET':
-        return get_meeting()
     body = flask.request.get_json()
     if body is not None:
         global mydb
@@ -808,6 +805,7 @@ def meeting_schedule():
         flask.abort(400)
 
 
+@ssm.route("/meet", methods=['GET'])
 def get_meeting():
     """
     Выводит данные из таблицы расписания брони переговорок (meet_schedule)
