@@ -22,7 +22,7 @@ def receive_update():
     #chat_id = request.json["message"]["chat"]["id"]
     #send_message(chat_id, "Hello!")
     #return "ok"
-
+'''
 @bot.message_handler(commands=['start'])
 def handle_start(message):
     user_markup = telebot.types.ReplyKeyboardMarkup(resize_keyboard=True)
@@ -30,3 +30,9 @@ def handle_start(message):
     bot.send_message(message.from_user.id, 'Assalomu alaykum!\n'
                                            'Serialni tanlang, qaysi birini tomosha qilishni istaysiz? Yoki botga serialni nomini yozing.',
                      reply_markup=user_markup)
+'''
+
+@bot.message_handler(commands=['start'])
+def start_command(message):
+    bot.send_message(message.chat.id, 'Assalomu alaykum!\n'
+                                    'Serialni tanlang, qaysi birini tomosha qilishni istaysiz? Yoki botga serialni nomini yozing.')
