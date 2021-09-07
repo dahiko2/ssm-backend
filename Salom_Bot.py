@@ -11,7 +11,7 @@ def send_message(chat_id, text):
     requests.post(url, data=data)
 
 
-@salom_bot.route("/", methods=["POST"])
+@salom_bot.route("/1994938654:AAHFLtVLwkog_4HK75-xTo8_-PA4vi4reuU/", methods=["POST"])
 def receive_update():
     chat_id = request.json["message"]["chat"]["id"]
     send_message(chat_id, "Hello!")
