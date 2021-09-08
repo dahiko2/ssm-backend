@@ -10,6 +10,8 @@ bot = telebot.TeleBot(token, threaded=False)
 bot.remove_webhook()
 bot.set_webhook(url="https://maksimsalnikov.pythonanywhere.com/salob/1994938654:AAHFLtVLwkog_4HK75-xTo8_-PA4vi4reuU/")
 
+start_markup = telebot.types.InlineKeyboardMarkup(row_width=2)
+
 @salom_bot.route("/" + token + "/", methods=["POST"])
 def receive_update():
     bot.process_new_updates([telebot.types.Update.de_json(request.stream.read().decode("utf-8"))])
@@ -51,21 +53,26 @@ def query_handler(call):
                  "Hullas kalom biz sizlar uchun ajoyib hayotiy serial su'ratga oldik. Tomosha qilmasangiz kundalikga 2 tushadi aytib qo'ydim lekin;)\n" \
                  "\n" \
                  "AJOYIB JAMOA BILAN AJOYIB SERIAL"
-        markup = telebot.types.InlineKeyboardMarkup()
-        markup.add(telebot.types.InlineKeyboardButton(text='1 qism', callback_data=1))
-        markup.add(telebot.types.InlineKeyboardButton(text='2 qism', callback_data=2))
-        markup.add(telebot.types.InlineKeyboardButton(text='3 qism', callback_data=3))
-        markup.add(telebot.types.InlineKeyboardButton(text='4 qism', callback_data=1))
-        markup.add(telebot.types.InlineKeyboardButton(text='5 qism', callback_data=2))
-        markup.add(telebot.types.InlineKeyboardButton(text='6 qism', callback_data=3))
-        markup.add(telebot.types.InlineKeyboardButton(text='7 qism', callback_data=1))
-        markup.add(telebot.types.InlineKeyboardButton(text='8 qism', callback_data=2))
-        markup.add(telebot.types.InlineKeyboardButton(text='9 qism', callback_data=3))
-        markup.add(telebot.types.InlineKeyboardButton(text='10 qism', callback_data=1))
+        btn1 = telebot.types.InlineKeyboardMarkup(text='1 qism', callback_data=1)
+        btn2 = telebot.types.InlineKeyboardMarkup(text='1 qism', callback_data=1)
+        btn3 = telebot.types.InlineKeyboardMarkup(text='2 qism', callback_data=2)
+        btn4 = telebot.types.InlineKeyboardMarkup(text='3 qism', callback_data=3)
+        btn5 = telebot.types.InlineKeyboardMarkup(text='4 qism', callback_data=1)
+        btn6 = telebot.types.InlineKeyboardMarkup(text='5 qism', callback_data=2)
+        btn7 = telebot.types.InlineKeyboardMarkup(text='6 qism', callback_data=3)
+        btn8 = telebot.types.InlineKeyboardMarkup(text='7 qism', callback_data=1)
+        btn9 = telebot.types.InlineKeyboardMarkup(text='8 qism', callback_data=2)
+        btn10 = telebot.types.InlineKeyboardMarkup(text='9 qism', callback_data=3)
+        btn11 = telebot.types.InlineKeyboardMarkup(text='10 qism', callback_data=1)
 
     elif call.data == '2':
         answer = 'Вы хорошист!'
     elif call.data == '3':
         answer = 'Вы отличник!'
 
-    bot.send_message(call.message.chat.id, answer, reply_markup=markup)
+    bot.send_message(call.message.chat.id, answer)
+    start_markup.row(btn1, btn2)
+    start_markup.row(btn3, btn4)
+    start_markup.row(btn5, btn6)
+    start_markup.row(btn7, btn8)
+    start_markup.row(btn9, btn10)
