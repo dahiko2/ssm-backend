@@ -23,6 +23,11 @@ def receive_update():
     #send_message(chat_id, "Hello!")
     #return "ok"
 
+@bot.message_handler(commands=['start'])
+def start_command(message):
+    bot.send_message(message.chat.id, 'Hello!')
+
+'''
 @bot.message_handler(commands=['/start'])
 def start_message(message):
     keyboard = telebot.types.ReplyKeyboardMarkup(True)
@@ -30,5 +35,4 @@ def start_message(message):
     bot.send_message(message.chat.id, 'Assalomu alaykum!\nSerialni tanlang, qaysi birini tomosha qilishni istaysiz? Yoki botga serialni nomini yozing.',
                      reply_markup=keyboard)
     print("Start Button")
-
-bot.polling()
+'''
