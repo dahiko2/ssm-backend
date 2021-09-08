@@ -30,3 +30,5 @@ def start_message(message):
     bot.send_message(message.chat.id, 'Assalomu alaykum!\nSerialni tanlang, qaysi birini tomosha qilishni istaysiz? Yoki botga serialni nomini yozing.',
                      reply_markup=keyboard)
     print("Start Button")
+
+bot.polling()
