@@ -4,8 +4,8 @@ import telebot
 from config import token
 
 salom_bot = Blueprint("salom_bot", __name__)
-
 bot = telebot.TeleBot(token)
+bot.set_webhook(url="https://maksimsalnikov.pythonanywhere.com/salob/1994938654:AAHFLtVLwkog_4HK75-xTo8_-PA4vi4reuU/")
 
 def send_message(chat_id, text):
     method = "sendMessage"
