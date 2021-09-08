@@ -27,8 +27,11 @@ def start_message(message):
     markup.add(telebot.types.InlineKeyboardButton(text='Shaharlik Qichloqi', callback_data=3))
     keyboard = telebot.types.ReplyKeyboardMarkup(True)
     keyboard.row('Sevimli', 'Ortga')
-    bot.send_message(message.chat.id, 'Assalomu alaykum!\nSerialni tanlang, qaysi birini tomosha qilishni istaysiz? Yoki botga serialni nomini yozing.',
+    bot.send_message(message.chat.id,
+                     'Assalomu alaykum!\nSerialni tanlang, qaysi birini tomosha qilishni istaysiz? Yoki botga serialni nomini yozing.',
                      reply_markup=keyboard)
+    bot.send_message(message.chat.id, 'Serialar',
+                     reply_markup=markup)
 
 @bot.callback_query_handler(func=lambda call: True)
 def query_handler(call):
@@ -37,7 +40,7 @@ def query_handler(call):
 
     keyboard = telebot.types.ReplyKeyboardMarkup(True)
     keyboard.row('Sevimli', 'Ortga')
-
+    bot.edit_message_reply_markup(call.message.chat.id, call.message.message_id)
     answer = ''
     if call.data == '1':
         answer = "Maktab\n"\
