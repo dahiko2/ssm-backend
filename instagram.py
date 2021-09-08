@@ -168,6 +168,7 @@ def update_insta_post():
                 mycursor.execute(query, val)
 
         mydb.commit()
+        return "ok."
     else:
         flask.abort(400)
 
@@ -189,6 +190,7 @@ def update_insta_profile():
                       body["username"])
             mycursor.execute(query, values)
         mydb.commit()
+        return "ok."
     else:
         flask.abort(400)
 
