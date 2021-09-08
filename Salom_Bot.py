@@ -5,14 +5,16 @@ from config import token
 from telebot import types
 
 salom_bot = Blueprint("salom_bot", __name__)
-bot = telebot.TeleBot(token)
-bot.set_webhook(url="https://maksimsalnikov.pythonanywhere.com/salob/1994938654:AAHFLtVLwkog_4HK75-xTo8_-PA4vi4reuU/")
+bot = telebot.TeleBot(token, threaded=False)
 
+bot.remove_webhook()
+bot.set_webhook(url="https://maksimsalnikov.pythonanywhere.com/salob/1994938654:AAHFLtVLwkog_4HK75-xTo8_-PA4vi4reuU/")
+'''
 def send_message(chat_id, text):
     method = "sendMessage"
     url = f"https://api.telegram.org/bot{token}/{method}"
     data = {"chat_id": chat_id, "text": text}
-    requests.post(url, data=data)
+    requests.post(url, data=data)'''
 
 @salom_bot.route("/" + token + "/", methods=["POST"])
 def receive_update():
@@ -23,7 +25,7 @@ def receive_update():
     #send_message(chat_id, "Hello!")
     #return "ok"
 
-@bot.message_handler(commands=['start'])
+@bot.message_handler(commands=['start', 'help'])
 def start_command(message):
     bot.send_message(message.chat.id, 'Hi *' + message.chat.first_name + '*!' , parse_mode='Markdown', reply_markup=types.ReplyKeyboardRemove())
 
