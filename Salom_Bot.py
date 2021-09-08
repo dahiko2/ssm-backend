@@ -2,6 +2,7 @@ from flask import Flask, request, Blueprint
 import requests
 import telebot
 from config import token
+from telebot import types
 
 salom_bot = Blueprint("salom_bot", __name__)
 bot = telebot.TeleBot(token)
@@ -15,17 +16,16 @@ def send_message(chat_id, text):
 
 @salom_bot.route("/" + token + "/", methods=["POST"])
 def receive_update():
-    bot.process_new_updates(
-        [telebot.types.Update.de_json(request.stream.read().decode("utf-8"))]
-    )
-    return "ok"
+    bot.process_new_updates([telebot.types.Update.de_json(request.stream.read().decode("utf-8"))])
+    print("Message")
+    return "ok", 200
     #chat_id = request.json["message"]["chat"]["id"]
     #send_message(chat_id, "Hello!")
     #return "ok"
 
 @bot.message_handler(commands=['start'])
 def start_command(message):
-    bot.send_message(message.chat.id, 'Hello!')
+    bot.send_message(message.chat.id, 'Hi *' + message.chat.first_name + '*!' , parse_mode='Markdown', reply_markup=types.ReplyKeyboardRemove())
 
 '''
 @bot.message_handler(commands=['/start'])
