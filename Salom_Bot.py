@@ -23,7 +23,7 @@ def receive_update():
     #send_message(chat_id, "Hello!")
     #return "ok"
 
-@bot.message_handler(commands=['start'])
+@bot.message_handler(commands=['/start'])
 def start_message(message):
     keyboard = telebot.types.ReplyKeyboardMarkup(True)
     keyboard.row('START')
