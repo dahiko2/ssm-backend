@@ -25,16 +25,14 @@ def receive_update():
     #send_message(chat_id, "Hello!")
     #return "ok"
 
-@bot.message_handler(commands=['start', 'help'])
+'''@bot.message_handler(commands=['start', 'help'])
 def start_command(message):
     bot.send_message(message.chat.id, 'Hi *' + message.chat.first_name + '*!' , parse_mode='Markdown', reply_markup=types.ReplyKeyboardRemove())
-
 '''
+
 @bot.message_handler(commands=['/start'])
 def start_message(message):
     keyboard = telebot.types.ReplyKeyboardMarkup(True)
     keyboard.row('START')
     bot.send_message(message.chat.id, 'Assalomu alaykum!\nSerialni tanlang, qaysi birini tomosha qilishni istaysiz? Yoki botga serialni nomini yozing.',
                      reply_markup=keyboard)
-    print("Start Button")
-'''
