@@ -128,5 +128,5 @@ def query_handler(call):
     elif call.data == '3':
         answer = 'Вы отличник!'
 
-    bot.send_message(call.message.chat.id, answer)
+    bot.send_message(call.message.chat.id, answer, reply_markup=start_markup)
 
