@@ -7,3 +7,9 @@ maktab_desc = "Maktab\n"\
                  "\n" \
                  "AJOYIB JAMOA BILAN AJOYIB SERIAL"
 
+start = "Assalomu alaykum!\n" \
+        "Serialni tanlang, qaysi birini tomosha qilishni istaysiz? Yoki botga serialni nomini yozing."
+
+
+
+
