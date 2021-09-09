@@ -52,7 +52,7 @@ def start_message(message):
     print(chat_id)
 
     sql = 'INSERT INTO users (chat_id) VALUES (%s)'
-    val = chat_id
+    val = (chat_id, )
     mycursor.execute(sql, val)
     mydb.commit()
 
