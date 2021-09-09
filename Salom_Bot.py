@@ -101,7 +101,7 @@ def query_handler(call):
     answer = ''
     if call.data == "maktab":
         answer = Strings.maktab_desc
-        markup = telebot.types.InlineKeyboardMarkup()
+        markup = telebot.types.InlineKeyboardMarkup(row_width=2)
         markup.add(telebot.types.InlineKeyboardButton(text='1 qism', callback_data=1))
         markup.add(telebot.types.InlineKeyboardButton(text='2 qism', callback_data=2))
         markup.add(telebot.types.InlineKeyboardButton(text='3 qism', callback_data=3))
