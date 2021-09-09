@@ -35,6 +35,7 @@ mycursor = mydb.cursor()
 
 @salom_bot.route("/" + token + "/", methods=["POST"])
 def receive_update():
+    print(request.json)
     bot.process_new_updates([telebot.types.Update.de_json(request.stream.read().decode("utf-8"))])
     print("Message")
     return "ok", 200
