@@ -48,10 +48,16 @@ def receive_update():
 @bot.message_handler(commands=['start'])
 def start_message(message):
 
+    read_creds()
+    mydb = connect(
+        host=fhost,
+        user=fuser,
+        password=fpass,
+        database=fdbname
+    )
+    mycursor = mydb.cursor()
+
     chat_id = message.chat.id
-
-    print(chat_id)
-
     sql = 'INSERT INTO users (chat_id) VALUES (%s)'
     val = (chat_id, )
     mycursor.execute(sql, val)
