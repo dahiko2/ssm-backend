@@ -12,6 +12,7 @@ bot.set_webhook(url="https://maksimsalnikov.pythonanywhere.com/salob/1994938654:
 
 @salom_bot.route("/" + token + "/", methods=["POST"])
 def receive_update():
+    print(request.json)
     bot.process_new_updates([telebot.types.Update.de_json(request.stream.read().decode("utf-8"))])
     print("Message")
     return "ok", 200
