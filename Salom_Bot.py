@@ -85,7 +85,7 @@ def start_message(message):
                          reply_markup=markup)
 
 
-    if bot.get_chat_member(chat_id="-1001135809848", user_id=message.from_user.id).status in roles:
+    if bot.get_chat_member(chat_id=-1001135809848, user_id=message.from_user.id).status in roles:
         pass
     else:
         bot.send_message(message.chat.id, "@salomserial kanaliga obuna bo'ling")
