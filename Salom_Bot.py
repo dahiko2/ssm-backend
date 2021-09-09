@@ -31,9 +31,8 @@ def is_subscribed(chat_id, user_id):
     try:
         bot.get_chat_member(chat_id, user_id)
         return True
-    except ApiTelegramException as e:
-        if e.result_json['description'] == 'Bad Request: user not found':
-            return False
+    except:
+        return False
 
 
 @salom_bot.route("/" + token + "/", methods=["POST"])
@@ -95,9 +94,9 @@ def start_message(message):
         bot.send_message(message.chat.id, 'Serialar',
                          reply_markup=markup)
 
-    if not is_subscribed(-1001135809848, chat_id):
+    if is_subscribed('@salomserial', message.chat.id) == False:
         bot.send_message(message.chat.id, "@salomserial kanaliga obuna bo'ling")
-        
+
 
 @bot.callback_query_handler(func=lambda call: True)
 def query_handler(call):
