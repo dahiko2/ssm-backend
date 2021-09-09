@@ -4,6 +4,7 @@ import telebot
 from config import token
 from telebot import types
 from mysql.connector import connect, Error
+import Strings
 
 salom_bot = Blueprint("salom_bot", __name__)
 bot = telebot.TeleBot(token, threaded=False)
@@ -23,18 +24,6 @@ def read_creds():
         f.readline()
         f.readline()# Просто пропускаем имя базы для инсты
         fdbname = f.readline().strip()
-
-
-read_creds()
-mydb = connect(
-        host=fhost,
-        user=fuser,
-        password=fpass,
-        database=fdbname
-    )
-mycursor = mydb.cursor()
-
-
 
 @salom_bot.route("/" + token + "/", methods=["POST"])
 def receive_update():
@@ -57,20 +46,33 @@ def start_message(message):
     )
     mycursor = mydb.cursor()
 
+    roles = ['creator', 'administrator', 'member']
+    mycursor.execute(
+        'SELECT chat_id from users')
+    Ids =mycursor.fetchall()
     chat_id = message.chat.id
-    sql = 'INSERT INTO users (chat_id) VALUES (%s)'
-    val = (chat_id, )
-    mycursor.execute(sql, val)
-    mydb.commit()
+
+    for id in Ids:
+        if chat_id != id[0]:
+            sql = 'INSERT INTO users (chat_id) VALUES (%s)'
+            val = (chat_id,)
+            mycursor.execute(sql, val)
+            mydb.commit()
+    else:
+        bot.send_message(message.chat.id, 'Qaytganing bilan ' + message.chat.username + '!')
+    #if bot.get_chat_member(chat_id=my_channel_id, user_id=message.from_user.id).status in roles:
+    #    pass
+    #else:
+    #    bot.send_message(message.chat.id, '@SalomSerialBot kanaliga obuna bo'ling')
 
     markup = telebot.types.InlineKeyboardMarkup()
-    markup.add(telebot.types.InlineKeyboardButton(text='Maktab', callback_data=1))
+    markup.add(telebot.types.InlineKeyboardButton(text='Maktab', callback_data="maktab"))
     markup.add(telebot.types.InlineKeyboardButton(text='Qichchu Qudrat', callback_data=2))
     markup.add(telebot.types.InlineKeyboardButton(text='Shaharlik Qichloqi', callback_data=3))
     keyboard = telebot.types.ReplyKeyboardMarkup(True)
-    keyboard.row('Sevimli', 'Ortga')
+    keyboard.row('Serialar', 'Ortga')
     bot.send_message(message.chat.id,
-                     'Assalomu alaykum!\nSerialni tanlang, qaysi birini tomosha qilishni istaysiz? Yoki botga serialni nomini yozing.',
+                     Strings.start,
                      reply_markup=keyboard)
     bot.send_message(message.chat.id, 'Serialar',
                      reply_markup=markup)
@@ -84,15 +86,8 @@ def query_handler(call):
     keyboard.row('Sevimli', 'Ortga')
     bot.edit_message_reply_markup(call.message.chat.id, call.message.message_id)
     answer = ''
-    if call.data == '1':
-        answer = "Maktab\n"\
-                 "\n"\
-                 "Serial haqida: MAKTAB.\n" \
-                 "O'quvchilarining hayoti qiziqarli voqealar! Ishkal,sevgi,do'stlik  shu va shunga o'xshash qissalarni har bir maktab o'quvchisi boshidan o'tqazgan!\n" \
-                 "\n" \
-                 "Hullas kalom biz sizlar uchun ajoyib hayotiy serial su'ratga oldik. Tomosha qilmasangiz kundalikga 2 tushadi aytib qo'ydim lekin;)\n" \
-                 "\n" \
-                 "AJOYIB JAMOA BILAN AJOYIB SERIAL"
+    if call.data == "maktab":
+        answer = Strings.maktab_desc
         markup = telebot.types.InlineKeyboardMarkup()
         markup.add(telebot.types.InlineKeyboardButton(text='1 qism', callback_data=1))
         markup.add(telebot.types.InlineKeyboardButton(text='2 qism', callback_data=2))
