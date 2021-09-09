@@ -65,7 +65,7 @@ def start_message(message):
 
     #if is_subscribed('@salomserial', message.chat.id) == False:
         #bot.send_message(message.chat.id, "@salomserial kanaliga obuna bo'ling")
-    print(bot.get_chat_member('@salomserial', message.chat.id))
+    print(bot.get_chat_member(-1001584831368, message.chat.id))
 
     for id in Ids:
         if chat_id == id[0]:
