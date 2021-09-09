@@ -49,15 +49,25 @@ def start_message(message):
     roles = ['creator', 'administrator', 'member']
     mycursor.execute(
         'SELECT chat_id from users')
-    Ids =mycursor.fetchall()
+    Ids = mycursor.fetchall()
     chat_id = message.chat.id
     count = 0
 
     for id in Ids:
         if chat_id == id[0]:
             count += 1
-            
+
     if count > 0:
+        markup = telebot.types.InlineKeyboardMarkup()
+        markup.add(telebot.types.InlineKeyboardButton(text='Maktab', callback_data="maktab"))
+        markup.add(telebot.types.InlineKeyboardButton(text='Qichchu Qudrat', callback_data=2))
+        markup.add(telebot.types.InlineKeyboardButton(text='Shaharlik Qichloqi', callback_data=3))
+        keyboard = telebot.types.ReplyKeyboardMarkup(True)
+        keyboard.row('Serialar', 'Ortga')
+        bot.send_message(message.chat.id, 'Qaytganing bilan ' + message.chat.username + '!', reply_markup=keyboard)
+        bot.send_message(message.chat.id, 'Serialar',
+                         reply_markup=markup)
+    else:
         sql = 'INSERT INTO users (chat_id) VALUES (%s)'
         val = (chat_id,)
         mycursor.execute(sql, val)
@@ -71,16 +81,6 @@ def start_message(message):
         bot.send_message(message.chat.id,
                          Strings.start,
                          reply_markup=keyboard)
-        bot.send_message(message.chat.id, 'Serialar',
-                         reply_markup=markup)
-    elif count == 0:
-        markup = telebot.types.InlineKeyboardMarkup()
-        markup.add(telebot.types.InlineKeyboardButton(text='Maktab', callback_data="maktab"))
-        markup.add(telebot.types.InlineKeyboardButton(text='Qichchu Qudrat', callback_data=2))
-        markup.add(telebot.types.InlineKeyboardButton(text='Shaharlik Qichloqi', callback_data=3))
-        keyboard = telebot.types.ReplyKeyboardMarkup(True)
-        keyboard.row('Serialar', 'Ortga')
-        bot.send_message(message.chat.id, 'Qaytganing bilan ' + message.chat.username + '!', reply_markup=keyboard)
         bot.send_message(message.chat.id, 'Serialar',
                          reply_markup=markup)
 
