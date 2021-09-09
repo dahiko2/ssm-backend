@@ -1,6 +1,8 @@
 from flask import Flask, request, Blueprint
 import requests
 import telebot
+from telebot.apihelper import ApiTelegramException
+
 from config import token
 from telebot import types
 from mysql.connector import connect, Error
@@ -24,6 +26,15 @@ def read_creds():
         f.readline()
         f.readline()# Просто пропускаем имя базы для инсты
         fdbname = f.readline().strip()
+
+def is_subscribed(chat_id, user_id):
+    try:
+        bot.get_chat_member(chat_id, user_id)
+        return True
+    except ApiTelegramException as e:
+        if e.result_json['description'] == 'Bad Request: user not found':
+            return False
+
 
 @salom_bot.route("/" + token + "/", methods=["POST"])
 def receive_update():
@@ -84,11 +95,9 @@ def start_message(message):
         bot.send_message(message.chat.id, 'Serialar',
                          reply_markup=markup)
 
-
-    if bot.get_chat_member(chat_id=-1001135809848, user_id=message.from_user.id).status in roles:
-        pass
-    else:
+    if not is_subscribed(-1001135809848, chat_id):
         bot.send_message(message.chat.id, "@salomserial kanaliga obuna bo'ling")
+        
 
 @bot.callback_query_handler(func=lambda call: True)
 def query_handler(call):
