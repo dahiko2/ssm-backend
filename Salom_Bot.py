@@ -20,7 +20,8 @@ def read_creds():
         fhost = f.readline()
         fuser = f.readline()
         fpass = f.readline().strip()
-        f.readline()  # Просто пропускаем имя базы для инсты
+        f.readline()
+        f.readline()# Просто пропускаем имя базы для инсты
         fdbname = f.readline().strip()
 
 
