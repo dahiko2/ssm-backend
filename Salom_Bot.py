@@ -3,12 +3,35 @@ import requests
 import telebot
 from config import token
 from telebot import types
+from mysql.connector import connect, Error
 
 salom_bot = Blueprint("salom_bot", __name__)
 bot = telebot.TeleBot(token, threaded=False)
 
 bot.remove_webhook()
 bot.set_webhook(url="https://maksimsalnikov.pythonanywhere.com/salob/1994938654:AAHFLtVLwkog_4HK75-xTo8_-PA4vi4reuU/")
+
+def read_creds():
+    """
+    Считывает данные для входа в бд из файла
+    """
+    global fhost, fuser, fpass, fdbname
+    with open("credentials.txt") as f:
+        fhost = f.readline()
+        fuser = f.readline()
+        fpass = f.readline().strip()
+        f.readline()  # Просто пропускаем имя базы для инсты
+        fdbname = f.readline().strip()
+
+
+read_creds()
+mydb = connect(
+        host=fhost,
+        user=fuser,
+        password=fpass,
+        database=fdbname
+    )
+mycursor = mydb.cursor()
 
 @salom_bot.route("/" + token + "/", methods=["POST"])
 def receive_update():
@@ -21,6 +44,16 @@ def receive_update():
 
 @bot.message_handler(commands=['start'])
 def start_message(message):
+
+    chat_id = message.chat.id
+
+    print(chat_id)
+
+    sql = 'INSERT INTO users (chat_id) VALUES (%s)'
+    val = (chat_id)
+    mycursor.execute(sql, val)
+    mydb.commit()
+
     markup = telebot.types.InlineKeyboardMarkup()
     markup.add(telebot.types.InlineKeyboardButton(text='Maktab', callback_data=1))
     markup.add(telebot.types.InlineKeyboardButton(text='Qichchu Qudrat', callback_data=2))
