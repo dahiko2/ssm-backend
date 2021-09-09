@@ -794,7 +794,7 @@ def post_meeting():
         mycursor = ssm_connection()
         query = "INSERT INTO meet_schedule (author, time, room, time_finish, mdate) VALUES (%s, %s, %s, %s, %s)"
         try:
-            values = (body["author"], body["time"], body["room"], body["finish"], body["mdate"])
+            values = (body["author"], body["time"], body["room"], body["finish"], body["date"])
         except KeyError:
             flask.abort(400)
         else:
