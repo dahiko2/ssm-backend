@@ -51,34 +51,20 @@ def start_message(message):
         'SELECT chat_id from users')
     Ids =mycursor.fetchall()
     chat_id = message.chat.id
+    count = 0
 
-    if chat_id in Ids[0]:
-        markup = telebot.types.InlineKeyboardMarkup()
-        markup.add(telebot.types.InlineKeyboardButton(text='Maktab', callback_data="maktab"))
-        markup.add(telebot.types.InlineKeyboardButton(text='Qichchu Qudrat', callback_data=2))
-        markup.add(telebot.types.InlineKeyboardButton(text='Shaharlik Qichloqi', callback_data=3))
-        keyboard = telebot.types.ReplyKeyboardMarkup(True)
-        keyboard.row('Sevimli', 'Ortga')
-        bot.send_message(message.chat.id, 'Qaytganing bilan ' + message.chat.username + '!', reply_markup=keyboard)
-        bot.send_message(message.chat.id, 'Serialar',
-                         reply_markup=markup)
+    for id in Ids:
+        if chat_id != id[0]:
+            count += 1
 
+    if count > 0:
+        if chat_id != id[0]:
+            sql = 'INSERT INTO users (chat_id) VALUES (%s)'
+            val = (chat_id,)
+            mycursor.execute(sql, val)
+            mydb.commit()
     else:
-        sql = 'INSERT INTO users (chat_id) VALUES (%s)'
-        val = (chat_id,)
-        mycursor.execute(sql, val)
-        mydb.commit()
-        markup = telebot.types.InlineKeyboardMarkup()
-        markup.add(telebot.types.InlineKeyboardButton(text='Maktab', callback_data="maktab"))
-        markup.add(telebot.types.InlineKeyboardButton(text='Qichchu Qudrat', callback_data=2))
-        markup.add(telebot.types.InlineKeyboardButton(text='Shaharlik Qichloqi', callback_data=3))
-        keyboard = telebot.types.ReplyKeyboardMarkup(True)
-        keyboard.row('Sevimli', 'Ortga')
-        bot.send_message(message.chat.id,
-                         Strings.start,
-                         reply_markup=keyboard)
-        bot.send_message(message.chat.id, 'Serialar',
-                         reply_markup=markup)
+        bot.send_message(message.chat.id, 'Qaytganing bilan ' + message.chat.username + '!')
         
     #if bot.get_chat_member(chat_id=my_channel_id, user_id=message.from_user.id).status in roles:
     #    pass
