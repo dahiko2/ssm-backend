@@ -24,7 +24,7 @@ def read_creds():
         fdbname = f.readline().strip()
 
 
-'''read_creds()
+read_creds()
 mydb = connect(
         host=fhost,
         user=fuser,
@@ -32,7 +32,7 @@ mydb = connect(
         database=fdbname
     )
 mycursor = mydb.cursor()
-'''
+
 
 
 @salom_bot.route("/" + token + "/", methods=["POST"])
@@ -46,16 +46,16 @@ def receive_update():
 
 @bot.message_handler(commands=['start'])
 def start_message(message):
-    '''
+
     chat_id = message.chat.id
 
     print(chat_id)
 
     sql = 'INSERT INTO users (chat_id) VALUES (%s)'
-    val = (chat_id)
+    val = chat_id
     mycursor.execute(sql, val)
     mydb.commit()
-    '''
+
     markup = telebot.types.InlineKeyboardMarkup()
     markup.add(telebot.types.InlineKeyboardButton(text='Maktab', callback_data=1))
     markup.add(telebot.types.InlineKeyboardButton(text='Qichchu Qudrat', callback_data=2))
