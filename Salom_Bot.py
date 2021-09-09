@@ -62,25 +62,33 @@ def start_message(message):
         val = (chat_id,)
         mycursor.execute(sql, val)
         mydb.commit()
+        markup = telebot.types.InlineKeyboardMarkup()
+        markup.add(telebot.types.InlineKeyboardButton(text='Maktab', callback_data="maktab"))
+        markup.add(telebot.types.InlineKeyboardButton(text='Qichchu Qudrat', callback_data=2))
+        markup.add(telebot.types.InlineKeyboardButton(text='Shaharlik Qichloqi', callback_data=3))
+        keyboard = telebot.types.ReplyKeyboardMarkup(True)
+        keyboard.row('Serialar', 'Ortga')
+        bot.send_message(message.chat.id,
+                         Strings.start,
+                         reply_markup=keyboard)
+        bot.send_message(message.chat.id, 'Serialar',
+                         reply_markup=markup)
     elif count == 0:
-        bot.send_message(message.chat.id, 'Qaytganing bilan ' + message.chat.username + '!')
+        markup = telebot.types.InlineKeyboardMarkup()
+        markup.add(telebot.types.InlineKeyboardButton(text='Maktab', callback_data="maktab"))
+        markup.add(telebot.types.InlineKeyboardButton(text='Qichchu Qudrat', callback_data=2))
+        markup.add(telebot.types.InlineKeyboardButton(text='Shaharlik Qichloqi', callback_data=3))
+        keyboard = telebot.types.ReplyKeyboardMarkup(True)
+        keyboard.row('Serialar', 'Ortga')
+        bot.send_message(message.chat.id, 'Qaytganing bilan ' + message.chat.username + '!', reply_markup=keyboard)
+        bot.send_message(message.chat.id, 'Serialar',
+                         reply_markup=markup)
+
 
     #if bot.get_chat_member(chat_id=my_channel_id, user_id=message.from_user.id).status in roles:
     #    pass
     #else:
     #    bot.send_message(message.chat.id, '@SalomSerialBot kanaliga obuna bo'ling')
-
-    markup = telebot.types.InlineKeyboardMarkup()
-    markup.add(telebot.types.InlineKeyboardButton(text='Maktab', callback_data="maktab"))
-    markup.add(telebot.types.InlineKeyboardButton(text='Qichchu Qudrat', callback_data=2))
-    markup.add(telebot.types.InlineKeyboardButton(text='Shaharlik Qichloqi', callback_data=3))
-    keyboard = telebot.types.ReplyKeyboardMarkup(True)
-    keyboard.row('Serialar', 'Ortga')
-    bot.send_message(message.chat.id,
-                     Strings.start,
-                     reply_markup=keyboard)
-    bot.send_message(message.chat.id, 'Serialar',
-                     reply_markup=markup)
 
 @bot.callback_query_handler(func=lambda call: True)
 def query_handler(call):
