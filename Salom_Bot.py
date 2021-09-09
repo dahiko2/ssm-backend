@@ -27,12 +27,12 @@ def read_creds():
         f.readline()# Просто пропускаем имя базы для инсты
         fdbname = f.readline().strip()
 
-def is_subscribed(chat_id, user_id):
-    try:
-        bot.get_chat_member(chat_id, user_id)
-        return True
-    except:
-        return False
+#def is_subscribed(chat_id, user_id):
+    #try:
+        #print(bot.get_chat_member(chat_id, user_id))
+        #return True
+    #except:
+        #return False
 
 
 @salom_bot.route("/" + token + "/", methods=["POST"])
@@ -62,6 +62,10 @@ def start_message(message):
     Ids = mycursor.fetchall()
     chat_id = message.chat.id
     count = 0
+
+    #if is_subscribed('@salomserial', message.chat.id) == False:
+        #bot.send_message(message.chat.id, "@salomserial kanaliga obuna bo'ling")
+    print(bot.get_chat_member('@salomserial', message.chat.id))
 
     for id in Ids:
         if chat_id == id[0]:
@@ -94,8 +98,7 @@ def start_message(message):
         bot.send_message(message.chat.id, 'Serialar',
                          reply_markup=markup)
 
-    if is_subscribed('@salomserial', message.chat.id) == False:
-        bot.send_message(message.chat.id, "@salomserial kanaliga obuna bo'ling")
+
 
 
 @bot.callback_query_handler(func=lambda call: True)
