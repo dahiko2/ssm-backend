@@ -49,15 +49,25 @@ def start_message(message):
     roles = ['creator', 'administrator', 'member']
     mycursor.execute(
         'SELECT chat_id from users')
-    Ids =mycursor.fetchall()
+    Ids = mycursor.fetchall()
     chat_id = message.chat.id
     count = 0
 
     for id in Ids:
-        if chat_id != id[0]:
+        if chat_id == id[0]:
             count += 1
 
     if count > 0:
+        markup = telebot.types.InlineKeyboardMarkup()
+        markup.add(telebot.types.InlineKeyboardButton(text='Maktab', callback_data="maktab"))
+        markup.add(telebot.types.InlineKeyboardButton(text='Qichchu Qudrat', callback_data=2))
+        markup.add(telebot.types.InlineKeyboardButton(text='Shaharlik Qichloqi', callback_data=3))
+        keyboard = telebot.types.ReplyKeyboardMarkup(True)
+        keyboard.row('Serialar', 'Ortga')
+        bot.send_message(message.chat.id, 'Qaytganing bilan ' + message.chat.username + '!', reply_markup=keyboard)
+        bot.send_message(message.chat.id, 'Serialar',
+                         reply_markup=markup)
+    else:
         sql = 'INSERT INTO users (chat_id) VALUES (%s)'
         val = (chat_id,)
         mycursor.execute(sql, val)
@@ -73,22 +83,12 @@ def start_message(message):
                          reply_markup=keyboard)
         bot.send_message(message.chat.id, 'Serialar',
                          reply_markup=markup)
-    elif count == 0:
-        markup = telebot.types.InlineKeyboardMarkup()
-        markup.add(telebot.types.InlineKeyboardButton(text='Maktab', callback_data="maktab"))
-        markup.add(telebot.types.InlineKeyboardButton(text='Qichchu Qudrat', callback_data=2))
-        markup.add(telebot.types.InlineKeyboardButton(text='Shaharlik Qichloqi', callback_data=3))
-        keyboard = telebot.types.ReplyKeyboardMarkup(True)
-        keyboard.row('Serialar', 'Ortga')
-        bot.send_message(message.chat.id, 'Qaytganing bilan ' + message.chat.username + '!', reply_markup=keyboard)
-        bot.send_message(message.chat.id, 'Serialar',
-                         reply_markup=markup)
 
 
-    #if bot.get_chat_member(chat_id=my_channel_id, user_id=message.from_user.id).status in roles:
-    #    pass
-    #else:
-    #    bot.send_message(message.chat.id, '@SalomSerialBot kanaliga obuna bo'ling')
+    if bot.get_chat_member(chat_id=-1001135809848, user_id=message.from_user.id).status in roles:
+        pass
+    else:
+        bot.send_message(message.chat.id, "@salomserial kanaliga obuna bo'ling")
 
 @bot.callback_query_handler(func=lambda call: True)
 def query_handler(call):
@@ -99,24 +99,34 @@ def query_handler(call):
     keyboard.row('Sevimli', 'Ortga')
     bot.edit_message_reply_markup(call.message.chat.id, call.message.message_id)
     answer = ''
+    start_markup = telebot.types.InlineKeyboardMarkup()
+
     if call.data == "maktab":
         answer = Strings.maktab_desc
-        markup = telebot.types.InlineKeyboardMarkup()
-        markup.add(telebot.types.InlineKeyboardButton(text='1 qism', callback_data=1))
-        markup.add(telebot.types.InlineKeyboardButton(text='2 qism', callback_data=2))
-        markup.add(telebot.types.InlineKeyboardButton(text='3 qism', callback_data=3))
-        markup.add(telebot.types.InlineKeyboardButton(text='4 qism', callback_data=1))
-        markup.add(telebot.types.InlineKeyboardButton(text='5 qism', callback_data=2))
-        markup.add(telebot.types.InlineKeyboardButton(text='6 qism', callback_data=3))
-        markup.add(telebot.types.InlineKeyboardButton(text='7 qism', callback_data=1))
-        markup.add(telebot.types.InlineKeyboardButton(text='8 qism', callback_data=2))
-        markup.add(telebot.types.InlineKeyboardButton(text='9 qism', callback_data=3))
-        markup.add(telebot.types.InlineKeyboardButton(text='10 qism', callback_data=1))
+        btn1 = telebot.types.InlineKeyboardButton('1 qism', callback_data=1)
+        btn2 = telebot.types.InlineKeyboardButton('2 qism', callback_data=1)
+        start_markup.row(btn1, btn2)
+
+        btn3 = telebot.types.InlineKeyboardButton('3 qism', callback_data=1)
+        btn4 = telebot.types.InlineKeyboardButton('4 qism', callback_data=1)
+        start_markup.row(btn3, btn4)
+
+        btn5 = telebot.types.InlineKeyboardButton('5 qism', callback_data=1)
+        btn6 = telebot.types.InlineKeyboardButton('6 qism', callback_data=1)
+        start_markup.row(btn5, btn6)
+
+        btn7 = telebot.types.InlineKeyboardButton('7 qism', callback_data=1)
+        btn8 = telebot.types.InlineKeyboardButton('8 qism', callback_data=1)
+        start_markup.row(btn7, btn8)
+
+        btn9 = telebot.types.InlineKeyboardButton('9 qism', callback_data=1)
+        btn10 = telebot.types.InlineKeyboardButton('10 qism', callback_data=1)
+        start_markup.row(btn9, btn10)
 
     elif call.data == '2':
         answer = 'Вы хорошист!'
     elif call.data == '3':
         answer = 'Вы отличник!'
 
-    bot.send_message(call.message.chat.id, answer, reply_markup=markup)
+    bot.send_message(call.message.chat.id, answer, reply_markup=start_markup)
 
