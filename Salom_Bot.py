@@ -54,12 +54,9 @@ def start_message(message):
     count = 0
 
     for id in Ids:
-        try:
-            if chat_id != id[0]:
-                count += 1
-        except Error as e:
-            pass
-
+        if chat_id == id[0]:
+            count += 1
+            
     if count > 0:
         sql = 'INSERT INTO users (chat_id) VALUES (%s)'
         val = (chat_id,)
