@@ -792,9 +792,9 @@ def post_meeting():
     if body is not None:
         global mydb
         mycursor = ssm_connection()
-        query = "INSERT INTO meet_schedule (author, time, room, duration) VALUES (%s, %s, %s)"
+        query = "INSERT INTO meet_schedule (author, time, room, duration, mdate) VALUES (%s, %s, %s, %s, %s)"
         try:
-            values = (body["author"], body["time"], body["room"], body["duration"])
+            values = (body["author"], body["time"], body["room"], body["duration"], body["mdate"])
         except KeyError:
             flask.abort(400)
         else:
@@ -824,6 +824,7 @@ def get_meeting():
         item["time"] = row[2]
         item["room"] = row[3]
         item["duration"] = row[4]
+        item["date"] = row[5]
         itemlist.append(item)
     result = json.dumps(itemlist, indent=4)
     return result
