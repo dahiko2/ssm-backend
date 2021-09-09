@@ -1,3 +1,5 @@
+qichchu_qudrat = ''
+
 maktab_desc = "Maktab\n"\
                  "\n"\
                  "Serial haqida: MAKTAB.\n" \
