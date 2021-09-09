@@ -783,7 +783,7 @@ def get_pr_mentions():
 
 
 @ssm.route("/meet", methods=['POST'])
-def meeting_schedule():
+def post_meeting():
     """
     Записывает данные из тела запроса в табличку (meet_schedule)
     :return: str
@@ -792,9 +792,9 @@ def meeting_schedule():
     if body is not None:
         global mydb
         mycursor = ssm_connection()
-        query = "INSERT INTO meet_schedule (author, time, room) VALUES (%s, %s, %s)"
+        query = "INSERT INTO meet_schedule (author, time, room, duration) VALUES (%s, %s, %s)"
         try:
-            values = (body["author"], body["time"], body["room"])
+            values = (body["author"], body["time"], body["room"], body["duration"])
         except KeyError:
             flask.abort(400)
         else:
@@ -823,6 +823,7 @@ def get_meeting():
         item["author"] = row[1]
         item["time"] = row[2]
         item["room"] = row[3]
+        item["duration"] = row[4]
         itemlist.append(item)
     result = json.dumps(itemlist, indent=4)
     return result
