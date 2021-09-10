@@ -98,6 +98,7 @@ def start_message(message):
         keyboard.row('Sevimli')
         bot.send_message(message.chat.id, 'Qaytganing bilan ' + message.chat.username + '!', reply_markup=keyboard)
     serial_menu(message, True)
+    bot.delete_message(message.chat.id, message.message_id)
 
 
 @bot.message_handler(content_types=['text'])
