@@ -831,8 +831,16 @@ def get_meeting():
     :return: json
     """
     mycursor = ssm_connection()
-    query = "select * from meet_schedule;"
-    mycursor.execute(query)
+    body = flask.request.get_json()
+
+    if body is not None:
+        if 'date' in body.keys():
+            query = "select * from meet_schedule where mdate = %s;"
+            value = (body['date'],)
+            mycursor.execute(query, value)
+    else:
+        query = "select * from meet_schedule;"
+        mycursor.execute(query)
     query_result = mycursor.fetchall()
     itemlist = []
     for row in query_result:
