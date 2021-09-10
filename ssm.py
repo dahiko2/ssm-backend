@@ -786,7 +786,8 @@ def get_pr_mentions():
 def post_meeting():
     """
     Записывает данные из тела запроса в табличку (meet_schedule)
-    :return: str
+    Возвращает json, словарь.
+    :return: json
     """
     body = flask.request.get_json()
     if body is not None:
@@ -800,7 +801,9 @@ def post_meeting():
         else:
             mycursor.execute(query, values)
             mydb.commit()
-            return "ok."
+            return_dict = dict()
+            return_dict["message"] = "Event added."
+            return return_dict
     else:
         flask.abort(400)
 
@@ -828,3 +831,33 @@ def get_meeting():
         itemlist.append(item)
     result = json.dumps(itemlist, indent=4)
     return result
+
+
+@ssm.route("/meet", methods=['DELETE'])
+def delete_meeting():
+    """
+    Удаляет данные из таблицы расписания брони переговорок (meet_schedule)
+    Возвращает json, словарь.
+    :return: json
+    """
+    global mydb
+    body = flask.request.get_json()
+    try:
+        idmeet = body["id"]
+    except KeyError:
+        flask.abort(400)
+    else:
+        mycursor = ssm_connection()
+        value = (idmeet,)
+        query = "SELECT * FROM meet_schedule where idmeet = %s"
+        mycursor.execute(query, value)
+        return_dict = dict()
+        mycursor.fetchall()
+        if mycursor.rowcount == 0:
+            return_dict["message"] = "Release with id = "+str(idmeet)+" was not found."
+            return return_dict
+        query = "DELETE FROM meet_schedule WHERE idmeet = %s;"
+        mycursor.execute(query, value)
+        mydb.commit()
+        return_dict["message"] = "Release with id = "+str(idmeet)+" deleted."
+        return return_dict
