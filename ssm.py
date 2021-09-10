@@ -852,6 +852,7 @@ def delete_meeting():
         query = "SELECT * FROM meet_schedule where idmeet = %s"
         mycursor.execute(query, value)
         return_dict = dict()
+        mycursor.fetchall()
         if mycursor.rowcount == 0:
             return_dict["message"] = "Release with id = "+str(idmeet)+" was not found."
             return return_dict
