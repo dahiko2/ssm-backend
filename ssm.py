@@ -828,3 +828,22 @@ def get_meeting():
         itemlist.append(item)
     result = json.dumps(itemlist, indent=4)
     return result
+
+
+@ssm.route("/meet", methods=['DELETE'])
+def delete_meeting():
+    """
+
+    :return: str
+    """
+    body = flask.request.get_json()
+    try:
+        idmeet = body["id"]
+    except KeyError:
+        flask.abort(400)
+    else:
+        mycursor = ssm_connection()
+        query = "DELETE FROM meet_schedule WHERE idmeet = %s;"
+        value = (idmeet,)
+        mycursor.execute(query, value)
+        return "Ok."
