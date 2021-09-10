@@ -848,10 +848,15 @@ def delete_meeting():
         flask.abort(400)
     else:
         mycursor = ssm_connection()
-        query = "DELETE FROM meet_schedule WHERE idmeet = %s;"
         value = (idmeet,)
+        query = "SELECT * FROM meet_schedule where idmeet = %s"
+        mycursor.execute(query, value)
+        return_dict = dict()
+        if mycursor.rowcount == 0:
+            return_dict["message"] = "Release with id = "+str(idmeet)+" was not found."
+            return return_dict
+        query = "DELETE FROM meet_schedule WHERE idmeet = %s;"
         mycursor.execute(query, value)
         mydb.commit()
-        return_dict = dict()
-        return_dict["message"] = "Release with id = "+str(idmeet)+" added."
+        return_dict["message"] = "Release with id = "+str(idmeet)+" deleted."
         return return_dict
