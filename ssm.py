@@ -832,10 +832,12 @@ def get_meeting():
     """
     mycursor = ssm_connection()
     body = flask.request.get_json()
-    if 'date' in body.keys():
-        query = "select * from meet_schedule where mdate = %s;"
-        value = (body['date'],)
-        mycursor.execute(query, value)
+
+    if body is not None:
+        if 'date' in body.keys():
+            query = "select * from meet_schedule where mdate = %s;"
+            value = (body['date'],)
+            mycursor.execute(query, value)
     else:
         query = "select * from meet_schedule;"
         mycursor.execute(query)
