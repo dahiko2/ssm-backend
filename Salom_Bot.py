@@ -27,12 +27,13 @@ def read_creds():
         f.readline()# Просто пропускаем имя базы для инсты
         fdbname = f.readline().strip()
 
-#def is_subscribed(chat_id, user_id):
-    #try:
-        #print(bot.get_chat_member(chat_id, user_id))
-        #return True
-    #except:
-        #return False
+def is_subscribed(chat_id, user_id):
+    try:
+        bot.get_chat_member(chat_id, user_id)
+        return True
+    except ApiTelegramException as e:
+        if e.result_json['description'] == 'Bad Request: user not found':
+            return False
 
 
 @salom_bot.route("/" + token + "/", methods=["POST"])
@@ -63,9 +64,8 @@ def start_message(message):
     chat_id = message.chat.id
     count = 0
 
-    #if is_subscribed('@salomserial', message.chat.id) == False:
-        #bot.send_message(message.chat.id, "@salomserial kanaliga obuna bo'ling")
-    print(bot.get_chat_member('@salomserial', message.chat.id))
+    if not is_subscribed(-1001584831368, message.chat.id):
+        bot.send_message(message.chat.id, "@salomserial kanaliga obuna bo'ling")
 
     for id in Ids:
         if chat_id == id[0]:
