@@ -64,7 +64,7 @@ def start_message(message):
     chat_id = message.chat.id
     count = 0
 
-    if is_subscribed("-1001584831368", chat_id) == False:
+    if is_subscribed("@testtestert", 419664731) == False:
         bot.send_message(message.chat.id, "@salomserial kanaliga obuna bo'ling")
     else:
         bot.send_message(message.chat.id, "Вы уже подписаны на канал @salomserial")
