@@ -786,7 +786,8 @@ def get_pr_mentions():
 def post_meeting():
     """
     Записывает данные из тела запроса в табличку (meet_schedule)
-    :return: str
+    Возвращает json, словарь.
+    :return: json
     """
     body = flask.request.get_json()
     if body is not None:
@@ -800,7 +801,9 @@ def post_meeting():
         else:
             mycursor.execute(query, values)
             mydb.commit()
-            return "ok."
+            return_dict = dict()
+            return_dict["message"] = "Event added."
+            return return_dict
     else:
         flask.abort(400)
 
@@ -833,8 +836,9 @@ def get_meeting():
 @ssm.route("/meet", methods=['DELETE'])
 def delete_meeting():
     """
-
-    :return: str
+    Удаляет данные из таблицы расписания брони переговорок (meet_schedule)
+    Возвращает json, словарь.
+    :return: json
     """
     global mydb
     body = flask.request.get_json()
@@ -848,4 +852,6 @@ def delete_meeting():
         value = (idmeet,)
         mycursor.execute(query, value)
         mydb.commit()
-        return "Ok."
+        return_dict = dict()
+        return_dict["message"] = "Release with id = "+str(idmeet)+" added."
+        return return_dict
