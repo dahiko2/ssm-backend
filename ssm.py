@@ -89,9 +89,9 @@ def get_yt_id(url):
 def time_in_range(start, end, x):
     """Return true if x is in the range [start, end]"""
     if start <= end:
-        return start <= x <= end
+        return start < x < end
     else:
-        return start <= x or x <= end
+        return start < x or x < end
 
 
 def get_youtube_channels(mycursor):
@@ -824,11 +824,11 @@ def post_meeting():
         mycursor.execute(query, values)
         query_results = mycursor.fetchall()
         for row in query_results:
-            str_time_start = time.strptime(row[0], "%H:%M")
-            str_time_finish = time.strptime(row[1], "%H:%M")
+            sql_time_start = time.strptime(row[0], "%H:%M")
+            sql_time_finish = time.strptime(row[1], "%H:%M")
             input_start_time = time.strptime(body["time"], "%H:%M")
             output_start_time = time.strptime(body["finish"], "%H:%M")
-            if time_in_range(str_time_start, str_time_finish, input_start_time) or time_in_range(str_time_start, str_time_finish, output_start_time):
+            if time_in_range(sql_time_start, sql_time_finish, input_start_time) or time_in_range(sql_time_start, sql_time_finish, output_start_time):
                 add_event = False
                 break
         if add_event:
@@ -845,9 +845,7 @@ def post_meeting():
                 return_dict["message"] = "Meet event added."
                 return return_dict
         else:
-            return_dict = dict()
-            return_dict["message"] = "Meet event was not added."
-            return return_dict
+            flask.abort(403)
     else:
         flask.abort(400)
 
