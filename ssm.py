@@ -823,7 +823,7 @@ def post_meeting():
         flask.abort(400)
 
 
-@ssm.route("/meet", methods=['GET'])
+'''@ssm.route("/meet", methods=['GET'])
 def get_meeting():
     """
     Выводит данные из таблицы расписания брони переговорок (meet_schedule)
@@ -853,14 +853,14 @@ def get_meeting():
         item["room"] = row[3]
         itemlist.append(item)
     result = json.dumps(itemlist, indent=4)
-    return result
+    return result'''
 
 
-@ssm.route("/meet?date=<date>", methods=['GET'])
-def get_meeting_date(date):
+@ssm.route("/meet/<mdate>", methods=['GET'])
+def get_meeting_date(mdate):
     mycursor = ssm_connection()
     query = "select * from meet_schedule where mdate = %s;"
-    value = (date,)
+    value = (mdate,)
     mycursor.execute(query, value)
     query_result = mycursor.fetchall()
     itemlist = []
