@@ -35,7 +35,9 @@ def serial_menu(message, start=False):
     if start == False:
         bot.edit_message_reply_markup(message.chat.id, message_id=message.message_id - 1, reply_markup='')
         #bot.edit_message_text("test", chat_id=message.chat.id, message_id=to_delete.message_id)
-        bot.delete_message(message.chat.id, message.message_id-2)
+        bot.delete_message(message.chat.id, message.message_id - 1)
+        bot.delete_message(message.chat.id, message.message_id - 2)
+        bot.delete_message(message.chat.id, message.message_id)
     bot.send_message(message.chat.id, 'Serialar',
                     reply_markup=markup)
 
@@ -101,8 +103,6 @@ def send_text(message):
 
 @bot.callback_query_handler(func=lambda call: True)
 def query_handler(call):
-
-    global to_delete, to_delete_ser
 
     #bot.answer_callback_query(callback_query_id=call.id, text='Спасибо за честный ответ!')
 
@@ -177,7 +177,8 @@ def query_handler(call):
         btn10 = telebot.types.InlineKeyboardButton('10 qism', callback_data="shah_qich10")
         start_markup.row(btn9, btn10)
 
-    to_delete = bot.send_message(call.message.chat.id, answer, reply_markup=keyboard)
-    to_delete_ser = bot.send_message(call.message.chat.id, Strings.series_chose, reply_markup=start_markup)
+    bot.delete_message(call.message.chat.id, call.message.message_id - 1)
+    bot.send_message(call.message.chat.id, answer, reply_markup=keyboard)
+    bot.send_message(call.message.chat.id, Strings.series_chose, reply_markup=start_markup)
     bot.edit_message_reply_markup(call.message.chat.id, call.message.message_id)
 
