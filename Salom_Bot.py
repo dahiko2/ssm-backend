@@ -32,10 +32,10 @@ def serial_menu(message, start=False):
     markup.add(telebot.types.InlineKeyboardButton(text='Maktab', callback_data="maktab"))
     markup.add(telebot.types.InlineKeyboardButton(text='Qichchu Qudrat', callback_data="qichchu_qudrat"))
     markup.add(telebot.types.InlineKeyboardButton(text='Shaharlik Qichloqi', callback_data="shaharlik_qichilogi"))
-    #if start == False:
+    if start == False:
         #bot.edit_message_reply_markup(message.chat.id, message_id=message.message_id - 1, reply_markup='')
         #bot.edit_message_text("test", chat_id=message.chat.id, message_id=to_delete.message_id)
-        #bot.delete_messages(message.chat.id, message.message_id)
+        bot.delete_message(message.chat.id, message.message_id)
     bot.send_message(message.chat.id, 'Serialar',
                     reply_markup=markup)
 
