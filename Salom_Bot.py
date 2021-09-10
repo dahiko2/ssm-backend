@@ -38,10 +38,10 @@ def serial_menu(message, start=False):
     serialar = bot.send_message(message.chat.id, 'Serialar',
                      reply_markup=markup)
     if start == False:
-        bot.edit_message_reply_markup(message.chat.id, message_id=message.message_id - 1, reply_markup='')
+        #bot.edit_message_reply_markup(message.chat.id, message_id=message.message_id - 1, reply_markup='')
         #bot.edit_message_text("test", chat_id=message.chat.id, message_id=to_delete.message_id)
-        bot.delete_message(message.chat.id, message.message_id - 1)
-        bot.delete_message(message.chat.id, message.message_id - 2)
+        bot.delete_message(message.chat.id, to_delete.message_id)
+        bot.delete_message(message.chat.id, to_delete_ser.message_id)
         bot.delete_message(message.chat.id, message.message_id)
 
 
