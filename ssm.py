@@ -826,7 +826,9 @@ def post_meeting():
         for row in query_results:
             str_time_start = time.strptime(row[0], "%H:%M")
             str_time_finish = time.strptime(row[1], "%H:%M")
-            if time_in_range(str_time_start, str_time_finish, body["time"]) or time_in_range(str_time_start, str_time_finish, body["finish"]):
+            input_start_time = time.strptime(body["time"], "%H:%M")
+            output_start_time = time.strptime(body["finish"], "%H:%M")
+            if time_in_range(str_time_start, str_time_finish, input_start_time) or time_in_range(str_time_start, str_time_finish, output_start_time):
                 add_event = False
                 break
         if add_event:
