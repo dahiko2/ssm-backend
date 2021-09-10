@@ -55,7 +55,7 @@ def start_message(message):
     chat_id = message.chat.id
     count = 0
 
-    if not bot.get_chat_member(chat_id=-1001135809848, user_id=message.from_user.id).status in roles:
+    if not bot.get_chat_member(chat_id=-1001584831368, user_id=message.from_user.id).status in roles:
         chat_id = message.chat.id
         bot.send_message(chat_id, "@salomserial kanaliga obuna bo'ling")
 
