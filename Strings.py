@@ -9,6 +9,7 @@ shaharlik_qichloqi = "Shaharlik Qichloqi\n" \
                      "Zarnigor juda taltayib ketib otasiga ko'p muomolar tug'diradi va otasi uni tarbiyalashi uchun qishloqga ya'ni qattiq qo'l ammasini yoniga yuboradi 🚕🏔🏡.\n" \
                      "Shaharga qaytishning yagona yo'li - otasi aytgan yigitga erga tegish 👰🏻‍♀, lekin Zara uni sevmaydi 😡.  U qishloqda qolib hech kimga aytmasdan, o'qishga magistraturaga topshiradi👩🏻‍🎓"
 
+series_chose = "Seriyalarni tanlang"
 
 maktab_desc = "Maktab\n"\
                  "\n"\

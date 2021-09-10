@@ -170,6 +170,7 @@ def query_handler(call):
         btn10 = telebot.types.InlineKeyboardButton('10 qism', callback_data="shah_qich10")
         start_markup.row(btn9, btn10)
 
-    bot.send_message(call.message.chat.id, answer, reply_markup=[start_markup, keyboard])
+    bot.send_message(call.message.chat.id, answer, reply_markup=keyboard)
+    bot.send_message(call.message.chat.id, Strings.series_chose, reply_markup=start_markup)
     bot.edit_message_reply_markup(call.message.chat.id, call.message.message_id)
 
