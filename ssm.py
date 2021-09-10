@@ -836,6 +836,7 @@ def delete_meeting():
 
     :return: str
     """
+    global mydb
     body = flask.request.get_json()
     try:
         idmeet = body["id"]
@@ -846,4 +847,5 @@ def delete_meeting():
         query = "DELETE FROM meet_schedule WHERE idmeet = %s;"
         value = (idmeet,)
         mycursor.execute(query, value)
+        mydb.commit()
         return "Ok."
