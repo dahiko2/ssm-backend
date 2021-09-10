@@ -27,15 +27,6 @@ def read_creds():
         f.readline()# Просто пропускаем имя базы для инсты
         fdbname = f.readline().strip()
 
-def is_subscribed(chat_id, user_id):
-    try:
-        bot.get_chat_member(chat_id, user_id)
-        return True
-    except ApiTelegramException as e:
-        if e.result_json['description'] == 'Bad Request: user not found':
-            return False
-
-
 @salom_bot.route("/" + token + "/", methods=["POST"])
 def receive_update():
     bot.process_new_updates([telebot.types.Update.de_json(request.stream.read().decode("utf-8"))])
@@ -64,40 +55,34 @@ def start_message(message):
     chat_id = message.chat.id
     count = 0
 
-    if is_subscribed("testtestert", "self") == False:
-        bot.send_message(message.chat.id, "@salomserial kanaliga obuna bo'ling")
-    else:
-        bot.send_message(message.chat.id, "Вы уже подписаны на канал @salomserial")
+    '''if not bot.get_chat_member(chat_id=-1001584831368, user_id=message.from_user.id).status in roles:
+        chat_id = message.chat.id
+        bot.send_message(chat_id, "@salomserial kanaliga obuna bo'ling")''' #Проверка подписки, требуется админка
 
     for id in Ids:
         if chat_id == id[0]:
             count += 1
 
-    if count > 0:
-        markup = telebot.types.InlineKeyboardMarkup()
-        markup.add(telebot.types.InlineKeyboardButton(text='Maktab', callback_data="maktab"))
-        markup.add(telebot.types.InlineKeyboardButton(text='Qichchu Qudrat', callback_data="qichchu_qudrat"))
-        markup.add(telebot.types.InlineKeyboardButton(text='Shaharlik Qichloqi', callback_data="shaharlik_qichilogi"))
-        keyboard = telebot.types.ReplyKeyboardMarkup(True)
-        keyboard.row('Serialar', 'Ortga')
-        bot.send_message(message.chat.id, 'Qaytganing bilan ' + message.chat.username + '!', reply_markup=keyboard)
-        bot.send_message(message.chat.id, 'Serialar',
-                         reply_markup=markup)
-    else:
+    if count == 0:
         sql = 'INSERT INTO users (chat_id) VALUES (%s)'
         val = (chat_id,)
         mycursor.execute(sql, val)
         mydb.commit()
-        markup = telebot.types.InlineKeyboardMarkup()
-        markup.add(telebot.types.InlineKeyboardButton(text='Maktab', callback_data="maktab"))
-        markup.add(telebot.types.InlineKeyboardButton(text='Qichchu Qudrat', callback_data="qichchu_qudrat"))
-        markup.add(telebot.types.InlineKeyboardButton(text='Shaharlik Qichloqi', callback_data="shaharlik_qichilogi"))
         keyboard = telebot.types.ReplyKeyboardMarkup(True)
         keyboard.row('Serialar', 'Ortga')
         bot.send_message(message.chat.id,
                          Strings.start,
                          reply_markup=keyboard)
-        bot.send_message(message.chat.id, 'Serialar',
+    else:
+        keyboard = telebot.types.ReplyKeyboardMarkup(True)
+        keyboard.row('Serialar', 'Ortga')
+        bot.send_message(message.chat.id, 'Qaytganing bilan ' + message.chat.username + '!', reply_markup=keyboard)
+
+    markup = telebot.types.InlineKeyboardMarkup()
+    markup.add(telebot.types.InlineKeyboardButton(text='Maktab', callback_data="maktab"))
+    markup.add(telebot.types.InlineKeyboardButton(text='Qichchu Qudrat', callback_data="qichchu_qudrat"))
+    markup.add(telebot.types.InlineKeyboardButton(text='Shaharlik Qichloqi', callback_data="shaharlik_qichilogi"))
+    bot.send_message(message.chat.id, 'Serialar',
                          reply_markup=markup)
 
 
