@@ -34,7 +34,6 @@ def serial_menu(message):
     markup.add(telebot.types.InlineKeyboardButton(text='Shaharlik Qichloqi', callback_data="shaharlik_qichilogi"))
     bot.send_message(message.chat.id, 'Serialar',
                     reply_markup=markup)
-    bot.edit_message_reply_markup(message.chat.id, message.message_id)
 
 
 @salom_bot.route("/" + token + "/", methods=["POST"])
