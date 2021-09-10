@@ -856,7 +856,7 @@ def get_meeting():
     return result'''
 
 
-@ssm.route("/meet_<mdate>", methods=['GET'])
+@ssm.route("/meet/<mdate>", methods=['GET'])
 def get_meeting_date(mdate):
     mycursor = ssm_connection()
     query = "select * from meet_schedule where mdate = %s;"
