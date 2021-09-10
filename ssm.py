@@ -865,22 +865,25 @@ def delete_meeting():
     """
     global mydb
     body = flask.request.get_json()
-    try:
-        idmeet = body["id"]
-    except KeyError:
-        flask.abort(400)
-    else:
-        mycursor = ssm_connection()
-        value = (idmeet,)
-        query = "SELECT * FROM meet_schedule where idmeet = %s"
-        mycursor.execute(query, value)
-        return_dict = dict()
-        mycursor.fetchall()
-        if mycursor.rowcount == 0:
-            return_dict["message"] = "Meet event with id = "+str(idmeet)+" was not found."
+    if body is not None:
+        try:
+            idmeet = body["id"]
+        except KeyError:
+            flask.abort(400)
+        else:
+            mycursor = ssm_connection()
+            value = (idmeet,)
+            query = "SELECT * FROM meet_schedule where idmeet = %s"
+            mycursor.execute(query, value)
+            return_dict = dict()
+            mycursor.fetchall()
+            if mycursor.rowcount == 0:
+                return_dict["message"] = "Meet event with id = "+str(idmeet)+" was not found."
+                return return_dict
+            query = "DELETE FROM meet_schedule WHERE idmeet = %s;"
+            mycursor.execute(query, value)
+            mydb.commit()
+            return_dict["message"] = "Meet event with id = "+str(idmeet)+" deleted."
             return return_dict
-        query = "DELETE FROM meet_schedule WHERE idmeet = %s;"
-        mycursor.execute(query, value)
-        mydb.commit()
-        return_dict["message"] = "Meet event with id = "+str(idmeet)+" deleted."
-        return return_dict
+    else:
+        flask.abort(400)
