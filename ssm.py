@@ -856,6 +856,27 @@ def get_meeting():
     return result
 
 
+@ssm.route("/meet?date=<date>", methods=['GET'])
+def get_meeting_date(date):
+    mycursor = ssm_connection()
+    query = "select * from meet_schedule where mdate = %s;"
+    value = (date,)
+    mycursor.execute(query, value)
+    query_result = mycursor.fetchall()
+    itemlist = []
+    for row in query_result:
+        item = dict()
+        item["id"] = row[0]
+        item["author"] = row[1]
+        item["date"] = row[5]
+        item["time"] = row[2]
+        item["finish"] = row[4]
+        item["room"] = row[3]
+        itemlist.append(item)
+    result = json.dumps(itemlist, indent=4)
+    return result
+
+
 @ssm.route("/meet", methods=['DELETE'])
 def delete_meeting():
     """
@@ -865,22 +886,25 @@ def delete_meeting():
     """
     global mydb
     body = flask.request.get_json()
-    try:
-        idmeet = body["id"]
-    except KeyError:
-        flask.abort(400)
-    else:
-        mycursor = ssm_connection()
-        value = (idmeet,)
-        query = "SELECT * FROM meet_schedule where idmeet = %s"
-        mycursor.execute(query, value)
-        return_dict = dict()
-        mycursor.fetchall()
-        if mycursor.rowcount == 0:
-            return_dict["message"] = "Meet event with id = "+str(idmeet)+" was not found."
+    if body is not None:
+        try:
+            idmeet = body["id"]
+        except KeyError:
+            flask.abort(400)
+        else:
+            mycursor = ssm_connection()
+            value = (idmeet,)
+            query = "SELECT * FROM meet_schedule where idmeet = %s"
+            mycursor.execute(query, value)
+            return_dict = dict()
+            mycursor.fetchall()
+            if mycursor.rowcount == 0:
+                return_dict["message"] = "Meet event with id = "+str(idmeet)+" was not found."
+                return return_dict
+            query = "DELETE FROM meet_schedule WHERE idmeet = %s;"
+            mycursor.execute(query, value)
+            mydb.commit()
+            return_dict["message"] = "Meet event with id = "+str(idmeet)+" deleted."
             return return_dict
-        query = "DELETE FROM meet_schedule WHERE idmeet = %s;"
-        mycursor.execute(query, value)
-        mydb.commit()
-        return_dict["message"] = "Meet event with id = "+str(idmeet)+" deleted."
-        return return_dict
+    else:
+        flask.abort(400)
