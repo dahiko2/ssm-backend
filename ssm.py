@@ -412,7 +412,9 @@ def update_kpi_mau():
             query = "UPDATE kpi_mao SET value = %s where country = %s and month = %s and year = %s and month_year = %s;"
             mycursor.execute(query, val)
         mydb.commit()
-        return "MAU KPI of" + country + " updated."
+        return_dict = dict()
+        return_dict["message"] = "MAU KPI of" + country + " updated."
+        return return_dict
 
 
 @ssm.route("/update_yt_trends", methods=['POST'])
@@ -447,7 +449,9 @@ def update_yt_trends():
                 values = (video['video_name'], video['channel'], video['views'], video['place'])
             mycursor.execute(query, values)
     mydb.commit()
-    return str(count)+" videos added."
+    return_dict = dict()
+    return_dict["message"] = str(count)+" videos added."
+    return return_dict
 
 
 @ssm.route("/get_yt_trends", methods=['GET'])
@@ -501,7 +505,9 @@ def add_yt_channel():
         values = (channel, )
         mycursor.execute(query, values)
         mydb.commit()
-        return "Channel "+channel+" added."
+        return_dict = dict()
+        return_dict["message"] = "Channel "+channel+" added."
+        return return_dict
 
 
 @ssm.route("/get_kpi_aitu", methods=['GET'])
@@ -565,7 +571,9 @@ def update_kpi_aitu():
     val = (int(items[0]), int(items[1]), int(items[2]), int(items[3]), int(items[4]), int(items[5]), int(items[6]), int(items[7]), int(items[8]))
     mycursor.execute(query, val)
     mydb.commit()
-    return "AITU KPI updated."
+    return_dict = dict()
+    return_dict["message"] = "AITU KPI updated."
+    return return_dict
 
 
 @ssm.route("/update_logs", methods=['POST'])
@@ -591,7 +599,9 @@ def update_logging():
                 global mydb
                 mycursor.execute(query, value)
                 mydb.commit()
-                return data["type"] + " log updated."
+                return_dict = dict()
+                return_dict["message"] = data["type"] + " log updated."
+                return return_dict
     except KeyError:
         flask.abort(403)
 
@@ -692,7 +702,12 @@ def add_release():
         except mysql.connector.errors.Error as e:
             print("Error: "+e.msg)
             flask.abort(400)
-    return "Release added."
+        return_dict = dict()
+        return_dict["message"] = "Release added."
+        return return_dict
+    else:
+        flask.abort(400)
+
 
 
 @ssm.route("/get_custom_data", methods=['POST'])
@@ -802,7 +817,7 @@ def post_meeting():
             mycursor.execute(query, values)
             mydb.commit()
             return_dict = dict()
-            return_dict["message"] = "Event added."
+            return_dict["message"] = "Meet event added."
             return return_dict
     else:
         flask.abort(400)
@@ -854,10 +869,10 @@ def delete_meeting():
         return_dict = dict()
         mycursor.fetchall()
         if mycursor.rowcount == 0:
-            return_dict["message"] = "Release with id = "+str(idmeet)+" was not found."
+            return_dict["message"] = "Meet event with id = "+str(idmeet)+" was not found."
             return return_dict
         query = "DELETE FROM meet_schedule WHERE idmeet = %s;"
         mycursor.execute(query, value)
         mydb.commit()
-        return_dict["message"] = "Release with id = "+str(idmeet)+" deleted."
+        return_dict["message"] = "Meet event with id = "+str(idmeet)+" deleted."
         return return_dict

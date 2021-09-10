@@ -168,7 +168,9 @@ def update_insta_post():
                 mycursor.execute(query, val)
 
         mydb.commit()
-        return "ok."
+        return_dict = dict()
+        return_dict["message"] = "Instagram post added/updated."
+        return return_dict
     else:
         flask.abort(400)
 
@@ -190,7 +192,9 @@ def update_insta_profile():
                       body["username"])
             mycursor.execute(query, values)
         mydb.commit()
-        return "ok."
+        return_dict = dict()
+        return_dict["message"] = "Instagram profile added/updated."
+        return return_dict
     else:
         flask.abort(400)
 
