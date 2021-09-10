@@ -64,13 +64,12 @@ def start_message(message):
     chat_id = message.chat.id
     count = 0
 
-    if message.text == "Проверить подписку":
-        status = ['creator', 'administrator', 'member']
-        for i in status:
-            if i == bot.get_chat_member(chat_id=-1001584831368, user_id=message.from_user.id).status:
-                chat_id = message.chat.id
-                bot.send_message(chat_id, "Доступ получен✅")
-                break
+    status = ['creator', 'administrator', 'member']
+    for i in status:
+        if i == bot.get_chat_member(chat_id=-1001584831368, user_id=message.from_user.id).status:
+            chat_id = message.chat.id
+            bot.send_message(chat_id, "Доступ получен✅")
+            break
 
         else:
             chat_id = message.chat.id
