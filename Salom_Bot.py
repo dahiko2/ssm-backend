@@ -32,9 +32,9 @@ def serial_menu(message):
     markup.add(telebot.types.InlineKeyboardButton(text='Maktab', callback_data="maktab"))
     markup.add(telebot.types.InlineKeyboardButton(text='Qichchu Qudrat', callback_data="qichchu_qudrat"))
     markup.add(telebot.types.InlineKeyboardButton(text='Shaharlik Qichloqi', callback_data="shaharlik_qichilogi"))
-    bot.edit_message_reply_markup(message.chat.id, message_id=message.message_id - 3, reply_markup='')
-    bot.edit_message_reply_markup(message.chat.id, message_id=message.message_id - 2, reply_markup='')
-    bot.edit_message_reply_markup(message.chat.id, message_id=message.message_id - 1, reply_markup='')
+    #bot.edit_message_reply_markup(message.chat.id, message_id=message.message_id - 3, reply_markup='')
+    #bot.edit_message_reply_markup(message.chat.id, message_id=message.message_id - 2, reply_markup='')
+    #bot.edit_message_reply_markup(message.chat.id, message_id=message.message_id - 1, reply_markup='')
     bot.send_message(message.chat.id, 'Serialar',
                     reply_markup=markup)
 
