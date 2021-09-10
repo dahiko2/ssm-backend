@@ -819,16 +819,18 @@ def post_meeting():
         add_event = True
         mycursor = ssm_connection()
         # Проверка, не попадает ли новая запись в промежутки предыдущих записей
-        '''query = "SELECT time, time_finish from meet_schedule where room = %s and mdate = %s;"
+        query = "SELECT time, time_finish from meet_schedule where room = %s and mdate = %s;"
         values = (body['room'], body['date'])
         mycursor.execute(query, values)
         query_results = mycursor.fetchall()
         for row in query_results:
             str_time_start = time.strptime(row[0], "%H:%M")
             str_time_finish = time.strptime(row[1], "%H:%M")
-            if time_in_range(str_time_start, str_time_finish, body["time"]) or time_in_range(str_time_start, str_time_finish, body["finish"]):
+            input_start_time = time.strptime(body["time"], "%H:%M")
+            output_start_time = time.strptime(body["finish"], "%H:%M")
+            if time_in_range(str_time_start, str_time_finish, input_start_time) or time_in_range(str_time_start, str_time_finish, output_start_time):
                 add_event = False
-                break'''
+                break
         if add_event:
             # Запись нового meet event.
             query = "INSERT INTO meet_schedule (author, time, room, time_finish, mdate) VALUES (%s, %s, %s, %s, %s)"
