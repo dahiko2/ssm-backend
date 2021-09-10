@@ -856,6 +856,27 @@ def get_meeting():
     return result
 
 
+@ssm.route("/meet?date=<date>", methods=['GET'])
+def get_meeting_date(date):
+    mycursor = ssm_connection()
+    query = "select * from meet_schedule where mdate = %s;"
+    value = (date,)
+    mycursor.execute(query, value)
+    query_result = mycursor.fetchall()
+    itemlist = []
+    for row in query_result:
+        item = dict()
+        item["id"] = row[0]
+        item["author"] = row[1]
+        item["date"] = row[5]
+        item["time"] = row[2]
+        item["finish"] = row[4]
+        item["room"] = row[3]
+        itemlist.append(item)
+    result = json.dumps(itemlist, indent=4)
+    return result
+
+
 @ssm.route("/meet", methods=['DELETE'])
 def delete_meeting():
     """
