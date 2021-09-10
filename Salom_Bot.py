@@ -64,10 +64,22 @@ def start_message(message):
     chat_id = message.chat.id
     count = 0
 
-    if is_subscribed("testtestert", "self") == False:
+    if message.text == "Проверить подписку":
+        status = ['creator', 'administrator', 'member']
+        for i in status:
+            if i == bot.get_chat_member(chat_id=-1001584831368, user_id=message.from_user.id).status:
+                chat_id = message.chat.id
+                bot.send_message(chat_id, "Доступ получен✅")
+                break
+
+        else:
+            chat_id = message.chat.id
+            bot.send_message(chat_id, text="Нету подписки")
+
+    '''if is_subscribed("testtestert", "self") == False:
         bot.send_message(message.chat.id, "@salomserial kanaliga obuna bo'ling")
     else:
-        bot.send_message(message.chat.id, "Вы уже подписаны на канал @salomserial")
+        bot.send_message(message.chat.id, "Вы уже подписаны на канал @salomserial")'''
 
     for id in Ids:
         if chat_id == id[0]:
