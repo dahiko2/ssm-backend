@@ -4,6 +4,7 @@ from flask import Blueprint
 import mysql.connector
 from datetime import datetime
 from urllib.parse import urlparse, parse_qs
+import time
 
 mydb = mysql.connector.connect()
 fhost = ""
@@ -83,6 +84,14 @@ def get_yt_id(url):
     if n != -1:
         return temp[:n]
     return temp
+
+
+def time_in_range(start, end, x):
+    """Return true if x is in the range [start, end]"""
+    if start <= end:
+        return start <= x <= end
+    else:
+        return start <= x or x <= end
 
 
 def get_youtube_channels(mycursor):
@@ -807,53 +816,38 @@ def post_meeting():
     body = flask.request.get_json()
     if body is not None:
         global mydb
+        add_event = True
         mycursor = ssm_connection()
-        query = "INSERT INTO meet_schedule (author, time, room, time_finish, mdate) VALUES (%s, %s, %s, %s, %s)"
-        try:
-            values = (body["author"], body["time"], body["room"], body["finish"], body["date"])
-        except KeyError:
-            flask.abort(400)
+        # Проверка, не попадает ли новая запись в промежутки предыдущих записей
+        query = "SELECT time, time_finish from meet_schedule where room = %s and mdate = %s;"
+        values = (body['room'], body['date'])
+        mycursor.execute(query, values)
+        query_results = mycursor.fetchall()
+        for row in query_results:
+            str_time_start = time.strptime(row[0], "%H:%M")
+            str_time_finish = time.strptime(row[1], "%H:%M")
+            if time_in_range(str_time_start, str_time_finish, body["time"]) or time_in_range(str_time_start, str_time_finish, body["finish"]):
+                add_event = False
+                break
+        if add_event:
+            # Запись нового meet event.
+            query = "INSERT INTO meet_schedule (author, time, room, time_finish, mdate) VALUES (%s, %s, %s, %s, %s)"
+            try:
+                values = (body["author"], body["time"], body["room"], body["finish"], body["date"])
+            except KeyError:
+                flask.abort(400)
+            else:
+                mycursor.execute(query, values)
+                mydb.commit()
+                return_dict = dict()
+                return_dict["message"] = "Meet event added."
+                return return_dict
         else:
-            mycursor.execute(query, values)
-            mydb.commit()
             return_dict = dict()
-            return_dict["message"] = "Meet event added."
+            return_dict["message"] = "Meet event was not added."
             return return_dict
     else:
         flask.abort(400)
-
-
-'''@ssm.route("/meet", methods=['GET'])
-def get_meeting():
-    """
-    Выводит данные из таблицы расписания брони переговорок (meet_schedule)
-    Возвращает json-объект, список словарей
-    :return: json
-    """
-    mycursor = ssm_connection()
-    body = flask.request.get_json()
-
-    if body is not None:
-        if 'date' in body.keys():
-            query = "select * from meet_schedule where mdate = %s;"
-            value = (body['date'],)
-            mycursor.execute(query, value)
-    else:
-        query = "select * from meet_schedule;"
-        mycursor.execute(query)
-    query_result = mycursor.fetchall()
-    itemlist = []
-    for row in query_result:
-        item = dict()
-        item["id"] = row[0]
-        item["author"] = row[1]
-        item["date"] = row[5]
-        item["time"] = row[2]
-        item["finish"] = row[4]
-        item["room"] = row[3]
-        itemlist.append(item)
-    result = json.dumps(itemlist, indent=4)
-    return result'''
 
 
 @ssm.route("/meet/<mdate>", methods=['GET'])
