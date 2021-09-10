@@ -74,8 +74,8 @@ def start_message(message):
     if count > 0:
         markup = telebot.types.InlineKeyboardMarkup()
         markup.add(telebot.types.InlineKeyboardButton(text='Maktab', callback_data="maktab"))
-        markup.add(telebot.types.InlineKeyboardButton(text='Qichchu Qudrat', callback_data=2))
-        markup.add(telebot.types.InlineKeyboardButton(text='Shaharlik Qichloqi', callback_data=3))
+        markup.add(telebot.types.InlineKeyboardButton(text='Qichchu Qudrat', callback_data="qichchu_qudrat"))
+        markup.add(telebot.types.InlineKeyboardButton(text='Shaharlik Qichloqi', callback_data="shaharlik_qichilogi"))
         keyboard = telebot.types.ReplyKeyboardMarkup(True)
         keyboard.row('Serialar', 'Ortga')
         bot.send_message(message.chat.id, 'Qaytganing bilan ' + message.chat.username + '!', reply_markup=keyboard)
@@ -88,8 +88,8 @@ def start_message(message):
         mydb.commit()
         markup = telebot.types.InlineKeyboardMarkup()
         markup.add(telebot.types.InlineKeyboardButton(text='Maktab', callback_data="maktab"))
-        markup.add(telebot.types.InlineKeyboardButton(text='Qichchu Qudrat', callback_data=2))
-        markup.add(telebot.types.InlineKeyboardButton(text='Shaharlik Qichloqi', callback_data=3))
+        markup.add(telebot.types.InlineKeyboardButton(text='Qichchu Qudrat', callback_data="qichchu_qudrat"))
+        markup.add(telebot.types.InlineKeyboardButton(text='Shaharlik Qichloqi', callback_data="shaharlik_qichilogi"))
         keyboard = telebot.types.ReplyKeyboardMarkup(True)
         keyboard.row('Serialar', 'Ortga')
         bot.send_message(message.chat.id,
@@ -134,10 +134,49 @@ def query_handler(call):
         btn10 = telebot.types.InlineKeyboardButton('10 qism', callback_data=1)
         start_markup.row(btn9, btn10)
 
-    elif call.data == '2':
-        answer = 'Вы хорошист!'
-    elif call.data == '3':
-        answer = 'Вы отличник!'
+    elif call.data == "qichchu_qudrat":
+        answer = Strings.maktab_desc
+        btn1 = telebot.types.InlineKeyboardButton('1 qism', callback_data=1)
+        btn2 = telebot.types.InlineKeyboardButton('2 qism', callback_data=1)
+        start_markup.row(btn1, btn2)
+
+        btn3 = telebot.types.InlineKeyboardButton('3 qism', callback_data=1)
+        btn4 = telebot.types.InlineKeyboardButton('4 qism', callback_data=1)
+        start_markup.row(btn3, btn4)
+
+        btn5 = telebot.types.InlineKeyboardButton('5 qism', callback_data=1)
+        btn6 = telebot.types.InlineKeyboardButton('6 qism', callback_data=1)
+        start_markup.row(btn5, btn6)
+
+        btn7 = telebot.types.InlineKeyboardButton('7 qism', callback_data=1)
+        btn8 = telebot.types.InlineKeyboardButton('8 qism', callback_data=1)
+        start_markup.row(btn7, btn8)
+
+        btn9 = telebot.types.InlineKeyboardButton('9 qism', callback_data=1)
+        btn10 = telebot.types.InlineKeyboardButton('10 qism', callback_data=1)
+        start_markup.row(btn9, btn10)
+
+    elif call.data == "shaharlik_qichilogi":
+        answer = Strings.maktab_desc
+        btn1 = telebot.types.InlineKeyboardButton('1 qism', callback_data=1)
+        btn2 = telebot.types.InlineKeyboardButton('2 qism', callback_data=1)
+        start_markup.row(btn1, btn2)
+
+        btn3 = telebot.types.InlineKeyboardButton('3 qism', callback_data=1)
+        btn4 = telebot.types.InlineKeyboardButton('4 qism', callback_data=1)
+        start_markup.row(btn3, btn4)
+
+        btn5 = telebot.types.InlineKeyboardButton('5 qism', callback_data=1)
+        btn6 = telebot.types.InlineKeyboardButton('6 qism', callback_data=1)
+        start_markup.row(btn5, btn6)
+
+        btn7 = telebot.types.InlineKeyboardButton('7 qism', callback_data=1)
+        btn8 = telebot.types.InlineKeyboardButton('8 qism', callback_data=1)
+        start_markup.row(btn7, btn8)
+
+        btn9 = telebot.types.InlineKeyboardButton('9 qism', callback_data=1)
+        btn10 = telebot.types.InlineKeyboardButton('10 qism', callback_data=1)
+        start_markup.row(btn9, btn10)
 
     bot.send_message(call.message.chat.id, answer, reply_markup=start_markup)
 
