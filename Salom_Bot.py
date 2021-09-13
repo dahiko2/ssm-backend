@@ -27,26 +27,16 @@ def read_creds():
         f.readline()
         fdbname = f.readline().strip()
 
-def gen_keyboard():
-    markup = telebot.types.InlineKeyboardMarkup()
-    markup.row_width = 1
-    markup.add(telebot.types.InlineKeyboardMarkup("Maktab", callback_data="maktab"),
-               telebot.types.InlineKeyboardMarkup('Qichchu Qudrat', callback_data="qichchu_qudrat"),
-               telebot.types.InlineKeyboardMarkup('Shaharlik Qichloqi', callback_data="shaharlik_qichilogi"))
-    return markup
-
 def serial_menu(message, start=False):
 
     global serialar
 
-
-    '''markup = telebot.types.InlineKeyboardMarkup()
+    markup = telebot.types.InlineKeyboardMarkup()
     markup.add(telebot.types.InlineKeyboardButton(text='Maktab', callback_data="maktab"))
     markup.add(telebot.types.InlineKeyboardButton(text='Qichchu Qudrat', callback_data="qichchu_qudrat"))
-    markup.add(telebot.types.InlineKeyboardButton(text='Shaharlik Qichloqi', callback_data="shaharlik_qichilogi"))'''
-    serialar = bot.send_message(message.chat.id, 'Serialar')
-    gen_keyboard()
-    
+    markup.add(telebot.types.InlineKeyboardButton(text='Shaharlik Qichloqi', callback_data="shaharlik_qichilogi"))
+    serialar = bot.send_message(message.chat.id, 'Serialar',
+                     reply_markup=markup)
     if start == False:
         #bot.edit_message_reply_markup(message.chat.id, message_id=message.message_id - 1, reply_markup='')
         #bot.edit_message_text("test", chat_id=message.chat.id, message_id=to_delete.message_id)
