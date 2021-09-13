@@ -106,7 +106,7 @@ def start_message(message):
 def send_text(message):
     if message.text == 'Ortga':
         serial_menu(message)
-    if message.text == "Sevimlilarga qo'shing":
+    '''if message.text == "Sevimlilarga qo'shing":
         read_creds()
         mydb = connect(
             host=fhost,
@@ -160,7 +160,8 @@ def send_text(message):
         q_result = mycursor.fetchall()
         favs_from_db = []
         for row in q_result:
-            favs_from_db = json.loads(row[0])
+            if row[0] is not None:
+                favs_from_db = json.loads(row[0])
         if len(favs_from_db) == 0:
             bot.send_message(message.chat.id, "Siz tanlagan teleko'rsatuvlar yo'q")
         else:
@@ -174,7 +175,7 @@ def send_text(message):
                         btn = telebot.types.InlineKeyboardButton(row[0], callback_data=item['name'])
                         markup.row(btn)
             bot.send_message(message.chat.id, "Sevimlilaringiz", reply_markup=markup)
-
+'''
 
 
 @bot.callback_query_handler(func=lambda call: True)
