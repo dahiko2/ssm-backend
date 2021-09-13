@@ -87,7 +87,7 @@ def get_yt_id(url):
 
 
 def time_in_range(start, end, x):
-    """Return true if x is in the range [start, end]"""
+    """Return true if x is in the range (start, end)"""
     if start <= end:
         return start < x < end
     else:
@@ -193,8 +193,7 @@ def get_projects():
         item["age"] = row[3]
         item["utm_name"] = row[4]
         itemlist.append(item)
-    result = json.dumps(itemlist, indent=4)
-    return result
+    return json.dumps(itemlist, indent=4)
 
 
 def get_project_averages(project_id):
@@ -254,7 +253,7 @@ def get_fullinfo_by_projectid(project_id):
     Собирает список релизов определенного проекта, заданного через project_id
     Возвращает json-объект, список релизов.
     :param project_id: int
-    :return: json
+    :return: json(list[dict])
     """
     mycursor = ssm_connection()
     query = "SELECT * FROM releases where projectID = %s ORDER BY ReleaseDate ASC;"
@@ -264,8 +263,7 @@ def get_fullinfo_by_projectid(project_id):
     itemlist = []
     for row in query_result:
         itemlist.append(form_proj_info_dict(row))
-    result = json.dumps(itemlist, indent=4)
-    return result
+    return json.dumps(itemlist, indent=4)
 
 
 @ssm.route("/info_byprojectname=<project>", methods=['GET'])
@@ -274,7 +272,7 @@ def get_fullinfo_by_projectname(project):
     Собирает список релизов определенного проекта, заданного через название проекта (полное или частичное)
     Возвращает json-объект, список релизов.
     :param project: int
-    :return: json
+    :return: json(list[dict])
     """
     project = str(project) + "%"
     mycursor = ssm_connection()
@@ -285,8 +283,7 @@ def get_fullinfo_by_projectname(project):
     itemlist = []
     for row in query_result:
         itemlist.append(form_proj_info_dict(row))
-    result = json.dumps(itemlist, indent=4)
-    return result
+    return json.dumps(itemlist, indent=4)
 
 
 @ssm.route("/releases_for_<int:n>_<period>", methods=['GET'])
@@ -298,7 +295,7 @@ def get_releases_by_period(n, period):
     Автоматом делает выборку по дате релиза в айтубе, если передать в теле запроса {"type":"youtube"}, то выборка будет по дате с ютуба
     :param period: enum (DAY, WEEK, MONTH, YEAR)
     :param n: int
-    :return: json
+    :return: json(list[dict])
     """
     # CURDATE - INTERVAL N PERIOD - вычисление релизов за период
     datetype = "ReleaseDate"
@@ -322,8 +319,7 @@ def get_releases_by_period(n, period):
     itemlist = []
     for row in query_result:
         itemlist.append(form_proj_info_dict(row))
-    result = json.dumps(itemlist, indent=4)
-    return result
+    return json.dumps(itemlist, indent=4)
 
 
 @ssm.route("/releases_between_<date1>_and_<date2>", methods=['GET'])
@@ -334,7 +330,7 @@ def get_releases_between(date1, date2):
     Автоматом делает выборку по дате релиза в айтубе, если передать в теле запроса {"type":"youtube"}, то выборка будет по дате с ютуба
     :param date1: str (date format yyyy.mm.dd)
     :param date2: str (date format yyyy.mm.dd)
-    :return: json
+    :return: json(list[dict])
     """
     datetype = "ReleaseDate"
     body = flask.request.get_json()
@@ -354,8 +350,7 @@ def get_releases_between(date1, date2):
     itemlist = []
     for row in query_result:
         itemlist.append(form_proj_info_dict(row))
-    result = json.dumps(itemlist, indent=4)
-    return result
+    return json.dumps(itemlist, indent=4)
 
 
 @ssm.route("/kpi_<year>_<country>", methods=['GET'])
@@ -365,7 +360,7 @@ def get_kpi_by_country_year(year, country):
     Возвращает json-объект, список словарей.
     :param year: int
     :param country: str
-    :return: json
+    :return: json(list[dict])
     """
     country = country.upper()
     mycursor = ssm_connection()
@@ -380,8 +375,7 @@ def get_kpi_by_country_year(year, country):
         item["target"] = row[2]
         item["month"] = row[3]
         itemlist.append(item)
-    result = json.dumps(itemlist, indent=4)
-    return result
+    return json.dumps(itemlist, indent=4)
 
 
 @ssm.route("/updatekpimau", methods=['POST'])
@@ -485,8 +479,7 @@ def get_yt_trends():
         item["views"] = row[3]
         item["place"] = row[4]
         itemlist.append(item)
-    result = json.dumps(itemlist, indent=4)
-    return result
+    return json.dumps(itemlist, indent=4)
 
 
 @ssm.route("/add_yt_channel", methods=['POST'])
@@ -524,7 +517,7 @@ def get_kpi_aitu():
     """
     Получает значения KPI Aitu.
     Возвращает json-объект, список словарей.
-    :return: json
+    :return: json(list[dict])
     """
     mycursor = ssm_connection()
     sql = "SELECT target, `left`, top_50, top_100, quiz, releases, today, `quarter`, quarter_left from kpi_aitu;"   # Кавычки в запросе не убирать, иначе сломает запрос.
@@ -543,8 +536,7 @@ def get_kpi_aitu():
         item["quarter"] = row[7]
         item["quarter_left"] = row[8]
         itemlist.append(item)
-    result = json.dumps(itemlist, indent=4)
-    return result
+    return json.dumps(itemlist, indent=4)
 
 
 @ssm.route("/update_kpi_aitu", methods=['POST'])
@@ -598,44 +590,40 @@ def update_logging():
     if body is None:
         flask.abort(403)
     data = json.loads(str(body).replace("'", '"'))
-    types = [{"kpi_mao": 1}, {"kpi_aitu": 2}, {"aitube_utm": 3}, {"yt_trends": 4}]
     try:
-        for item in types:
-            if data["type"] == list(item.keys())[0]:
-                query = "UPDATE log SET date = NOW() WHERE idlog = %s"
-                value = (item[list(item.keys())[0]],)
-                mycursor = ssm_connection()
-                global mydb
-                mycursor.execute(query, value)
-                mydb.commit()
-                return_dict = dict()
-                return_dict["message"] = data["type"] + " log updated."
-                return return_dict
+        query = "UPDATE log SET date = NOW() WHERE name = %s"
+        value = (data["type"],)
+        mycursor = ssm_connection()
+        global mydb
+        mycursor.execute(query, value)
+        mydb.commit()
+        return_dict = dict()
+        return_dict["message"] = data["type"] + " log updated."
+        return return_dict
     except KeyError:
         flask.abort(403)
 
 
-@ssm.route("/get_logs_<logtype>", methods=['GET'])
-def get_logs(logtype):
+@ssm.route("/get_logs", methods=['GET'])
+def get_logs():
     """
-    Получает значение даты определенного лога.
+    Получает данные из таблицы логов.
     Возвращает json-объект, словарь.
-    :param logtype: str
-    :return: json
+    :return: json(list[dict])
     """
-    types = [{"kpi_mao": 1}, {"kpi_aitu": 2}, {"aitube_utm": 3}, {"yt_trends": 4}]
     mycursor = ssm_connection()
     try:
-        for item in types:
-            if logtype == list(item.keys())[0]:
-                value = (item[list(item.keys())[0]],)
-                query = "SELECT date FROM log WHERE idlog = %s"
-                mycursor.execute(query, value)
-                query_result = mycursor.fetchall()
-                if query_result is None:
-                    flask.abort(403)
-                result = {"date": str(query_result[0][0])}
-                return json.dumps(result, indent=4)
+        query = "SELECT * FROM log;"
+        mycursor.execute(query)
+        query_result = mycursor.fetchall()
+        itemlist = []
+        for row in query_result:
+            item = dict()
+            item["id"] = row[0]
+            item["full_name"] = row[3]
+            item["date"] = str(row[1])
+            itemlist.append(item)
+        return json.dumps(itemlist, indent=4)
     except KeyError:
         flask.abort(403)
 
@@ -645,7 +633,7 @@ def get_dashboard_params():
     """
     Получает параметры для дэшборда. Параметры заданы в коде.
     Возвращает json-объект, список словарей.
-    :return: json
+    :return: json(list[dict])
     """
     itemlist = []
     keys = ["color", "position", "cpv_youtube_m", "cpv_youtube_f", "cpv_youtube_mid", "cpu_aitube_m", "cpu_aitube_f", "cpu_aitube_mid", "youtube_ud", "cpv_aitube_m", "cpv_aitube_f", "cpv_aitube_mid"]
@@ -658,8 +646,7 @@ def get_dashboard_params():
         for i in range(0, 9):
             item[keys[i]] = item_list[j][i]
         itemlist.append(item)
-    result = json.dumps(itemlist, indent=4)
-    return result
+    return json.dumps(itemlist, indent=4)
 
 
 @ssm.route("/get_milestone_releases", methods=['GET'])
@@ -667,7 +654,7 @@ def get_milestone_releases():
     """
     Выводит все релизы (актуальные), которые приближаются к milestone
     Возвращает json-объект, список словарей
-    :return: json
+    :return: json(list[dict])
     """
     mycursor = ssm_connection()
     milestone_projects = "(1, 2, 3, 4, 5, 7, 9, 10, 15, 76, 115, 117, 119, 120, 121, 122, 123)"
@@ -677,8 +664,7 @@ def get_milestone_releases():
     itemlist = []
     for row in query_result:
         itemlist.append(form_proj_info_dict(row))
-    result = json.dumps(itemlist, indent=4)
-    return result
+    return json.dumps(itemlist, indent=4)
 
 
 @ssm.route("/add_release", methods=['POST'])
@@ -718,14 +704,13 @@ def add_release():
         flask.abort(400)
 
 
-
 @ssm.route("/get_custom_data", methods=['POST'])
 def get_custom_json_data():
     """
     Выводит данные из json файла, который хранится в директории проекта
     Название файла, с которого нужно считать, передается в теле запроса как параметр type. {"type":"genesis"}
     Возвращает json-объект, содержимое файла
-    :return: json
+    :return: json(list[dict])
     """
     body = flask.request.get_json()
     if body is None:
@@ -748,7 +733,7 @@ def get_pr_status():
     """
     Выводит данные из таблички статуса задач пр отдела (pr_status).
     Возвращает json-объект, список словарей
-    :return: json
+    :return: json(list[dict])
     """
     mycursor = ssm_connection()
     query = "select * from pr_status;"
@@ -767,8 +752,7 @@ def get_pr_status():
         temp["status"] = row[7]
         temp["channel"] = row[8]
         itemlist.append(temp)
-    result = json.dumps(itemlist, indent=4)
-    return result
+    return json.dumps(itemlist, indent=4)
 
 
 @ssm.route("/get_pr_mentions", methods=['POST'])
@@ -777,7 +761,7 @@ def get_pr_mentions():
     Выводит данные из таблички упоминаний Salen (pr_mentions).
     В теле запроса можно передать параметр year, тогда выборка будет только за определенный год. Например, {"year": 2021}
     Возвращает json-объект, список словарей
-    :return: json
+    :return: json(list[dict])
     """
     body = flask.request.get_json()
     mycursor = ssm_connection()
@@ -802,8 +786,7 @@ def get_pr_mentions():
         temp["release_date"] = str(row[6])
         temp["author"] = row[7]
         itemlist.append(temp)
-    result = json.dumps(itemlist, indent=4)
-    return result
+    return json.dumps(itemlist, indent=4)
 
 
 @ssm.route("/meet", methods=['POST'])
@@ -811,47 +794,52 @@ def post_meeting():
     """
     Записывает данные из тела запроса в табличку (meet_schedule)
     Возвращает json, словарь.
-    :return: json
+    :return: json(list[dict])
     """
     body = flask.request.get_json()
-    if body is not None:
-        global mydb
-        add_event = True
-        mycursor = ssm_connection()
-        # Проверка, не попадает ли новая запись в промежутки предыдущих записей
-        query = "SELECT time, time_finish from meet_schedule where room = %s and mdate = %s;"
-        values = (body['room'], body['date'])
-        mycursor.execute(query, values)
-        query_results = mycursor.fetchall()
-        for row in query_results:
-            sql_time_start = time.strptime(row[0], "%H:%M")
-            sql_time_finish = time.strptime(row[1], "%H:%M")
-            input_start_time = time.strptime(body["time"], "%H:%M")
-            output_start_time = time.strptime(body["finish"], "%H:%M")
-            if time_in_range(sql_time_start, sql_time_finish, input_start_time) or time_in_range(sql_time_start, sql_time_finish, output_start_time):
-                add_event = False
-                break
-        if add_event:
-            # Запись нового meet event.
-            query = "INSERT INTO meet_schedule (author, time, room, time_finish, mdate) VALUES (%s, %s, %s, %s, %s)"
-            try:
-                values = (body["author"], body["time"], body["room"], body["finish"], body["date"])
-            except KeyError:
-                flask.abort(400)
-            else:
-                mycursor.execute(query, values)
-                mydb.commit()
-                return_dict = dict()
-                return_dict["message"] = "Meet event added."
-                return return_dict
-        else:
-            flask.abort(403)
-    else:
+    if body is None:
         flask.abort(400)
+    global mydb
+    add_event = True
+    mycursor = ssm_connection()
+    # Проверка, не попадает ли новая запись в промежутки предыдущих записей
+    query = "SELECT time, time_finish from meet_schedule where room = %s and mdate = %s;"
+    values = (body['room'], body['date'])
+    mycursor.execute(query, values)
+    query_results = mycursor.fetchall()
+    for row in query_results:
+        sql_time_start = time.strptime(row[0], "%H:%M")
+        sql_time_finish = time.strptime(row[1], "%H:%M")
+        input_start_time = time.strptime(body["time"], "%H:%M")
+        output_start_time = time.strptime(body["finish"], "%H:%M")
+        if time_in_range(sql_time_start, sql_time_finish, input_start_time) \
+                or time_in_range(sql_time_start, sql_time_finish, output_start_time):
+            add_event = False
+            break
+    if add_event:
+        # Запись нового meet event.
+        query = "INSERT INTO meet_schedule (author, time, room, time_finish, mdate) VALUES (%s, %s, %s, %s, %s)"
+        try:
+            values = (body["author"], body["time"], body["room"], body["finish"], body["date"])
+        except KeyError:
+            flask.abort(400)
+        else:
+            mycursor.execute(query, values)
+            mydb.commit()
+            return_dict = dict()
+            return_dict["message"] = "Meet event added."
+            return return_dict
+    else:
+        flask.abort(403)
 
 
 @ssm.route("/meet/<mdate>", methods=['GET'])
 def get_meeting_date(mdate):
+    """
+    Возвращает список встреч из таблицы meet_schedule (за определенную дату)
+    :param mdate: date (format dd.mm.yyyy)
+    :return: json(list[dict])
+    """
     mycursor = ssm_connection()
     query = "select * from meet_schedule where mdate = %s;"
     value = (mdate,)
@@ -867,38 +855,36 @@ def get_meeting_date(mdate):
         item["finish"] = row[4]
         item["room"] = row[3]
         itemlist.append(item)
-    result = json.dumps(itemlist, indent=4)
-    return result
+    return json.dumps(itemlist, indent=4)
 
 
 @ssm.route("/meet", methods=['DELETE'])
 def delete_meeting():
     """
     Удаляет данные из таблицы расписания брони переговорок (meet_schedule)
-    Возвращает json, словарь.
-    :return: json
+    Возвращает строку с
+    :return: str
     """
     global mydb
     body = flask.request.get_json()
-    if body is not None:
-        try:
-            idmeet = body["id"]
-        except KeyError:
-            flask.abort(400)
-        else:
-            mycursor = ssm_connection()
-            value = (idmeet,)
-            query = "SELECT * FROM meet_schedule where idmeet = %s"
-            mycursor.execute(query, value)
-            return_dict = dict()
-            mycursor.fetchall()
-            if mycursor.rowcount == 0:
-                return_dict["message"] = "Meet event with id = "+str(idmeet)+" was not found."
-                return return_dict
-            query = "DELETE FROM meet_schedule WHERE idmeet = %s;"
-            mycursor.execute(query, value)
-            mydb.commit()
-            return_dict["message"] = "Meet event with id = "+str(idmeet)+" deleted."
-            return return_dict
-    else:
+    if body is None:
         flask.abort(400)
+    try:
+        idmeet = body["id"]
+    except KeyError:
+        flask.abort(400)
+    else:
+        mycursor = ssm_connection()
+        value = (idmeet,)
+        query = "SELECT * FROM meet_schedule where idmeet = %s"
+        mycursor.execute(query, value)
+        return_dict = dict()
+        mycursor.fetchall()
+        if mycursor.rowcount == 0:
+            return_dict["message"] = "Meet event with id = " + str(idmeet) + " was not found."
+            return return_dict
+        query = "DELETE FROM meet_schedule WHERE idmeet = %s;"
+        mycursor.execute(query, value)
+        mydb.commit()
+        return_dict["message"] = "Meet event with id = " + str(idmeet) + " deleted."
+        return return_dict
