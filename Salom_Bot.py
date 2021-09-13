@@ -166,7 +166,7 @@ def send_text(message):
         if len(favs_from_db) == 0:
             bot.send_message(message.chat.id, "Siz tanlagan teleko'rsatuvlar yo'q")
         else:
-            markup = telebot.types.InlineKeyboardButton()
+            markup = telebot.types.InlineKeyboardMarkup()
             query = "select project_name, call_data from project"
             mycursor.execute(query)
             results = mycursor.fetchall()
