@@ -115,8 +115,10 @@ def send_text(message):
             database=fdbname
         )
         mycursor = mydb.cursor()
-
-        input_fav_name = list[message.chat.id]
+        try:
+            input_fav_name = list[message.chat.id]
+        except KeyError:
+            pass
 
         query = "select favorite from users where chat_id = %s;"
         value = (message.chat.id,)
