@@ -1,6 +1,6 @@
 from flask import Flask, request, Blueprint
 import requests
-import telebot
+import telebot, json
 from telebot.apihelper import ApiTelegramException
 
 from config import token
@@ -10,6 +10,7 @@ import Strings
 
 salom_bot = Blueprint("salom_bot", __name__)
 bot = telebot.TeleBot(token, threaded=False)
+list = {}
 
 bot.remove_webhook()
 bot.set_webhook(url="https://maksimsalnikov.pythonanywhere.com/salob/1994938654:AAHFLtVLwkog_4HK75-xTo8_-PA4vi4reuU/")
@@ -105,18 +106,90 @@ def start_message(message):
 def send_text(message):
     if message.text == 'Ortga':
         serial_menu(message)
+    if message.text == "Sevimlilarga qo'shing":
+        read_creds()
+        mydb = connect(
+            host=fhost,
+            user=fuser,
+            password=fpass,
+            database=fdbname
+        )
+        mycursor = mydb.cursor()
+
+        input_fav_name = list[message.chat.id]
+
+        query = "select favorite from users where chat_id = %s;"
+        value = (message.chat.id,)
+        mycursor.execute(query, value)
+        q_result = mycursor.fetchall()
+        favs_from_db = []
+        count = 0
+        for row in q_result:
+            favs_from_db = json.loads(row[0])
+        for item in favs_from_db:
+            try:
+                if item["name"] == input_fav_name:
+                    count += 1
+                    bot.send_message(message.chat.id, "Seriya allaqachon favoritlarga qo'shilgan")
+            except KeyError:
+                pass
+        if count == 0:
+            item = dict()
+            item["name"] = input_fav_name
+            favs_from_db.append(item)
+        result = json.dumps(favs_from_db)
+
+        query = "update users set favorite = %s where chat_id = %s"
+        value = (result, message.chat.id)
+        mycursor.execute(query, value)
+        mydb.commit()
+    if message.text == "Sevimli":
+        read_creds()
+        mydb = connect(
+            host=fhost,
+            user=fuser,
+            password=fpass,
+            database=fdbname
+        )
+        mycursor = mydb.cursor()
+
+        query = "select favorite from users where chat_id = %s;"
+        value = (message.chat.id,)
+        mycursor.execute(query, value)
+
+        q_result = mycursor.fetchall()
+        favs_from_db = []
+        for row in q_result:
+            favs_from_db = json.loads(row[0])
+        if len(favs_from_db) == 0:
+            bot.send_message(message.chat.id, "Siz tanlagan teleko'rsatuvlar yo'q")
+        else:
+            markup = telebot.types.InlineKeyboardButton()
+            query = "select project_name, call_data from project"
+            mycursor.execute(query)
+            results = mycursor.fetchall()
+            for item in favs_from_db:
+                for row in results:
+                    if row[1] == item['name']:
+                        btn = telebot.types.InlineKeyboardButton(row[0], callback_data=item['name'])
+                        markup.row(btn)
+            bot.send_message(message.chat.id, "Sevimlilaringiz", reply_markup=markup)
+
+
 
 @bot.callback_query_handler(func=lambda call: True)
 def query_handler(call):
 
-    global to_delete, to_delete_ser
+    global to_delete, to_delete_ser, list
 
     #bot.answer_callback_query(callback_query_id=call.id, text='Спасибо за честный ответ!')
 
     keyboard = telebot.types.ReplyKeyboardMarkup(True)
-    keyboard.row('Sevimli', 'Ortga')
+    keyboard.row("Sevimlilarga qo'shing", 'Ortga')
     answer = ''
     start_markup = telebot.types.InlineKeyboardMarkup()
+
+    list[call.message.chat.id] = call.data
 
     if call.data == "maktab":
         answer = Strings.maktab_desc
