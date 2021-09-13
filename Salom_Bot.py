@@ -125,7 +125,8 @@ def send_text(message):
         favs_from_db = []
         count = 0
         for row in q_result:
-            favs_from_db = json.loads(row[0])
+            if row[0] is not None:
+                favs_from_db = json.loads(row[0])
         for item in favs_from_db:
             try:
                 if item["name"] == input_fav_name:
