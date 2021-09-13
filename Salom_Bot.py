@@ -106,7 +106,7 @@ def start_message(message):
 def send_text(message):
     if message.text == 'Ortga':
         serial_menu(message)
-    '''if message.text == "Sevimlilarga qo'shing":
+    if message.text == "Sevimlilarga qo'shing":
         read_creds()
         mydb = connect(
             host=fhost,
@@ -175,7 +175,7 @@ def send_text(message):
                         btn = telebot.types.InlineKeyboardButton(row[0], callback_data=item['name'])
                         markup.row(btn)
             bot.send_message(message.chat.id, "Sevimlilaringiz", reply_markup=markup)
-'''
+
 
 
 @bot.callback_query_handler(func=lambda call: True)
