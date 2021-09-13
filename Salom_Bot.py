@@ -28,16 +28,22 @@ def read_creds():
         fdbname = f.readline().strip()
 
 def serial_menu(message, start=False):
+
+    global serialar
+
     markup = telebot.types.InlineKeyboardMarkup()
     markup.add(telebot.types.InlineKeyboardButton(text='Maktab', callback_data="maktab"))
     markup.add(telebot.types.InlineKeyboardButton(text='Qichchu Qudrat', callback_data="qichchu_qudrat"))
     markup.add(telebot.types.InlineKeyboardButton(text='Shaharlik Qichloqi', callback_data="shaharlik_qichilogi"))
+    serialar = bot.send_message(message.chat.id, 'Serialar',
+                     reply_markup=markup)
     if start == False:
-        bot.edit_message_reply_markup(message.chat.id, message_id=message.message_id - 1, reply_markup='')
-        bot.edit_message_text("test", chat_id=message.chat.id, message_id=to_delete.message_id)
-        bot.delete_messages(message.chat.id, to_delete.message_id)
-    bot.send_message(message.chat.id, 'Serialar',
-                    reply_markup=markup)
+        #bot.edit_message_reply_markup(message.chat.id, message_id=message.message_id - 1, reply_markup='')
+        #bot.edit_message_text("test", chat_id=message.chat.id, message_id=to_delete.message_id)
+        bot.delete_message(message.chat.id, to_delete.message_id)
+        bot.delete_message(message.chat.id, to_delete_ser.message_id)
+        bot.delete_message(message.chat.id, message.message_id)
+
 
 
 
@@ -92,6 +98,7 @@ def start_message(message):
         keyboard.row('Sevimli')
         bot.send_message(message.chat.id, 'Qaytganing bilan ' + message.chat.username + '!', reply_markup=keyboard)
     serial_menu(message, True)
+    bot.delete_message(message.chat.id, message.message_id)
 
 
 @bot.message_handler(content_types=['text'])
@@ -177,7 +184,8 @@ def query_handler(call):
         btn10 = telebot.types.InlineKeyboardButton('10 qism', callback_data="shah_qich10")
         start_markup.row(btn9, btn10)
 
+    bot.delete_message(call.message.chat.id, serialar.message_id)
     to_delete = bot.send_message(call.message.chat.id, answer, reply_markup=keyboard)
     to_delete_ser = bot.send_message(call.message.chat.id, Strings.series_chose, reply_markup=start_markup)
-    bot.edit_message_reply_markup(call.message.chat.id, call.message.message_id)
+    #bot.edit_message_reply_markup(call.message.chat.id, call.message.message_id)
 
