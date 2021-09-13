@@ -27,6 +27,11 @@ def read_creds():
         f.readline()
         fdbname = f.readline().strip()
 
+def gen_keyboard():
+    keyboard = telebot.types.ReplyKeyboardMarkup(True)
+    keyboard.row('Sevimli', 'Ortga')
+    return keyboard
+
 def serial_menu(message, start=False):
 
     global serialar
@@ -113,8 +118,7 @@ def query_handler(call):
 
     #bot.answer_callback_query(callback_query_id=call.id, text='Спасибо за честный ответ!')
 
-    keyboard = telebot.types.ReplyKeyboardMarkup(True)
-    keyboard.row('Sevimli', 'Ortga')
+    gen_keyboard()
     answer = ''
     start_markup = telebot.types.InlineKeyboardMarkup()
 
@@ -185,7 +189,7 @@ def query_handler(call):
         start_markup.row(btn9, btn10)
 
     bot.delete_message(call.message.chat.id, serialar.message_id)
-    to_delete = bot.send_message(call.message.chat.id, answer, reply_markup=keyboard)
+    to_delete = bot.send_message(call.message.chat.id, answer)
     to_delete_ser = bot.send_message(call.message.chat.id, Strings.series_chose, reply_markup=start_markup)
     #bot.edit_message_reply_markup(call.message.chat.id, call.message.message_id)
 
