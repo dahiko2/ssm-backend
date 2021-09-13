@@ -841,7 +841,7 @@ def get_meeting_date(mdate):
     :return: json(list[dict])
     """
     mycursor = ssm_connection()
-    query = "select * from meet_schedule where mdate = %s;"
+    query = "select * from meet_schedule where mdate = %s ORDER BY `time`;"
     value = (mdate,)
     mycursor.execute(query, value)
     query_result = mycursor.fetchall()
