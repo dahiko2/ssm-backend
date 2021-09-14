@@ -179,7 +179,7 @@ def send_text(message):
             if row[0] is not None:
                 favs_from_db = json.loads(row[0])
         if len(favs_from_db) == 0:
-            serialar = bot.send_message(message.chat.id, "Siz tanlagan teleko'rsatuvlar yo'q")
+            bot.send_message(message.chat.id, "Siz tanlagan teleko'rsatuvlar yo'q")
         else:
             markup = telebot.types.InlineKeyboardMarkup()
             query = "select project_name, call_data from project"
