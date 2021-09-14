@@ -111,6 +111,7 @@ def send_text(message):
     if message.text == 'Ortga':
         serial_menu(message)
     if message.text == "Sevimlilarga qo'shing":
+        bot.delete_message(message.chat.id, message.message_id)
         read_creds()
         mydb = connect(
             host=fhost,
@@ -151,6 +152,7 @@ def send_text(message):
         mycursor.execute(query, value)
         mydb.commit()
     if message.text == "Sevimli":
+        bot.delete_message(message.chat.id, message.message_id)
         read_creds()
         mydb = connect(
             host=fhost,
