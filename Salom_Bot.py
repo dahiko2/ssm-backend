@@ -30,7 +30,7 @@ def read_creds():
 
 def serial_menu(message, start=False):
 
-    global serialar, text
+    global serialar, text, to_delete, to_delete_ser
 
     markup = telebot.types.InlineKeyboardMarkup()
     markup.add(telebot.types.InlineKeyboardButton(text='Maktab', callback_data="maktab"))
@@ -40,11 +40,11 @@ def serial_menu(message, start=False):
     if start == False:
         keyboard = telebot.types.ReplyKeyboardMarkup(True)
         keyboard.row('Sevimli')
-        text = bot.send_message(message.chat.id, 'Tomosha qilish uchun serialni tanlang',
-                     reply_markup=keyboard)
         bot.delete_message(message.chat.id, to_delete.message_id)
         bot.delete_message(message.chat.id, to_delete_ser.message_id)
         bot.delete_message(message.chat.id, message.message_id)
+        text = bot.send_message(message.chat.id, 'Tomosha qilish uchun serialni tanlang',
+                                reply_markup=keyboard)
 
     serialar = bot.send_message(message.chat.id, 'Serialar',
                                 reply_markup=markup)
