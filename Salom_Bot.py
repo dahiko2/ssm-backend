@@ -43,7 +43,6 @@ def serial_menu(message, start=False):
         keyboard.row('Sevimli')
         bot.delete_message(message.chat.id, to_delete.message_id)
         bot.delete_message(message.chat.id, to_delete_ser.message_id)
-        bot.delete_message(message.chat.id, message.message_id)
         text = bot.send_message(message.chat.id, 'Tomosha qilish uchun serialni tanlang',
                                 reply_markup=keyboard)
     try:
@@ -104,7 +103,6 @@ def start_message(message):
         keyboard.row('Sevimli')
         bot.send_message(message.chat.id, 'Qaytganing bilan ' + message.chat.username + '!', reply_markup=keyboard)
 
-    bot.delete_message(message.chat.id, message.message_id)
     serial_menu(message, True)
 
 
@@ -113,10 +111,11 @@ def send_text(message):
 
     global list
 
+    bot.delete_message(message.chat.id, message.message_id)
+
     if message.text == 'Ortga':
         serial_menu(message)
     if message.text == "Sevimlilarga qo'shing":
-        bot.delete_message(message.chat.id, message.message_id)
         read_creds()
         mydb = connect(
             host=fhost,
@@ -158,7 +157,6 @@ def send_text(message):
             mycursor.execute(query, value)
             mydb.commit()
     if message.text == "Sevimli":
-        bot.delete_message(message.chat.id, message.message_id)
         read_creds()
         mydb = connect(
             host=fhost,
