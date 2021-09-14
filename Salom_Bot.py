@@ -14,7 +14,7 @@ list = {}
 
 bot.remove_webhook()
 bot.set_webhook(url="https://maksimsalnikov.pythonanywhere.com/salob/1994938654:AAHFLtVLwkog_4HK75-xTo8_-PA4vi4reuU/")
-
+'''
 def read_creds():
     """
     Считывает данные для входа в бд из файла
@@ -45,7 +45,7 @@ def serial_menu(message, start=False):
         bot.delete_message(message.chat.id, to_delete_ser.message_id)
         bot.delete_message(message.chat.id, message.message_id)
 
-
+'''
 
 
 @salom_bot.route("/" + token + "/", methods=["POST"])
@@ -56,7 +56,7 @@ def receive_update():
     #chat_id = request.json["message"]["chat"]["id"]
     #send_message(chat_id, "Hello!")
     #return "ok"
-
+'''
 @bot.message_handler(commands=['start'])
 def start_message(message):
 
@@ -76,10 +76,10 @@ def start_message(message):
     chat_id = message.chat.id
     count = 0
 
-    '''if not bot.get_chat_member(chat_id=-1001584831368, user_id=message.from_user.id).status in roles:
+    if not bot.get_chat_member(chat_id=-1001584831368, user_id=message.from_user.id).status in roles:
         chat_id = message.chat.id
-        bot.send_message(chat_id, "@salomserial kanaliga obuna bo'ling")''' #Проверка подписки, требуется админка
-
+        bot.send_message(chat_id, "@salomserial kanaliga obuna bo'ling") #Проверка подписки, требуется админка
+    
     for id in Ids:
         if chat_id == id[0]:
             count += 1
@@ -265,4 +265,4 @@ def query_handler(call):
     to_delete = bot.send_message(call.message.chat.id, answer, reply_markup=keyboard)
     to_delete_ser = bot.send_message(call.message.chat.id, Strings.series_chose, reply_markup=start_markup)
     #bot.edit_message_reply_markup(call.message.chat.id, call.message.message_id)
-
+'''
