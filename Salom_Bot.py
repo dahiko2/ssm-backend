@@ -172,8 +172,6 @@ def send_text(message):
 
         q_result = mycursor.fetchall()
 
-        bot.delete_message(message.chat.id, serialar.message_id)
-
         favs_from_db = []
         for row in q_result:
             if row[0] is not None:
@@ -181,6 +179,7 @@ def send_text(message):
         if len(favs_from_db) == 0:
             bot.send_message(message.chat.id, "Siz tanlagan teleko'rsatuvlar yo'q")
         else:
+            bot.delete_message(message.chat.id, serialar.message_id)
             markup = telebot.types.InlineKeyboardMarkup()
             query = "select project_name, call_data from project"
             mycursor.execute(query)
