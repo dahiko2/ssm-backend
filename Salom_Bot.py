@@ -98,8 +98,9 @@ def start_message(message):
         keyboard = telebot.types.ReplyKeyboardMarkup(True)
         keyboard.row('Sevimli')
         bot.send_message(message.chat.id, 'Qaytganing bilan ' + message.chat.username + '!', reply_markup=keyboard)
-    serial_menu(message, True)
+
     bot.delete_message(message.chat.id, message.message_id)
+    serial_menu(message, True)
 
 
 @bot.message_handler(content_types=['text'])
