@@ -165,6 +165,9 @@ def send_text(message):
         mycursor.execute(query, value)
 
         q_result = mycursor.fetchall()
+
+        bot.delete_message(message.chat.id, serialar.message_id)
+
         favs_from_db = []
         for row in q_result:
             if row[0] is not None:
