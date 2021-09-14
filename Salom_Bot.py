@@ -30,21 +30,24 @@ def read_creds():
 
 def serial_menu(message, start=False):
 
-    global serialar
+    global serialar, text
 
     markup = telebot.types.InlineKeyboardMarkup()
     markup.add(telebot.types.InlineKeyboardButton(text='Maktab', callback_data="maktab"))
     markup.add(telebot.types.InlineKeyboardButton(text='Qichchu Qudrat', callback_data="qichchu_qudrat"))
     markup.add(telebot.types.InlineKeyboardButton(text='Shaharlik Qichloqi', callback_data="shaharlik_qichilogi"))
-    serialar = bot.send_message(message.chat.id, 'Serialar',
-                     reply_markup=markup)
+
     if start == False:
-        #bot.edit_message_reply_markup(message.chat.id, message_id=message.message_id - 1, reply_markup='')
-        #bot.edit_message_text("test", chat_id=message.chat.id, message_id=to_delete.message_id)
+        keyboard = telebot.types.ReplyKeyboardMarkup(True)
+        keyboard.row('Sevimli')
+        text = bot.send_message(message.chat.id, 'Tomosha qilish uchun serialni tanlang',
+                     reply_markup=markup)
         bot.delete_message(message.chat.id, to_delete.message_id)
         bot.delete_message(message.chat.id, to_delete_ser.message_id)
         bot.delete_message(message.chat.id, message.message_id)
 
+    serialar = bot.send_message(message.chat.id, 'Serialar',
+                                reply_markup=markup)
 
 
 
@@ -53,9 +56,6 @@ def receive_update():
     bot.process_new_updates([telebot.types.Update.de_json(request.stream.read().decode("utf-8"))])
     print("Message")
     return "ok", 200
-    #chat_id = request.json["message"]["chat"]["id"]
-    #send_message(chat_id, "Hello!")
-    #return "ok"
 
 @bot.message_handler(commands=['start'])
 def start_message(message):
@@ -105,6 +105,9 @@ def start_message(message):
 
 @bot.message_handler(content_types=['text'])
 def send_text(message):
+
+    global serialar
+
     if message.text == 'Ortga':
         serial_menu(message)
     if message.text == "Sevimlilarga qo'shing":
@@ -134,7 +137,7 @@ def send_text(message):
             try:
                 if item["name"] == input_fav_name:
                     count += 1
-                    bot.send_message(message.chat.id, "Seriya allaqachon favoritlarga qo'shilgan")
+                    serialar = bot.send_message(message.chat.id, "Seriya allaqachon favoritlarga qo'shilgan")
             except KeyError:
                 pass
         if count == 0:
@@ -167,7 +170,7 @@ def send_text(message):
             if row[0] is not None:
                 favs_from_db = json.loads(row[0])
         if len(favs_from_db) == 0:
-            bot.send_message(message.chat.id, "Siz tanlagan teleko'rsatuvlar yo'q")
+            serialar = bot.send_message(message.chat.id, "Siz tanlagan teleko'rsatuvlar yo'q")
         else:
             markup = telebot.types.InlineKeyboardMarkup()
             query = "select project_name, call_data from project"
@@ -178,7 +181,7 @@ def send_text(message):
                     if row[1] == item['name']:
                         btn = telebot.types.InlineKeyboardButton(row[0], callback_data=item['name'])
                         markup.row(btn)
-            bot.send_message(message.chat.id, "Sevimlilaringiz", reply_markup=markup)
+            serialar = bot.send_message(message.chat.id, "Sevimlilaringiz", reply_markup=markup)
 
 
 
@@ -186,8 +189,6 @@ def send_text(message):
 def query_handler(call):
 
     global to_delete, to_delete_ser, list
-
-    #bot.answer_callback_query(callback_query_id=call.id, text='Спасибо за честный ответ!')
 
     keyboard = telebot.types.ReplyKeyboardMarkup(True)
     keyboard.row("Sevimlilarga qo'shing", 'Ortga')
@@ -262,7 +263,11 @@ def query_handler(call):
         btn10 = telebot.types.InlineKeyboardButton('10 qism', callback_data="shah_qich10")
         start_markup.row(btn9, btn10)
 
-    bot.delete_message(call.message.chat.id, serialar.message_id)
+    try:
+        bot.delete_message(call.message.chat.id, text.message_id)
+        bot.delete_message(call.message.chat.id, serialar.message_id)
+    except:
+        bot.delete_message(call.message.chat.id, serialar.message_id)
     to_delete = bot.send_message(call.message.chat.id, answer, reply_markup=keyboard)
     to_delete_ser = bot.send_message(call.message.chat.id, Strings.series_chose, reply_markup=start_markup)
     #bot.edit_message_reply_markup(call.message.chat.id, call.message.message_id)
