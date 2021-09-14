@@ -613,7 +613,7 @@ def get_logs():
     """
     mycursor = ssm_connection()
     try:
-        query = "SELECT * FROM log;"
+        query = "SELECT * FROM log ORDER BY `date` ASC;"
         mycursor.execute(query)
         query_result = mycursor.fetchall()
         itemlist = []
@@ -621,6 +621,7 @@ def get_logs():
             item = dict()
             item["id"] = row[0]
             item["full_name"] = row[3]
+            item["name"] = row[2]
             item["date"] = str(row[1])
             itemlist.append(item)
         return json.dumps(itemlist, indent=4)
@@ -841,7 +842,7 @@ def get_meeting_date(mdate):
     :return: json(list[dict])
     """
     mycursor = ssm_connection()
-    query = "select * from meet_schedule where mdate = %s;"
+    query = "select * from meet_schedule where mdate = %s ORDER BY `time`;"
     value = (mdate,)
     mycursor.execute(query, value)
     query_result = mycursor.fetchall()
