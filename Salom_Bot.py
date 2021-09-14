@@ -193,7 +193,7 @@ def send_text(message):
 @bot.callback_query_handler(func=lambda call: True)
 def query_handler(call):
 
-    global to_delete, to_delete_ser, list
+    global serialar, to_delete, to_delete_ser, list
 
     keyboard = telebot.types.ReplyKeyboardMarkup(True)
     keyboard.row("Sevimlilarga qo'shing", 'Ortga')
