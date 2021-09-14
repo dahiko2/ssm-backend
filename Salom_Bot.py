@@ -148,12 +148,13 @@ def send_text(message):
             item = dict()
             item["name"] = input_fav_name
             favs_from_db.append(item)
-        result = json.dumps(favs_from_db)
+            serialar = bot.send_message(message.chat.id, "Seriya favoritlarga qo'shildi")
+            result = json.dumps(favs_from_db)
 
-        query = "update users set favorite = %s where chat_id = %s"
-        value = (result, message.chat.id)
-        mycursor.execute(query, value)
-        mydb.commit()
+            query = "update users set favorite = %s where chat_id = %s"
+            value = (result, message.chat.id)
+            mycursor.execute(query, value)
+            mydb.commit()
     if message.text == "Sevimli":
         bot.delete_message(message.chat.id, message.message_id)
         read_creds()
