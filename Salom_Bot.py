@@ -38,14 +38,14 @@ def serial_menu(message, start=False):
     markup.add(telebot.types.InlineKeyboardButton(text='Shaharlik Qichloqi', callback_data="shaharlik_qichilogi"))
 
     if start == False:
-        bot.delete_message(message.chat.id, to_delete.message_id)
-        bot.delete_message(message.chat.id, to_delete_ser.message_id)
-        bot.delete_message(message.chat.id, message.message_id)
-    else:
         keyboard = telebot.types.ReplyKeyboardMarkup(True)
         keyboard.row('Sevimli')
         text = bot.send_message(message.chat.id, 'Tomosha qilish uchun serialni tanlang',
-                                reply_markup=markup)
+                     reply_markup=keyboard)
+        bot.delete_message(message.chat.id, to_delete.message_id)
+        bot.delete_message(message.chat.id, to_delete_ser.message_id)
+        bot.delete_message(message.chat.id, message.message_id)
+
     serialar = bot.send_message(message.chat.id, 'Serialar',
                                 reply_markup=markup)
 
