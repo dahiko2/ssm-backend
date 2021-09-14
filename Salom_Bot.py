@@ -49,6 +49,7 @@ def serial_menu(message, start=False):
         bot.delete_message(message.chat.id, serialar)
     except:
         pass
+
     serialar = bot.send_message(message.chat.id, 'Serialar',
                                 reply_markup=markup)
 
@@ -148,7 +149,7 @@ def send_text(message):
             item = dict()
             item["name"] = input_fav_name
             favs_from_db.append(item)
-            serialar = bot.send_message(message.chat.id, "Seriya favoritlarga qo'shildi")
+            bot.send_message(message.chat.id, "Seriya favoritlarga qo'shildi")
             result = json.dumps(favs_from_db)
 
             query = "update users set favorite = %s where chat_id = %s"
@@ -196,7 +197,7 @@ def send_text(message):
 @bot.callback_query_handler(func=lambda call: True)
 def query_handler(call):
 
-    global serialar, to_delete, to_delete_ser
+    global to_delete, to_delete_ser
 
     keyboard = telebot.types.ReplyKeyboardMarkup(True)
     keyboard.row("Sevimlilarga qo'shing", 'Ortga')
