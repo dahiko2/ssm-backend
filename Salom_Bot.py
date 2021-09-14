@@ -11,6 +11,7 @@ import Strings
 salom_bot = Blueprint("salom_bot", __name__)
 bot = telebot.TeleBot(token, threaded=False)
 list = {}
+serialar = None
 
 bot.remove_webhook()
 bot.set_webhook(url="https://maksimsalnikov.pythonanywhere.com/salob/1994938654:AAHFLtVLwkog_4HK75-xTo8_-PA4vi4reuU/")
@@ -27,7 +28,7 @@ def read_creds():
         f.readline()
         f.readline()
         fdbname = f.readline().strip()
-"""
+
 def serial_menu(message, start=False):
 
     global serialar, text
@@ -53,14 +54,14 @@ def serial_menu(message, start=False):
     serialar = bot.send_message(message.chat.id, 'Serialar',
                                 reply_markup=markup)
 
-"""
+
 
 @salom_bot.route("/" + token + "/", methods=["POST"])
 def receive_update():
     bot.process_new_updates([telebot.types.Update.de_json(request.stream.read().decode("utf-8"))])
     print("Message")
     return "ok", 200
-"""
+
 @bot.message_handler(commands=['start'])
 def start_message(message):
 
@@ -281,4 +282,3 @@ def query_handler(call):
     to_delete_ser = bot.send_message(call.message.chat.id, Strings.series_chose, reply_markup=start_markup)
     #bot.edit_message_reply_markup(call.message.chat.id, call.message.message_id)
 
-"""
