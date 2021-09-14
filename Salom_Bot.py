@@ -109,6 +109,8 @@ def start_message(message):
 @bot.message_handler(content_types=['text'])
 def send_text(message):
 
+    global list
+
     if message.text == 'Ortga':
         serial_menu(message)
     if message.text == "Sevimlilarga qo'shing":
@@ -194,7 +196,7 @@ def send_text(message):
 @bot.callback_query_handler(func=lambda call: True)
 def query_handler(call):
 
-    global serialar, to_delete, to_delete_ser, list
+    global serialar, to_delete, to_delete_ser
 
     keyboard = telebot.types.ReplyKeyboardMarkup(True)
     keyboard.row("Sevimlilarga qo'shing", 'Ortga')
