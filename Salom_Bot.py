@@ -28,7 +28,7 @@ def read_creds():
         f.readline()
         fdbname = f.readline().strip()
 
-"""def serial_menu(message, start=False):
+def serial_menu(message, start=False):
 
     global serialar, text
 
@@ -278,4 +278,3 @@ def query_handler(call):
     to_delete_ser = bot.send_message(call.message.chat.id, Strings.series_chose, reply_markup=start_markup)
     #bot.edit_message_reply_markup(call.message.chat.id, call.message.message_id)
 
-"""
