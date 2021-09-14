@@ -30,7 +30,7 @@ def read_creds():
 
 def serial_menu(message, start=False):
 
-    global serialar, text, to_delete, to_delete_ser
+    global serialar, text
 
     markup = telebot.types.InlineKeyboardMarkup()
     markup.add(telebot.types.InlineKeyboardButton(text='Maktab', callback_data="maktab"))
