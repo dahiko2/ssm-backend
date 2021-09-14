@@ -1,10 +1,11 @@
 import json
+import time
 import flask
-from flask import Blueprint
 import mysql.connector
+from flask import Blueprint
 from datetime import datetime
 from urllib.parse import urlparse, parse_qs
-import time
+
 
 mydb = mysql.connector.connect()
 fhost = ""
