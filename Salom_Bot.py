@@ -109,7 +109,7 @@ def start_message(message):
 @bot.message_handler(content_types=['text'])
 def send_text(message):
 
-    global list
+    global list, serialar
 
     bot.delete_message(message.chat.id, message.message_id)
 
@@ -189,7 +189,7 @@ def send_text(message):
                     if row[1] == item['name']:
                         btn = telebot.types.InlineKeyboardButton(row[0], callback_data=item['name'])
                         markup.row(btn)
-            bot.send_message(message.chat.id, "Sevimlilaringiz", reply_markup=markup)
+            serialar = bot.send_message(message.chat.id, "Sevimlilaringiz", reply_markup=markup)
 
 
 
