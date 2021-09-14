@@ -109,8 +109,6 @@ def start_message(message):
 @bot.message_handler(content_types=['text'])
 def send_text(message):
 
-    global serialar
-
     if message.text == 'Ortga':
         serial_menu(message)
     if message.text == "Sevimlilarga qo'shing":
@@ -141,7 +139,7 @@ def send_text(message):
             try:
                 if item["name"] == input_fav_name:
                     count += 1
-                    serialar = bot.send_message(message.chat.id, "Seriya allaqachon favoritlarga qo'shilgan")
+                    bot.send_message(message.chat.id, "Seriya allaqachon favoritlarga qo'shilgan")
             except KeyError:
                 pass
         if count == 0:
@@ -189,7 +187,7 @@ def send_text(message):
                     if row[1] == item['name']:
                         btn = telebot.types.InlineKeyboardButton(row[0], callback_data=item['name'])
                         markup.row(btn)
-            serialar = bot.send_message(message.chat.id, "Sevimlilaringiz", reply_markup=markup)
+            bot.send_message(message.chat.id, "Sevimlilaringiz", reply_markup=markup)
 
 
 
@@ -275,7 +273,7 @@ def query_handler(call):
         bot.delete_message(call.message.chat.id, text.message_id)
         bot.delete_message(call.message.chat.id, serialar.message_id)
     except:
-        bot.delete_message(call.message.chat.id, call.message.message_id - 2)
+        bot.delete_message(call.message.chat.id, serialar.message_id)
     to_delete = bot.send_message(call.message.chat.id, answer, reply_markup=keyboard)
     to_delete_ser = bot.send_message(call.message.chat.id, Strings.series_chose, reply_markup=start_markup)
     #bot.edit_message_reply_markup(call.message.chat.id, call.message.message_id)
