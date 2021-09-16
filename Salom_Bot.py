@@ -188,7 +188,7 @@ def send_text(message):
         else:
             try:
                 bot.delete_message(message.chat.id, serialar.message_id)
-            except KeyError:
+            except:
                 pass
             markup = telebot.types.InlineKeyboardMarkup()
             query = "select project_name, call_data from project"
