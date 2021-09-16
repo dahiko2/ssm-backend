@@ -43,8 +43,11 @@ def serial_menu(message, start=False):
     if start == False:
         keyboard = telebot.types.ReplyKeyboardMarkup(True)
         keyboard.row('Sevimli')
-        bot.delete_message(message.chat.id, to_delete.message_id)
-        bot.delete_message(message.chat.id, to_delete_ser.message_id)
+        try:
+            bot.delete_message(message.chat.id, to_delete.message_id)
+            bot.delete_message(message.chat.id, to_delete_ser.message_id)
+        except:
+            pass
         text = bot.send_message(message.chat.id, 'Tomosha qilish uchun serialni tanlang',
                                 reply_markup=keyboard)
     try:
