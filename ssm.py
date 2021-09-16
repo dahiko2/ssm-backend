@@ -158,12 +158,8 @@ def form_proj_info_dict(row):
     item["price"] = row[15]
     item["uniq_release_month"] = row[17]
     item["uniq_second_month"] = row[18]
-    if row[18] < 0:
-        uniq_second_month = -1 * row[18]
-    else:
-        uniq_second_month = row[18]
     item["cpv"] = calculate_cp(row[15], row[8])
-    item["cpu"] = calculate_cp(row[15], row[17]+uniq_second_month)
+    item["cpu"] = calculate_cp(row[15], row[17])
     item["cpc"] = calculate_cp(row[15], row[3])
     item["male"] = row[19]
     item["female"] = row[20]
