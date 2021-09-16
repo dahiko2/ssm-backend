@@ -80,9 +80,9 @@ def start_message(message):
     chat_id = message.chat.id
     count = 0
 
-    '''if not bot.get_chat_member(chat_id=-1001584831368, user_id=message.from_user.id).status in roles:
-        chat_id = message.chat.id
-        bot.send_message(chat_id, "@salomserial kanaliga obuna bo'ling")''' #Проверка подписки, требуется админка
+    #if not bot.get_chat_member(chat_id=-1001135809848, user_id=message.from_user.id).status in roles:
+    chat_id = message.chat.id
+    bot.send_message(chat_id, "@salomserial kanaliga obuna bo'ling") #Проверка подписки, требуется админка
 
     for id in Ids:
         if chat_id == id[0]:
@@ -104,6 +104,7 @@ def start_message(message):
         bot.send_message(message.chat.id, 'Qaytganing bilan ' + message.chat.username + '!', reply_markup=keyboard)
 
     serial_menu(message, True)
+    bot.delete_message(message.chat.id, message.message_id)
 
 
 @bot.message_handler(content_types=['text'])
@@ -177,7 +178,10 @@ def send_text(message):
         if len(favs_from_db) == 0:
             bot.send_message(message.chat.id, "Siz tanlagan teleko'rsatuvlar yo'q")
         else:
-            bot.delete_message(message.chat.id, serialar.message_id)
+            try:
+                bot.delete_message(message.chat.id, serialar.message_id)
+            except KeyError:
+                pass
             markup = telebot.types.InlineKeyboardMarkup()
             query = "select project_name, call_data from project"
             mycursor.execute(query)
