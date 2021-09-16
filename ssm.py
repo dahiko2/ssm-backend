@@ -917,5 +917,8 @@ def get_project_stats(projectid):
         mycursor.execute(query['query'], value)
         query_result = mycursor.fetchall()
         for row in query_result:
-            result_dict[query["name"]] = float(row[0])
+            try:
+                result_dict[query["name"]] = float(row[0])
+            except TypeError:
+                result_dict[query["name"]] = 0
     return json.dumps(itemlist, indent=4)
