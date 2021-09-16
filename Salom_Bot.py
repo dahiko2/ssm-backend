@@ -189,7 +189,7 @@ def send_text(message):
             try:
                 bot.delete_message(message.chat.id, serialar.message_id)
             except:
-                pass
+                bot.delete_message(message.chat.id, message.message_id - 1)
             markup = telebot.types.InlineKeyboardMarkup()
             query = "select project_name, call_data from project"
             mycursor.execute(query)
