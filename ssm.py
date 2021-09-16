@@ -906,7 +906,7 @@ def get_project_stats(projectid):
         {"name": "yt_sum_comments", "query": "select SUM(YouTubeCommentsCount) from releases where ProjectID = %s;"},
         {"name": "at_sum_views", "query": "select SUM(AitubeViews) from releases where ProjectID = %s;"},
         {"name": "at_sum_uniqs_year", "query": "select SUM(UniqUserPerYear) from releases where ProjectID = %s;"},
-        {"name": "at_sum_traffic", "query": "select SUM(Traffic) from releases where ProjectID = 121;"},
+        {"name": "at_sum_traffic", "query": "select SUM(Traffic) from releases where ProjectID = %s;"},
         {"name": "avg_uniqs_per_month", "query": "select avg(avg) from (select AVG(UniqUsersReleaseMonth) as avg from releases where ProjectID = %s group by MONTH(ReleaseDate)) as t;"}
         ]
     itemlist = []
