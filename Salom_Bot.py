@@ -290,6 +290,8 @@ def query_handler(call):
         bot.delete_message(call.message.chat.id, serialar.message_id)
     except telebot.apihelper.ApiTelegramException:
         bot.delete_message(call.message.chat.id, call.message.message_id - 1)
+    except AttributeError:
+        bot.delete_message(call.message.chat.id, call.message.message_id - 1)
     to_delete = bot.send_message(call.message.chat.id, answer, reply_markup=keyboard)
     to_delete_ser = bot.send_message(call.message.chat.id, Strings.series_chose, reply_markup=start_markup)
     #bot.edit_message_reply_markup(call.message.chat.id, call.message.message_id)
