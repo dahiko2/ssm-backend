@@ -890,3 +890,31 @@ def delete_meeting():
         mydb.commit()
         return_dict["message"] = "Meet event with id = " + str(idmeet) + " deleted."
         return return_dict
+
+
+@ssm.route("/get_project_stats=<projectid>", methods=['GET'])
+def get_project_stats(projectid):
+    """
+
+    :return:
+    """
+    mycursor = ssm_connection()
+    query_list = [
+        {"name": "yt_sum_views", "query": "select sum(YoutubeViews) from releases where ProjectID = %s;"},
+        {"name": "yt_views_first_release", "query": "select YouTubeViews from releases where ProjectID = %s order by YoutubeReleaseDate Limit 1;"},
+        {"name": "yt_avg_views", "query": "select AVG(YouTubeViews) from releases where ProjectID = %s;"},
+        {"name": "yt_sum_comments", "query": "select SUM(YouTubeCommentsCount) from releases where ProjectID = %s;"},
+        {"name": "at_sum_views", "query": "select SUM(AitubeViews) from releases where ProjectID = %s;"},
+        {"name": "at_sum_uniqs_year", "query": "select SUM(UniqUserPerYear) from releases where ProjectID = %s;"},
+        {"name": "at_sum_traffic", "query": "select SUM(Traffic) from releases where ProjectID = 121;"},
+        {"name": "avg_uniqs_per_month", "query": "select avg(avg) from (select AVG(UniqUsersReleaseMonth) as avg from releases where ProjectID = %s group by MONTH(ReleaseDate)) as t;"}
+        ]
+    itemlist = []
+    result_dict = dict()
+    value = (projectid, )
+    for query in query_list:
+        mycursor.execute(query['query'], value)
+        query_result = mycursor.fetchall()
+        for row in query_result:
+            result_dict[query["name"]] = row[0]
+    return json.dumps(itemlist, indent=4)
