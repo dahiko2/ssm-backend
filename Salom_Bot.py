@@ -12,6 +12,9 @@ salom_bot = Blueprint("salom_bot", __name__)
 bot = telebot.TeleBot(token, threaded=False)
 list = {}
 serialar = None
+to_delete = None
+to_delete_ser = None
+text = None
 
 bot.remove_webhook()
 bot.set_webhook(url="https://maksimsalnikov.pythonanywhere.com/salob/1994938654:AAHFLtVLwkog_4HK75-xTo8_-PA4vi4reuU/")
@@ -41,8 +44,11 @@ def serial_menu(message, start=False):
     if start == False:
         keyboard = telebot.types.ReplyKeyboardMarkup(True)
         keyboard.row('Sevimli')
-        bot.delete_message(message.chat.id, to_delete.message_id)
-        bot.delete_message(message.chat.id, to_delete_ser.message_id)
+        try:
+            bot.delete_message(message.chat.id, to_delete.message_id)
+            bot.delete_message(message.chat.id, to_delete_ser.message_id)
+        except:
+            pass
         text = bot.send_message(message.chat.id, 'Tomosha qilish uchun serialni tanlang',
                                 reply_markup=keyboard)
     try:
@@ -104,7 +110,10 @@ def start_message(message):
         bot.send_message(message.chat.id, 'Qaytganing bilan ' + message.chat.username + '!', reply_markup=keyboard)
 
     serial_menu(message, True)
-    bot.delete_message(message.chat.id, message.message_id)
+    try:
+        bot.delete_message(message.chat.id, message.message_id)
+    except:
+        pass
 
 
 @bot.message_handler(content_types=['text'])
@@ -180,8 +189,8 @@ def send_text(message):
         else:
             try:
                 bot.delete_message(message.chat.id, serialar.message_id)
-            except KeyError:
-                pass
+            except:
+                bot.delete_message(message.chat.id, message.message_id - 1)
             markup = telebot.types.InlineKeyboardMarkup()
             query = "select project_name, call_data from project"
             mycursor.execute(query)
@@ -192,14 +201,16 @@ def send_text(message):
                         btn = telebot.types.InlineKeyboardButton(row[0], callback_data=item['name'])
                         markup.row(btn)
             serialar = bot.send_message(message.chat.id, "Sevimlilaringiz", reply_markup=markup)
-
-    bot.delete_message(message.chat.id, message.message_id)
+    try:
+        bot.delete_message(message.chat.id, message.message_id)
+    except:
+        pass
 
 
 @bot.callback_query_handler(func=lambda call: True)
 def query_handler(call):
 
-    global to_delete, to_delete_ser
+    global to_delete, to_delete_ser, text, serialar
 
     keyboard = telebot.types.ReplyKeyboardMarkup(True)
     keyboard.row("Sevimlilarga qo'shing", 'Ortga')
@@ -277,8 +288,10 @@ def query_handler(call):
     try:
         bot.delete_message(call.message.chat.id, text.message_id)
         bot.delete_message(call.message.chat.id, serialar.message_id)
-    except:
-        bot.delete_message(call.message.chat.id, serialar.message_id)
+    except telebot.apihelper.ApiTelegramException:
+        bot.delete_message(call.message.chat.id, call.message.message_id - 1)
+    except AttributeError:
+        bot.delete_message(call.message.chat.id, call.message.message_id - 1)
     to_delete = bot.send_message(call.message.chat.id, answer, reply_markup=keyboard)
     to_delete_ser = bot.send_message(call.message.chat.id, Strings.series_chose, reply_markup=start_markup)
     #bot.edit_message_reply_markup(call.message.chat.id, call.message.message_id)
