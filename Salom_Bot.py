@@ -104,7 +104,10 @@ def start_message(message):
         bot.send_message(message.chat.id, 'Qaytganing bilan ' + message.chat.username + '!', reply_markup=keyboard)
 
     serial_menu(message, True)
-    bot.delete_message(message.chat.id, message.message_id)
+    try:
+        bot.delete_message(message.chat.id, message.message_id)
+    except:
+        pass
 
 
 @bot.message_handler(content_types=['text'])
@@ -192,8 +195,10 @@ def send_text(message):
                         btn = telebot.types.InlineKeyboardButton(row[0], callback_data=item['name'])
                         markup.row(btn)
             serialar = bot.send_message(message.chat.id, "Sevimlilaringiz", reply_markup=markup)
-
-    bot.delete_message(message.chat.id, message.message_id)
+    try:
+        bot.delete_message(message.chat.id, message.message_id)
+    except:
+        pass
 
 
 @bot.callback_query_handler(func=lambda call: True)
