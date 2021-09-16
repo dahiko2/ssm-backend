@@ -159,7 +159,7 @@ def form_proj_info_dict(row):
     item["uniq_release_month"] = row[17]
     item["uniq_second_month"] = row[18]
     item["cpv"] = calculate_cp(row[15], row[8])
-    item["cpu"] = calculate_cp(row[15], row[2])
+    item["cpu"] = calculate_cp(row[15], row[17])
     item["cpc"] = calculate_cp(row[15], row[3])
     item["male"] = row[19]
     item["female"] = row[20]
@@ -172,29 +172,6 @@ def form_proj_info_dict(row):
             gender = "F"
     item["gender"] = gender
     return item
-
-
-@ssm.route("/get_projects", methods=['GET'])
-def get_projects():
-    """
-    Собирает ID проекта в базе и его название, пол и возраст аудитории в список.
-    Возвращает json-объект, список проектов.
-    :return: json
-    """
-    mycursor = ssm_connection()
-    query = "SELECT ProjectID, ProjectName, Gender, Age, UtmName from project ORDER BY ProjectName;"
-    mycursor.execute(query)
-    query_result = mycursor.fetchall()
-    itemlist = []
-    for row in query_result:
-        item = dict()
-        item["id"] = row[0]
-        item["name"] = row[1]
-        item["gender"] = row[2]
-        item["age"] = row[3]
-        item["utm_name"] = row[4]
-        itemlist.append(item)
-    return json.dumps(itemlist, indent=4)
 
 
 def get_project_averages(project_id):
@@ -246,6 +223,29 @@ def get_project_averages(project_id):
     if count_cpc != 0:
         avg_cpc = summary_cpc / count_cpc
     return avg_tail, avg_retention, avg_cpc
+
+
+@ssm.route("/get_projects", methods=['GET'])
+def get_projects():
+    """
+    Собирает ID проекта в базе и его название, пол и возраст аудитории в список.
+    Возвращает json-объект, список проектов.
+    :return: json
+    """
+    mycursor = ssm_connection()
+    query = "SELECT ProjectID, ProjectName, Gender, Age, UtmName from project ORDER BY ProjectName;"
+    mycursor.execute(query)
+    query_result = mycursor.fetchall()
+    itemlist = []
+    for row in query_result:
+        item = dict()
+        item["id"] = row[0]
+        item["name"] = row[1]
+        item["gender"] = row[2]
+        item["age"] = row[3]
+        item["utm_name"] = row[4]
+        itemlist.append(item)
+    return json.dumps(itemlist, indent=4)
 
 
 @ssm.route("/info_byprojectid=<int:project_id>", methods=['GET'])
