@@ -47,16 +47,16 @@ def serial_menu(message, start=False):
         keyboard.row('Sevimli')
         text = bot.send_message(message.chat.id, 'Tomosha qilish uchun serialni tanlang',
                                 reply_markup=keyboard)
-        """try:
+        try:
             bot.delete_message(message.chat.id, to_delete.message_id)
             bot.delete_message(message.chat.id, to_delete_ser.message_id)
         except:
-            pass"""
+            pass
 
-    """try:
+    try:
         bot.delete_message(message.chat.id, serialar)
     except:
-        pass"""
+        pass
 
 
 
