@@ -47,16 +47,16 @@ def serial_menu(message, start=False):
         keyboard.row('Sevimli')
         text = bot.send_message(message.chat.id, 'Tomosha qilish uchun serialni tanlang',
                                 reply_markup=keyboard)
-        try:
+        """try:
             bot.delete_message(message.chat.id, to_delete.message_id)
             bot.delete_message(message.chat.id, to_delete_ser.message_id)
         except:
-            pass
+            pass"""
 
-    try:
+    """try:
         bot.delete_message(message.chat.id, serialar)
     except:
-        pass
+        pass"""
 
 
 
@@ -111,11 +111,11 @@ def start_message(message):
         bot.send_message(message.chat.id, 'Qaytganing bilan ' + message.chat.username + '!', reply_markup=keyboard)
 
     serial_menu(message, True)
-    try:
+    """try:
         bot.delete_message(message.chat.id, message.message_id)
     except:
         pass
-
+    """
 
 @bot.message_handler(content_types=['text'])
 def send_text(message):
@@ -188,10 +188,10 @@ def send_text(message):
         if len(favs_from_db) == 0:
             bot.send_message(message.chat.id, "Siz tanlagan teleko'rsatuvlar yo'q")
         else:
-            try:
+            """try:
                 bot.delete_message(message.chat.id, serialar.message_id)
             except:
-                bot.delete_message(message.chat.id, message.message_id - 1)
+                bot.delete_message(message.chat.id, message.message_id - 1)"""
             markup = telebot.types.InlineKeyboardMarkup()
             query = "select project_name, call_data from project"
             mycursor.execute(query)
@@ -202,10 +202,10 @@ def send_text(message):
                         btn = telebot.types.InlineKeyboardButton(row[0], callback_data=item['name'])
                         markup.row(btn)
             serialar = bot.send_message(message.chat.id, "Sevimlilaringiz", reply_markup=markup)
-    try:
+    """try:
         bot.delete_message(message.chat.id, message.message_id)
     except:
-        pass
+        pass"""
 
 
 @bot.callback_query_handler(func=lambda call: True)
@@ -290,7 +290,7 @@ def query_handler(call):
 
     to_delete = bot.send_message(call.message.chat.id, answer, reply_markup=keyboard)
     to_delete_ser = bot.send_message(call.message.chat.id, Strings.series_chose, reply_markup=start_markup)
-    #bot.edit_message_reply_markup(call.message.chat.id, call.message.message_id)
+    bot.edit_message_reply_markup(call.message.chat.id, call.message.message_id)
     """try:
         bot.delete_message(call.message.chat.id, text.message_id)
         bot.delete_message(call.message.chat.id, serialar.message_id)
