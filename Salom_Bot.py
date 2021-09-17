@@ -224,8 +224,8 @@ def query_handler(call):
         answer = Strings.maktab_desc
         btn1 = telebot.types.InlineKeyboardButton('1 qism', callback_data="mak1")
         btn2 = telebot.types.InlineKeyboardButton('2 qism', callback_data="mak2")
-        start_markup.row(btn1, btn2)
-
+        start_markup.row(btn2)
+        """
         btn3 = telebot.types.InlineKeyboardButton('3 qism', callback_data="mak3")
         btn4 = telebot.types.InlineKeyboardButton('4 qism', callback_data="mak4")
         start_markup.row(btn3, btn4)
@@ -240,11 +240,11 @@ def query_handler(call):
 
         btn9 = telebot.types.InlineKeyboardButton('9 qism', callback_data="mak9")
         btn10 = telebot.types.InlineKeyboardButton('10 qism', callback_data="mak10")
-        start_markup.row(btn9, btn10)
+        start_markup.row(btn9, btn10)"""
 
     elif call.data == "qichchu_qudrat":
         answer = Strings.qichchu_qudrat
-        btn1 = telebot.types.InlineKeyboardButton('1 qism', callback_data="qich_qud1")
+        """btn1 = telebot.types.InlineKeyboardButton('1 qism', callback_data="qich_qud1")
         btn2 = telebot.types.InlineKeyboardButton('2 qism', callback_data="qich_qud3")
         start_markup.row(btn1, btn2)
 
@@ -262,11 +262,11 @@ def query_handler(call):
 
         btn9 = telebot.types.InlineKeyboardButton('9 qism', callback_data="qich_qud9")
         btn10 = telebot.types.InlineKeyboardButton('10 qism', callback_data="qich_qud10")
-        start_markup.row(btn9, btn10)
+        start_markup.row(btn9, btn10)"""
 
     elif call.data == "shaharlik_qichilogi":
         answer = Strings.shaharlik_qichloqi
-        btn1 = telebot.types.InlineKeyboardButton('1 qism', callback_data="shah_qich1")
+        """btn1 = telebot.types.InlineKeyboardButton('1 qism', callback_data="shah_qich1")
         btn2 = telebot.types.InlineKeyboardButton('2 qism', callback_data="shah_qich2")
         start_markup.row(btn1, btn2)
 
@@ -284,7 +284,9 @@ def query_handler(call):
 
         btn9 = telebot.types.InlineKeyboardButton('9 qism', callback_data="shah_qich9")
         btn10 = telebot.types.InlineKeyboardButton('10 qism', callback_data="shah_qich10")
-        start_markup.row(btn9, btn10)
+        start_markup.row(btn9, btn10)"""
+    elif call.data == "mak2":
+        answer = "https://t.me/salomserial/853"
 
 
 
