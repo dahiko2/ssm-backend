@@ -124,7 +124,6 @@ def send_text(message):
 
     if message.text == 'Ortga':
         serial_menu(message)
-        bot.edit_message_reply_markup(message.chat.id, message.message_id)
     if message.text == "Sevimlilarga qo'shing":
         read_creds()
         mydb = connect(
