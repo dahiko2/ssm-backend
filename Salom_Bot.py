@@ -290,7 +290,7 @@ def query_handler(call):
         btn10 = telebot.types.InlineKeyboardButton('10 qism', callback_data="shah_qich10")
         start_markup.row(btn9, btn10)"""
     elif call.data == "mak2":
-        answer = "https://t.me/salomserial/853"
+        answer = "https://t.me/salomserial/854"
         answer2 = "Baxtli tomosha!"
 
 
