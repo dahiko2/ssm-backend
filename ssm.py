@@ -937,13 +937,13 @@ def post_shop():
 
         if post_type == 'доставка':
             query = "INSERT INTO shop " \
-                    "(order_number, post_type, name, phone, email, country, city, adress, full_price, rules_ok, basket) " \
+                    "(id, post_type, name, phone, email, country, city, adress, full_price, rules_ok, basket) " \
                     "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
             values = (body['order_number'], body['post_type'], body['name'], body['phone'], body['email'], body['contry'], body['city'], body['adress'], body['full_price'], body['rules_ok'], str(body['basket']))
 
         elif post_type == 'самовывоз':
             query = "INSERT INTO shop " \
-                    "(order_number, post_type, name, phone, email, full_price, rules_ok, basket) " \
+                    "(id, post_type, name, phone, email, full_price, rules_ok, basket) " \
                     "VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"
             values = (body['order_number'], body['post_type'], body['name'], body['phone'], body['email'], body['full_price'], body['rules_ok'], str(body['basket']))
 
