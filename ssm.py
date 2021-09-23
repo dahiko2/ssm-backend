@@ -931,12 +931,11 @@ def post_shop():
     if body is None:
         flask.abort(400)
     try:
-
-        pass
+        print(body)
     except KeyError:
         flask.abort(400)
     else:
-        pass
+        return flask.make_response(200)
 
 
 @ssm.route("/month_traffic", methods=['GET'])
