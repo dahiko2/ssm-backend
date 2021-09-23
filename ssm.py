@@ -926,16 +926,38 @@ def get_project_stats(projectid):
 
 @ssm.route("/shop", methods=['POST'])
 def post_shop():
-    global mydb
     body = flask.request.get_json()
     if body is None:
         flask.abort(400)
     try:
-        print(body)
+        post_type = body['post_type']
     except KeyError:
         flask.abort(400)
     else:
-        return flask.make_response(200)
+
+        if post_type == 'доставка':
+            query = "INSERT INTO shop " \
+                    "(order_number, post_type, name, phone, email, country, city, adress, full_price, rules_ok, basket) " \
+                    "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
+            values = (body['order_number'], body['post_type'], body['name'], body['phone'], body['email'], body['contry'], body['city'], body['adress'], body['full_price'], body['rules_ok'], body['basket'])
+
+        elif post_type == 'самовывоз':
+            query = "INSERT INTO shop " \
+                    "(order_number, post_type, name, phone, email, full_price, rules_ok, basket) " \
+                    "VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"
+            values = (body['order_number'], body['post_type'], body['name'], body['phone'], body['email'], body['full_price'], body['rules_ok'], body['basket'])
+
+        else:
+            flask.abort(400)
+
+        global mydb
+        mycursor = ssm_connection()
+        mycursor.execute(query, values)
+        mydb.commit()
+
+        return_dict = dict()
+        return_dict["message"] = "Order with number " + body["order_number"] + " was added."
+        return return_dict
 
 
 @ssm.route("/month_traffic", methods=['GET'])
