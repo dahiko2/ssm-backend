@@ -182,7 +182,7 @@ def get_project_averages(project_id):
     """
     mycursor = ssm_connection()
     # Вытаскиваем среднюю длину хвоста, где значение хвоста задано, и значени хвоста у первой серии не учитывается (для этого нужна сортировка по дате и лимит 1)
-    query = "select AVG(tail) from (select EpisodesName, tail, ReleaseDate from releases where ProjectID = %s and Tail is not null ORDER BY ReleaseDate ASC LIMIT 1, 1000) as T;"
+    query = "SELECT AVG(tail) FROM (SELECT EpisodesName, tail, ReleaseDate FROM releases WHERE ProjectID = %s AND Tail IS NOT NULL ORDER BY ReleaseDate ASC LIMIT 1, 1000) AS t;"
     val = (project_id, )
     mycursor.execute(query, val)
     query_result = mycursor.fetchall()
@@ -192,7 +192,7 @@ def get_project_averages(project_id):
         if row[0] is not None:
             avg_tail = float(row[0])
     # Вытаскиваем досматриваемость, цену и переходы.
-    query = "select AudienceRetention, Price, Traffic, EpisodesName from releases where ProjectID = %s ORDER BY ReleaseDate ASC;"
+    query = "SELECT AudienceRetention, Price, Traffic, EpisodesName FROM releases WHERE ProjectID = %s ORDER BY ReleaseDate ASC;"
     val = (project_id, )
     mycursor.execute(query, val)
     query_result = mycursor.fetchall()
@@ -233,7 +233,7 @@ def get_projects():
     :return: json
     """
     mycursor = ssm_connection()
-    query = "SELECT ProjectID, ProjectName, Gender, Age, UtmName from project ORDER BY ProjectName;"
+    query = "SELECT ProjectID, ProjectName, Gender, Age, UtmName FROM project ORDER BY ProjectName;"
     mycursor.execute(query)
     query_result = mycursor.fetchall()
     itemlist = []
@@ -257,7 +257,7 @@ def get_fullinfo_by_projectid(project_id):
     :return: json(list[dict])
     """
     mycursor = ssm_connection()
-    query = "SELECT * FROM releases where projectID = %s ORDER BY ReleaseDate ASC;"
+    query = "SELECT * FROM releases WHERE projectID = %s ORDER BY ReleaseDate ASC;"
     val = (project_id,)
     mycursor.execute(query, val)
     query_result = mycursor.fetchall()
@@ -277,7 +277,7 @@ def get_fullinfo_by_projectname(project):
     """
     project = str(project) + "%"
     mycursor = ssm_connection()
-    query = "SELECT * FROM releases where projectID in (select ProjectID from project where ProjectName like %s) ORDER BY ReleaseDate ASC;"
+    query = "SELECT * FROM releases WHERE projectID IN (SELECT ProjectID FROM project WHERE ProjectName LIKE %s) ORDER BY ReleaseDate ASC;"
     val = (project,)
     mycursor.execute(query, val)
     query_result = mycursor.fetchall()
@@ -344,7 +344,7 @@ def get_releases_between(date1, date2):
     mycursor = ssm_connection()
     date1 = date1.replace(".", "/")
     date2 = date2.replace(".", "/")
-    query = "SELECT * FROM releases where ("+datetype+" between %s and %s) ORDER BY projectID DESC;"
+    query = "SELECT * FROM releases WHERE ("+datetype+" BETWEEN %s AND %s) ORDER BY projectID DESC;"
     val = (date1, date2)
     mycursor.execute(query, val)
     query_result = mycursor.fetchall()
@@ -365,7 +365,7 @@ def get_kpi_by_country_year(year, country):
     """
     country = country.upper()
     mycursor = ssm_connection()
-    query = "SELECT idkpi, value, target, month FROM kpi_mao where year = %s and country = %s;"
+    query = "SELECT idkpi, value, target, month FROM kpi_mao WHERE year = %s AND country = %s;"
     val = (year, country)
     mycursor.execute(query, val)
     query_result = mycursor.fetchall()
@@ -413,7 +413,7 @@ def update_kpi_mau():
         try:
             mycursor.execute(query, val)
         except mysql.connector.errors.IntegrityError:  # если данные по стране уже заполнены, то просто обновляет их
-            query = "UPDATE kpi_mao SET value = %s where country = %s and month = %s and year = %s and month_year = %s;"
+            query = "UPDATE kpi_mao SET value = %s WHERE country = %s AND month = %s AND year = %s AND month_year = %s;"
             mycursor.execute(query, val)
         mydb.commit()
         return_dict = dict()
@@ -446,7 +446,7 @@ def update_yt_trends():
         if youtube_channels.count(video['channel']) > 0:
             count += 1
             if today_videos.count(video['video_name']) > 0:
-                query = "UPDATE youtube_trends SET place = %s WHERE video_name = %s and DATE(date) = CURDATE();"
+                query = "UPDATE youtube_trends SET place = %s WHERE video_name = %s AND DATE(date) = CURDATE();"
                 values = (video['place'], video['video_name'])
             else:
                 query = "INSERT INTO youtube_trends (video_name, channel, views, place, date) VALUES (%s, %s, %s, %s, NOW());"
