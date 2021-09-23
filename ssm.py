@@ -521,7 +521,7 @@ def get_kpi_aitu():
     :return: json(list[dict])
     """
     mycursor = ssm_connection()
-    sql = "SELECT target, `left`, top_50, top_100, quiz, releases, today, `quarter`, quarter_left from kpi_aitu;"   # Кавычки в запросе не убирать, иначе сломает запрос.
+    sql = "SELECT target, `left`, top_50, top_100, quiz, releases, today, `quarter`, quarter_left FROM kpi_aitu;"   # Кавычки в запросе не убирать, иначе сломает запрос.
     mycursor.execute(sql)
     query_result = mycursor.fetchall()
     itemlist = []
@@ -568,7 +568,7 @@ def update_kpi_aitu():
         items.append(data['quarter_left'])
     except KeyError:
         flask.abort(403)
-    query = 'UPDATE kpi_aitu set target = %s, `left` = %s, top_50 = %s, top_100 = %s, quiz = %s, releases = %s, today = %s, `quarter` = %s, quarter_left = %s WHERE id = 1'
+    query = 'UPDATE kpi_aitu SET target = %s, `left` = %s, top_50 = %s, top_100 = %s, quiz = %s, releases = %s, today = %s, `quarter` = %s, quarter_left = %s WHERE id = 1'
     # Кавычки в запросе не убирать, иначе сломает запрос.
     val = (int(items[0]), int(items[1]), int(items[2]), int(items[3]), int(items[4]), int(items[5]), int(items[6]), int(items[7]), int(items[8]))
     mycursor.execute(query, val)
@@ -660,7 +660,7 @@ def get_milestone_releases():
     """
     mycursor = ssm_connection()
     milestone_projects = "(1, 2, 3, 4, 5, 7, 9, 10, 15, 76, 115, 117, 119, 120, 121, 122, 123)"
-    query = "select * from releases where ProjectID in "+milestone_projects+" and (YouTubeViews between 950000 and 1000000) or (YouTubeViews between 1950000 and 2000000) or (YouTubeViews between 2950000 and 3000000) or (YouTubeViews between 3950000 and 4000000) or (YouTubeViews between 4950000 and 5000000) ORDER BY ReleaseDate Asc;"
+    query = "SELECT * FROM releases WHERE ProjectID IN "+milestone_projects+" AND (YouTubeViews BETWEEN 950000 AND 1000000) OR (YouTubeViews BETWEEN 1950000 AND 2000000) OR (YouTubeViews BETWEEN 2950000 AND 3000000) OR (YouTubeViews BETWEEN 3950000 AND 4000000) OR (YouTubeViews BETWEEN 4950000 AND 5000000) ORDER BY ReleaseDate ASC;"
     mycursor.execute(query)
     query_result = mycursor.fetchall()
     itemlist = []
@@ -738,7 +738,7 @@ def get_pr_status():
     :return: json(list[dict])
     """
     mycursor = ssm_connection()
-    query = "select * from pr_status;"
+    query = "SELECT * FROM pr_status;"
     mycursor.execute(query)
     query_result = mycursor.fetchall()
     itemlist = []
@@ -769,11 +769,11 @@ def get_pr_mentions():
     mycursor = ssm_connection()
     if body is not None:
         year = body["year"]
-        query = "select * from pr_mentions where year(release_date) = %s;"
+        query = "SELECT * FROM pr_mentions WHERE YEAR(release_date) = %s;"
         val = (year, )
         mycursor.execute(query, val)
     else:
-        query = "select * from pr_mentions;"
+        query = "SELECT * FROM pr_mentions;"
         mycursor.execute(query)
     query_result = mycursor.fetchall()
     itemlist = []
@@ -805,7 +805,7 @@ def post_meeting():
     add_event = True
     mycursor = ssm_connection()
     # Проверка, не попадает ли новая запись в промежутки предыдущих записей
-    query = "SELECT time, time_finish from meet_schedule where room = %s and mdate = %s;"
+    query = "SELECT time, time_finish FROM meet_schedule WHERE room = %s AND mdate = %s;"
     values = (body['room'], body['date'])
     mycursor.execute(query, values)
     query_results = mycursor.fetchall()
@@ -843,7 +843,7 @@ def get_meeting_date(mdate):
     :return: json(list[dict])
     """
     mycursor = ssm_connection()
-    query = "select * from meet_schedule where mdate = %s ORDER BY `time`;"
+    query = "SELECT * FROM meet_schedule WHERE mdate = %s ORDER BY `time`;"
     value = (mdate,)
     mycursor.execute(query, value)
     query_result = mycursor.fetchall()
@@ -878,7 +878,7 @@ def delete_meeting():
     else:
         mycursor = ssm_connection()
         value = (idmeet,)
-        query = "SELECT * FROM meet_schedule where idmeet = %s"
+        query = "SELECT * FROM meet_schedule WHERE idmeet = %s"
         mycursor.execute(query, value)
         return_dict = dict()
         mycursor.fetchall()
@@ -900,14 +900,14 @@ def get_project_stats(projectid):
     """
     mycursor = ssm_connection()
     query_list = [
-        {"name": "yt_sum_views", "query": "select sum(YoutubeViews) from releases where ProjectID = %s;"},
-        {"name": "yt_views_first_release", "query": "select YouTubeViews from releases where ProjectID = %s order by YoutubeReleaseDate Limit 1;"},
-        {"name": "yt_avg_views", "query": "select AVG(YouTubeViews) from releases where ProjectID = %s;"},
-        {"name": "yt_sum_comments", "query": "select SUM(YouTubeCommentsCount) from releases where ProjectID = %s;"},
-        {"name": "at_sum_views", "query": "select SUM(AitubeViews) from releases where ProjectID = %s;"},
-        {"name": "at_sum_uniqs_year", "query": "select SUM(UniqUserPerYear) from releases where ProjectID = %s;"},
-        {"name": "at_sum_traffic", "query": "select SUM(Traffic) from releases where ProjectID = %s;"},
-        {"name": "avg_uniqs_per_month", "query": "select avg(avg) from (select AVG(UniqUsersReleaseMonth) as avg from releases where ProjectID = %s group by MONTH(ReleaseDate)) as t;"}
+        {"name": "yt_sum_views", "query": "SELECT sum(YoutubeViews) FROM releases WHERE ProjectID = %s;"},
+        {"name": "yt_views_first_release", "query": "SELECT YouTubeViews FROM releases WHERE ProjectID = %s ORDER BY YoutubeReleaseDate LIMIT 1;"},
+        {"name": "yt_avg_views", "query": "SELECT AVG(YouTubeViews) FROM releases WHERE ProjectID = %s;"},
+        {"name": "yt_sum_comments", "query": "SELECT SUM(YouTubeCommentsCount) FROM releases WHERE ProjectID = %s;"},
+        {"name": "at_sum_views", "query": "SELECT SUM(AitubeViews) FROM releases WHERE ProjectID = %s;"},
+        {"name": "at_sum_uniqs_year", "query": "SELECT SUM(UniqUserPerYear) FROM releases WHERE ProjectID = %s;"},
+        {"name": "at_sum_traffic", "query": "SELECT SUM(Traffic) FROM releases WHERE ProjectID = %s;"},
+        {"name": "avg_uniqs_per_month", "query": "SELECT avg(avg) FROM (select AVG(UniqUsersReleaseMonth) AS avg FROM releases WHERE ProjectID = %s GROUP BY MONTH(ReleaseDate)) AS t;"}
         ]
     itemlist = []
     result_dict = dict()
@@ -985,10 +985,22 @@ def get_shop():
     return json.dumps(itemlist, indent=4)
 
 
+@ssm.route("/shop/count", methods=['GET'])
+def get_orders_shop_count():
+    mycursor = ssm_connection()
+    query = "SELECT COUNT(*) FROM shop;"
+    mycursor.execute(query)
+    query_result = mycursor.fetchall()
+    itemlist = [dict()]
+    for row in query_result:
+        itemlist[0]["orders_count"] = row[0]
+    return json.dumps(itemlist)
+
+
 @ssm.route("/month_traffic", methods=['GET'])
 def get_month_traffic():
     mycursor = ssm_connection()
-    query = "SELECT * FROM main_month_traffic where All_Traffic is not null;"
+    query = "SELECT * FROM main_month_traffic WHERE All_Traffic IS NOT NULL;"
     mycursor.execute(query)
     query_result = mycursor.fetchall()
     itemlist = []
