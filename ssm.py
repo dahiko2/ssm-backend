@@ -892,7 +892,7 @@ def delete_meeting():
         return return_dict
 
 
-@ssm.route("/get_project_stats=<projectid>", methods=['GET'])
+@ssm.route("/project_stats=<projectid>", methods=['GET'])
 def get_project_stats(projectid):
     """
 
