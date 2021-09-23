@@ -956,7 +956,7 @@ def post_shop():
         mydb.commit()
 
         return_dict = dict()
-        return_dict["message"] = "Order with number " + body["order_number"] + " was added."
+        return_dict["message"] = "Order with number " + str(body["order_number"]) + " was added."
         return return_dict
 
 
