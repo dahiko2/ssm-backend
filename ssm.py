@@ -973,13 +973,14 @@ def get_shop():
         item['post_type'] = row[1]
         item['name'] = row[2]
         item['phone'] = row[3]
-        item['full_price'] = row[4]
-        item['rules_ok'] = row[5]
-        item['basket'] = row[6]
+        item['email'] = row[4]
+        item['full_price'] = row[5]
+        item['rules_ok'] = row[6]
+        item['basket'] = row[7]
         if row[1] == 'доставка':
-            item['country'] = row[7]
-            item['city'] = row[8]
-            item['adress'] = row[9]
+            item['country'] = row[8]
+            item['city'] = row[9]
+            item['adress'] = row[10]
         itemlist.append(item)
     return json.dumps(itemlist, indent=4)
 
