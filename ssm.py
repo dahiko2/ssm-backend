@@ -960,6 +960,30 @@ def post_shop():
         return return_dict
 
 
+@ssm.route("/shop", methods=['GET'])
+def get_shop():
+    mycursor = ssm_connection()
+    query = "SELECT * FROM shop;"
+    mycursor.execute(query)
+    query_result = mycursor.fetchall()
+    itemlist = []
+    for row in query_result:
+        item = dict()
+        item['order_number'] = row[0]
+        item['post_type'] = row[1]
+        item['name'] = row[2]
+        item['phone'] = row[3]
+        item['full_price'] = row[4]
+        item['rules_ok'] = row[5]
+        item['basket'] = row[6]
+        if row[1] == 'доставка':
+            item['country'] = row[7]
+            item['city'] = row[8]
+            item['adress'] = row[9]
+        itemlist.append(item)
+    return json.dumps(itemlist, indent=4)
+
+
 @ssm.route("/month_traffic", methods=['GET'])
 def get_month_traffic():
     mycursor = ssm_connection()
