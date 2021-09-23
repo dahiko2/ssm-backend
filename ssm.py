@@ -922,3 +922,41 @@ def get_project_stats(projectid):
             except TypeError:
                 result_dict[query["name"]] = 0
     return json.dumps(itemlist, indent=4)
+
+
+@ssm.route("/shop", methods=['POST'])
+def post_shop():
+    global mydb
+    body = flask.request.get_json()
+    if body is None:
+        flask.abort(400)
+    try:
+
+        pass
+    except KeyError:
+        flask.abort(400)
+    else:
+        pass
+
+
+@ssm.route("/month_traffic", methods=['GET'])
+def get_month_traffic():
+    mycursor = ssm_connection()
+    query = "SELECT * FROM main_month_traffic where All_Traffic is not null;"
+    mycursor.execute(query)
+    query_result = mycursor.fetchall()
+    itemlist = []
+    for row in query_result:
+        item = dict()
+        item['id'] = row[0]
+        item['year'] = row[1]
+        item['month'] = row[2]
+        item['all_traffic'] = row[3]
+        item['position_1_name'] = row[4]
+        item['position_1_traffic'] = row[5]
+        item['position_2_name'] = row[6]
+        item['position_2_traffic'] = row[7]
+        item['position_3_name'] = row[8]
+        item['position_3_traffic'] = row[9]
+        itemlist.append(item)
+    return json.dumps(itemlist, indent=4)
