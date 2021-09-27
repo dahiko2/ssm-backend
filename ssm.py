@@ -1035,7 +1035,7 @@ def kassa24_handle_callback():
     if body['status'] == 1:
         mycursor = ssm_connection()
         query = "UPDATE shop SET payment_status = true WHERE id = %s;"
-        value = (body['metadata']['order_id'])
+        value = (int(body['metadata']['order_id']))
         mycursor.execute(query, value)
     response = "Payment with order id = "+body['metadata']['order_id']+" has been completed."
     return response
