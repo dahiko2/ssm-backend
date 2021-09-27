@@ -1028,8 +1028,9 @@ def kassa24_send_query(inp):
     callback_url = 'https://maksimsalnikov.pythonanywhere.com/ssm/kassa24_callback'
     kassa_request_url = "https://ecommerce.pult24.kz/payment/create"
     description_str = "Заказ #"+str(inp['order_number'])+"\nСодержание:\n"
+
     for item in inp['basket']:
-        description_str += str(item['name'])+"\n"
+        description_str += str(item)+"\n"
     payload = {
         "orderId": str(inp['order_number']),
         "merchantId": fkassa_login,
