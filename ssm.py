@@ -1063,5 +1063,5 @@ def kassa24_send_query(inp):
     print(r.json())
     if r.status_code == 200:
         return flask.redirect(r.json()['url'], code=302)
-    else
+    else:
         return r.status_code
