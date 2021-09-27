@@ -1029,13 +1029,13 @@ def kassa24_handle_callback():
     body = flask.request.get_json()
     ip_address = flask.request.headers['X-Real-IP']
     kassa_ip = '35.157.105.64'
-    print('BODY IN CALLBACK'+str(body))
     if ip_address != kassa_ip:
         flask.abort(403)
     if body['status'] == 1:
         mycursor = ssm_connection()
-        query = "UPDATE shop SET payment_status = true WHERE id = %s;"
-        value = (int(body['metadata']['order_id']))
+        query = "UPDATE shop SET payment_status = %s WHERE id = %s;"
+        #"UPDATE shop SET payment_status = true WHERE id = %s;"
+        value = (1, 13371354)
         mycursor.execute(query, value)
     response = "Payment with order id = "+body['metadata']['order_id']+" has been completed."
     return response
