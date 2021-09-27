@@ -974,6 +974,8 @@ def get_shop(stype):
         query = "SELECT * FROM shop;"
     elif stype == 'paid':
         query = "SELECT * FROM shop WHERE payment_status = 1;"
+    elif stype == 'unpaid':
+        query = "SELECT * FROM shop WHERE payment_status = 0;"
     else:
         flask.abort(400)
     mycursor.execute(query)
