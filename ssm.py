@@ -1026,8 +1026,7 @@ def get_month_traffic():
 @ssm.route("/kassa24_callback", methods=['POST'])
 def kassa24_handle_callback():
     body = flask.request.get_json()
-    ip_address = flask.request.remote_addr
-    print(ip_address)
+    ip_address = flask.request.headers['X-Real-IP']
     kassa_ip = '35.157.105.64'
     if ip_address != kassa_ip:
         flask.abort(403)
