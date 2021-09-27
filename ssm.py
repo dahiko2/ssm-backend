@@ -958,6 +958,7 @@ def post_shop():
 
         global mydb
         mycursor = ssm_connection()
+        # todo try catch
         mycursor.execute(query, values)
         mydb.commit()
         return kassa24_send_query(body)
@@ -1028,20 +1029,20 @@ def kassa24_handle_callback():
     body = flask.request.get_json()
     ip_address = flask.request.headers['X-Real-IP']
     kassa_ip = '35.157.105.64'
+    print('BODY IN CALLBACK'+str(body))
     if ip_address != kassa_ip:
         flask.abort(403)
     if body['status'] == 1:
         mycursor = ssm_connection()
-        query = 'UPDATE shop SET payment_status = true where id = %s'
+        query = "UPDATE shop SET payment_status = true WHERE id = %s;"
         value = (body['metadata']['order_id'])
         mycursor.execute(query, value)
     response = "Payment with order id = "+body['metadata']['order_id']+" has been completed."
-    print(response)
     return response
 
 
 def kassa24_send_query(inp):
-    return_url = 'https://maksimsalnikov.pythonanywhere.com/ssm/month_traffic'
+    return_url = 'https://salemsocial.kz/'
     callback_url = 'https://maksimsalnikov.pythonanywhere.com/ssm/kassa24_callback'
     kassa_request_url = "https://ecommerce.pult24.kz/payment/create"
     payload = {
@@ -1061,8 +1062,6 @@ def kassa24_send_query(inp):
         "Content-Length": str(len(payload))
     }
     r = requests.post(url=kassa_request_url, headers=headers, json=payload)
-    print(r.json())
-    # todo поменять логику у ретерна
     if r.status_code == 201:
         return flask.redirect(r.json()['url'], code=302)
     else:
