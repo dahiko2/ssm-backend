@@ -967,10 +967,15 @@ def post_shop():
         return kassa24_send_query(body)
 
 
-@ssm.route("/shop", methods=['GET'])
-def get_shop():
+@ssm.route("/shop/<type>", methods=['GET'])
+def get_shop(stype):
     mycursor = ssm_connection()
-    query = "SELECT * FROM shop;"
+    if stype == 'all':
+        query = "SELECT * FROM shop;"
+    elif stype == 'paid':
+        query = "SELECT * FROM shop WHERE payment_status = 1;"
+    else:
+        flask.abort(400)
     mycursor.execute(query)
     query_result = mycursor.fetchall()
     itemlist = []
