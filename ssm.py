@@ -1027,6 +1027,7 @@ def get_month_traffic():
 def kassa24_handle_callback():
     body = flask.request.get_json()
     ip_address = flask.request.remote_addr
+    print(ip_address)
     kassa_ip = '35.157.105.64'
     if ip_address != kassa_ip:
         flask.abort(403)
@@ -1063,7 +1064,7 @@ def kassa24_send_query(inp):
     r = requests.post(url=kassa_request_url, headers=headers, json=payload)
     print(r.json())
     # todo поменять логику у ретерна
-    if r.status_code == 200:
+    if r.status_code == 201:
         return flask.redirect(r.json()['url'], code=302)
     else:
         return flask.abort(r.status_code)
