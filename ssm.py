@@ -1060,5 +1060,5 @@ def kassa24_send_query(inp):
         'customerData': {'email': inp['email'], 'phone': inp['phone']}
     }
     r = requests.post(url=kassa_request_url, headers=headers, data=payload)
-    print(r.json())
+    print(r.status_code)
     return flask.redirect(r.json()['url'], code=302)
