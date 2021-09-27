@@ -1058,7 +1058,7 @@ def kassa24_send_query(inp):
     headers = {
         "Authorization": "Basic "+base64.b64encode((fkassa_login+':'+fkassa_password).encode('ascii')).decode('ascii'),
         "Content-Type": "application/json",
-        "Content-Length": len(payload)
+        "Content-Length": str(len(payload))
     }
     r = requests.post(url=kassa_request_url, headers=headers, json=payload)
     print(r.json())
