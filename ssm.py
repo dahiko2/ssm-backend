@@ -967,7 +967,7 @@ def post_shop():
         return kassa24_send_query(body)
 
 
-@ssm.route("/shop/<type>", methods=['GET'])
+@ssm.route("/shop/<stype>", methods=['GET'])
 def get_shop(stype):
     mycursor = ssm_connection()
     if stype == 'all':
