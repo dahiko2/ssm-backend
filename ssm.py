@@ -1,7 +1,9 @@
+import base64
 import json
 import time
 import flask
 import mysql.connector
+import requests
 from flask import Blueprint
 from datetime import datetime
 from urllib.parse import urlparse, parse_qs
@@ -958,7 +960,7 @@ def post_shop():
         mycursor = ssm_connection()
         mycursor.execute(query, values)
         mydb.commit()
-        kassa24_send_query()
+        kassa24_send_query(body)
         return_dict = dict()
         return_dict["message"] = "Order with number " + str(body["order_number"]) + " was added."
         return return_dict
@@ -1024,5 +1026,39 @@ def get_month_traffic():
     return json.dumps(itemlist, indent=4)
 
 
-def kassa24_send_query(orderId):
-    pass
+@ssm.route("/kassa24_callback", methods=['POST'])
+def kassa24_handle_callback():
+    body = flask.request.get_json()
+    ip_address = flask.request.remote_addr
+    kassa_ip = '35.157.105.64'
+    if ip_address != kassa_ip:
+        flask.abort(403)
+    if body['status'] == 1:
+        mycursor = ssm_connection()
+        query = 'UPDATE shop SET payment_status = true where id = %s'
+        value = (body['metadata']['order_id'])
+        mycursor.execute(query, value)
+    response = "Payment with order id = "+body['metadata']['order_id']+" has been completed."
+    print(response)
+    return response
+
+
+def kassa24_send_query(inp):
+    return_url = 'https://maksimsalnikov.pythonanywhere.com/ssm/month_traffic'
+    callback_url = 'https://maksimsalnikov.pythonanywhere.com/ssm/kassa24_callback'
+    kassa_request_url = "https://ecommerce.pult24.kz/payment/create"
+    headers = {"Authorization": "Basic "+base64.b64encode((fkassa_login+':'+fkassa_password).encode('ascii')).decode('ascii')}
+    payload = {
+        "orderId": inp['order_number'],
+        "merchantId": fkassa_login,
+        "amount": inp['full_price']*100,
+        "returnUrl": return_url,
+        "callbackUrl": callback_url,
+        'description': inp['basket'],
+        'metadata': {'order_id': inp['order_number']},
+        'demo': True,
+        'customerData': {'email': inp['email'], 'phone': inp['phone']}
+    }
+    r = requests.post(url=kassa_request_url, headers=headers, data=payload)
+    print(r.json())
+    return flask.redirect(r.json()['url'], code=302)
