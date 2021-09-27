@@ -1044,8 +1044,10 @@ def kassa24_send_query(inp):
         "Content-Length": str(len(payload))
     }
     r = requests.post(url=kassa_request_url, headers=headers, json=payload)
+    return_redirect_url = r.json()['url']
+    response = {"url": return_redirect_url}
     if r.status_code == 201:
-        return flask.redirect(r.json()['url'], code=302)
+        return response
     else:
         return flask.abort(r.status_code)
 
