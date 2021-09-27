@@ -960,10 +960,7 @@ def post_shop():
         mycursor = ssm_connection()
         mycursor.execute(query, values)
         mydb.commit()
-        kassa24_send_query(body)
-        return_dict = dict()
-        return_dict["message"] = "Order with number " + str(body["order_number"]) + " was added."
-        return return_dict
+        return kassa24_send_query(body)
 
 
 @ssm.route("/shop", methods=['GET'])
@@ -1064,4 +1061,4 @@ def kassa24_send_query(inp):
     if r.status_code == 200:
         return flask.redirect(r.json()['url'], code=302)
     else:
-        return r.status_code
+        return flask.abort(r.status_code)
