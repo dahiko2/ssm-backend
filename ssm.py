@@ -961,7 +961,7 @@ def post_shop():
         try:
             mycursor.execute(query, values)
         except mysql.connector.errors.IntegrityError:
-            return_message = "Order with id = "+body['order_number']+" already present in database."
+            return_message = "Order with id = "+str(body['order_number'])+" already present in database."
             return flask.Response("{'error':"+return_message+"}", status=400, mimetype='application/json')
         mydb.commit()
         return kassa24_send_query(body)
