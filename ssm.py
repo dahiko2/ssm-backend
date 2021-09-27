@@ -1044,20 +1044,25 @@ def kassa24_send_query(inp):
     return_url = 'https://maksimsalnikov.pythonanywhere.com/ssm/month_traffic'
     callback_url = 'https://maksimsalnikov.pythonanywhere.com/ssm/kassa24_callback'
     kassa_request_url = "https://ecommerce.pult24.kz/payment/create"
-    headers = {"Authorization": "Basic "+base64.b64encode((fkassa_login+':'+fkassa_password).encode('ascii')).decode('ascii')}
     payload = {
-        "orderId": inp['order_number'],
+        "orderId": str(inp['order_number']),
         "merchantId": fkassa_login,
         "amount": inp['full_price']*100,
         "returnUrl": return_url,
         "callbackUrl": callback_url,
-        'description': inp['basket'],
+        'description': str(inp['basket']),
         'metadata': {'order_id': inp['order_number']},
         'demo': True,
         'customerData': {'email': inp['email'], 'phone': inp['phone']}
     }
-    r = requests.post(url=kassa_request_url, headers=headers, data=payload)
+    headers = {
+        "Authorization": "Basic "+base64.b64encode((fkassa_login+':'+fkassa_password).encode('ascii')).decode('ascii'),
+        "Content-Type": "application/json",
+        "Content-Length": len(payload)
+    }
+    r = requests.post(url=kassa_request_url, headers=headers, json=payload)
     print(r.json())
+    # todo поменять логику у ретерна
     if r.status_code == 200:
         return flask.redirect(r.json()['url'], code=302)
     else:
