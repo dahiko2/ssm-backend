@@ -958,8 +958,11 @@ def post_shop():
 
         global mydb
         mycursor = ssm_connection()
-        # todo try catch
-        mycursor.execute(query, values)
+        try:
+            mycursor.execute(query, values)
+        except mysql.connector.errors.IntegrityError:
+            return_message = "Order with id = "+body['order_number']+" already present in database."
+            return flask.Response("{'error':"+return_message+"}", status=400, mimetype='application/json')
         mydb.commit()
         return kassa24_send_query(body)
 
@@ -981,6 +984,7 @@ def get_shop():
         item['full_price'] = row[5]
         item['rules_ok'] = row[6]
         item['basket'] = row[7]
+        item['payment_status'] = row[11]
         if row[1] == 'доставка':
             item['country'] = row[8]
             item['city'] = row[9]
@@ -999,29 +1003,6 @@ def get_orders_shop_count():
     for row in query_result:
         itemlist[0]["orders_count"] = row[0]
     return json.dumps(itemlist)
-
-
-@ssm.route("/month_traffic", methods=['GET'])
-def get_month_traffic():
-    mycursor = ssm_connection()
-    query = "SELECT * FROM main_month_traffic WHERE All_Traffic IS NOT NULL;"
-    mycursor.execute(query)
-    query_result = mycursor.fetchall()
-    itemlist = []
-    for row in query_result:
-        item = dict()
-        item['id'] = row[0]
-        item['year'] = row[1]
-        item['month'] = row[2]
-        item['all_traffic'] = row[3]
-        item['position_1_name'] = row[4]
-        item['position_1_traffic'] = row[5]
-        item['position_2_name'] = row[6]
-        item['position_2_traffic'] = row[7]
-        item['position_3_name'] = row[8]
-        item['position_3_traffic'] = row[9]
-        itemlist.append(item)
-    return json.dumps(itemlist, indent=4)
 
 
 @ssm.route("/kassa24_callback", methods=['POST'])
@@ -1067,3 +1048,26 @@ def kassa24_send_query(inp):
         return flask.redirect(r.json()['url'], code=302)
     else:
         return flask.abort(r.status_code)
+
+
+@ssm.route("/month_traffic", methods=['GET'])
+def get_month_traffic():
+    mycursor = ssm_connection()
+    query = "SELECT * FROM main_month_traffic WHERE All_Traffic IS NOT NULL;"
+    mycursor.execute(query)
+    query_result = mycursor.fetchall()
+    itemlist = []
+    for row in query_result:
+        item = dict()
+        item['id'] = row[0]
+        item['year'] = row[1]
+        item['month'] = row[2]
+        item['all_traffic'] = row[3]
+        item['position_1_name'] = row[4]
+        item['position_1_traffic'] = row[5]
+        item['position_2_name'] = row[6]
+        item['position_2_traffic'] = row[7]
+        item['position_3_name'] = row[8]
+        item['position_3_traffic'] = row[9]
+        itemlist.append(item)
+    return json.dumps(itemlist, indent=4)
