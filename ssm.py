@@ -12,19 +12,23 @@ fhost = ""
 fuser = ""
 fpass = ""
 fdbname_ssm = ""
+fkassa_login = ""
+fkassa_password = ""
 
 
 def read_creds():
     """
     Построчно считывает данные для подключения к бд из файла credentials.txt.
     """
-    global fhost, fuser, fpass, fdbname_ssm
-    with open("credentials.txt") as f:
-        fhost = f.readline().strip()
-        fuser = f.readline().strip()
-        fpass = f.readline().strip()
-        f.readline()
-        fdbname_ssm = f.readline().strip()
+    global fhost, fuser, fpass, fdbname_ssm, fkassa_login, fkassa_password
+    with open("credentials.json") as f:
+        credentials = json.load(f)
+        fhost = credentials['db_hostname']
+        fuser = credentials['db_user']
+        fpass = credentials['db_password']
+        fdbname_ssm = credentials['db_name_ssm']
+        fkassa_login = credentials['kassa24_login']
+        fkassa_password = credentials['kassa24_password']
 
 
 read_creds()  # Считывает данные для входа при запуске скрипта
@@ -954,7 +958,7 @@ def post_shop():
         mycursor = ssm_connection()
         mycursor.execute(query, values)
         mydb.commit()
-
+        kassa24_send_query()
         return_dict = dict()
         return_dict["message"] = "Order with number " + str(body["order_number"]) + " was added."
         return return_dict
@@ -1018,3 +1022,7 @@ def get_month_traffic():
         item['position_3_traffic'] = row[9]
         itemlist.append(item)
     return json.dumps(itemlist, indent=4)
+
+
+def kassa24_send_query(orderId):
+    pass
