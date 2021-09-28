@@ -50,7 +50,7 @@ def import_to_gsheet():
     sheet = service.spreadsheets()
 
     mycursor = ssm_connection()
-    query = "SELECT * FROM shop;"
+    query = "SELECT * FROM shop ORDER BY order_date ASC;"
     mycursor.execute(query)
     query_res = mycursor.fetchall()
     rowcount = 2
