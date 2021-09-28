@@ -1051,7 +1051,6 @@ def kassa24_send_query(inp):
         "callbackUrl": callback_url,
         'description': description_str,
         'metadata': {'order_id': inp['order_number']},
-        'demo': True,
         'customerData': {'email': inp['email'], 'phone': inp['phone']}
     }
     headers = {
