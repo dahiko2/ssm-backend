@@ -965,7 +965,7 @@ def post_shop():
             return_message = "Order with id = "+str(body['order_number'])+" already present in database."
             return flask.Response("{'error':"+return_message+"}", status=400, mimetype='application/json')
         mydb.commit()
-        subprocess.call(['python3.8', 'update_shop_gsheet.py'])
+        subprocess.call(['python3.8', 'ssm-backend/update_shop_gsheet.py'])
         return kassa24_send_query(body)
 
 
@@ -1032,7 +1032,7 @@ def kassa24_handle_callback():
         response = "Payment with order id = "+str(body['metadata']['order_id'])+" was not completed."
         return response
     response = "Payment with order id = "+str(body['metadata']['order_id'])+" has been completed."
-    subprocess.call(['python3.8', 'update_shop_gsheet.py'])
+    subprocess.call(['python3.8', 'ssm-backend/update_shop_gsheet.py'])
     return response
 
 
