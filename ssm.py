@@ -724,13 +724,12 @@ def add_release():
 @ssm.route("/get_file_<filename>.<ext>", methods=['GET'])
 def get_custom_json_data(filename, ext):
     """
-    todo: разделение считывания по типу файла
     Выводит данные из файла, который хранится в директории data
     Название файла, с которого нужно считать, передается в запросе как параметр.
     Возвращает json-объект, содержимое файла
     :return: json(list[dict])
     """
-    with open("ssm-backend/data/"+filename) as f:
+    with open("ssm-backend/data/"+filename+'.'+ext) as f:
         data = f.read()
     if data is not None:
         if ext == 'html':
