@@ -473,10 +473,10 @@ def get_yt_trends():
     :return: json
     """
     mycursor = ssm_connection()
-    query = "SELECT id, video_name, channel, views, place FROM youtube_trends WHERE DATE(date) = CURDATE() ORDER BY date DESC;"
+    query = "SELECT id, video_name, channel, views, place, youtube_id, youtube_retention, youtube_CTR, youtube_male, youtube_female, youtube_shows, youtube_AVBU, youtube_country_retention FROM youtube_trends WHERE DATE(date) = CURDATE() ORDER BY date DESC;"
     mycursor.execute(query)
     if mycursor.rowcount == 0:  # Костыль. Фиксит ошибку которая не показывает никакие видосы ночью нового дня.
-        query = "SELECT id, video_name, channel, views, place FROM youtube_trends WHERE DATE(date) = DATE_SUB(CURDATE(), INTERVAL 1 DAY) ORDER BY date DESC;"
+        query = "SELECT id, video_name, channel, views, place, youtube_id, youtube_retention, youtube_CTR, youtube_male, youtube_female, youtube_shows, youtube_AVBU, youtube_country_retention FROM youtube_trends WHERE DATE(date) = DATE_SUB(CURDATE(), INTERVAL 1 DAY) ORDER BY date DESC;"
         mycursor.execute(query)
     query_result = mycursor.fetchall()
     itemlist = []
@@ -486,6 +486,14 @@ def get_yt_trends():
         item["channel"] = row[2]
         item["views"] = row[3]
         item["place"] = row[4]
+        item["youtube_id"] = row[5]
+        item["youtube_retention"] = row[6]
+        item["youtube_CTR"] = row[7]
+        item["youtube_male"] = row[8]
+        item["youtube_female"] = row[9]
+        item["youtube_shows"] = row[10]
+        item["youtube_AVBU"] = row[11]
+        item["youtube_country_retention"] = row[12]
         itemlist.append(item)
     return json.dumps(itemlist, indent=4)
 
