@@ -721,28 +721,28 @@ def add_release():
         flask.abort(400)
 
 
-@ssm.route("/get_custom_data", methods=['POST'])
-def get_custom_json_data():
+@ssm.route("/get_file_<filename>.<ext>", methods=['GET'])
+def get_custom_json_data(filename, ext):
     """
-    Выводит данные из json файла, который хранится в директории проекта
-    Название файла, с которого нужно считать, передается в теле запроса как параметр type. {"type":"genesis"}
+    todo: разделение считывания по типу файла
+    Выводит данные из файла, который хранится в директории data
+    Название файла, с которого нужно считать, передается в запросе как параметр.
     Возвращает json-объект, содержимое файла
     :return: json(list[dict])
     """
-    body = flask.request.get_json()
-    if body is None:
-        flask.abort(401)
-    try:
-        type_ = body["type"]
-    except KeyError:
-        flask.abort(401)
-    else:
-        with open("ssm-backend/data/"+type_+'.json') as f:
-            data = json.load(f)
-        if data is not None:
-            return data
+    with open("ssm-backend/data/"+filename) as f:
+        data = f.read()
+    if data is not None:
+        if ext == 'html':
+            item = dict()
+            item['html'] = data
+            return json.dumps(item, indent=4)
+        elif ext == 'json':
+            return json.dumps(json.loads(data), indent=4)
         else:
-            flask.abort(404)
+            flask.abort(400)
+    else:
+        flask.abort(404)
 
 
 @ssm.route("/get_pr_status", methods=['GET'])

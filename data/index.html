@@ -1,0 +1,1706 @@
+<style>
+
+  /* #ef591c - orange*/
+  /* #302c2d - grey */
+
+  body {
+    margin: 0;
+    background-color: #1a1a1a;
+    overflow-y: scroll;
+  }
+
+  .shop_body {
+    display: flex;
+    flex-direction: column;
+    overflow-y: scroll;
+  }
+
+  .main {
+    width: 100vw;
+    max-width: 1440px;
+    padding-bottom: 150px;
+    background-color: #1a1a1a;
+    margin: auto;
+    position: relative;
+  }
+
+  .shop {
+    width: 100%;
+    min-height: 10vh;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-template-rows: auto;
+    gap: 20px auto;
+  }
+
+  .good_container { /* Контейнер одного товара в магазине */
+    position: relative;
+    width: 90%;
+    height: 700px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    background-color: white;
+    margin: 30px auto 0;
+  }
+
+  .point_image {
+    width: 100%;
+    height: 55%;
+    object-fit: cover;
+    object-position: center center;
+    margin: 0;
+  }
+
+  .point_title {
+    width: 100%;
+    height: max-content;
+    color: black;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    text-align: center;
+    font-size: 20px;
+    font-weight: bold;
+    margin: 30px auto 0;
+  }
+
+  .point_subtitle {
+    width: 80%;
+    height: max-content;
+    color: black;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    text-align: black;
+    font-size: 16px;
+    font-weight: normal;
+    margin: 20px auto 0;
+  }
+
+  .point_price {
+    width: 80%;
+    height: max-content;
+    color: black;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    text-align: start;
+    font-size: 16px;
+    font-weight: bold;
+    margin: 20px auto 0;
+  }
+
+  .point_size {
+    width: 80%;
+    height: max-content;
+    color: black;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    text-align: start;
+    font-size: 16px;
+    font-weight: bold;
+    margin: 20px auto 0;
+  }
+
+  .point_size_selector {
+    width: max-content;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    text-align: center;
+    background-color: white;
+    outline: none;
+    border: 1px solid black;
+    font-size: 16px;
+    border-radius: 30px;
+    padding: 0 10px 0;
+    margin: 0 0 0 20px;
+  }
+
+  .point_size_option {
+    color: black;
+    text-decoration: none;
+  }
+
+  .point_button {
+    width: 170px;
+    height: 40px;
+    color: white;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    text-align: center;
+    cursor: pointer;
+    font-size: 18px;
+    line-height: 1;
+    font-weight: 300;
+    text-transform: lowercase;
+    background-color: #ef591c;
+    border-radius: 30px;
+    margin: 30px auto 0;
+    padding-top: 20px;
+  }
+
+  .point_button:hover {
+    box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.466);
+  }
+
+  .point_button:active {
+    background-color: white;
+    color: black;
+  }
+
+  .post_button_container {
+    width: 100%;
+    min-height: max-content;
+    display: flex;
+    flex-direction: row;
+    margin: 30px auto;
+  }
+
+  .post_button {
+    width: 170px;
+    height: 30px;
+    color: black;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    text-align: center;
+    cursor: pointer;
+    font-size: 18px;
+    font-weight: 300;
+    text-transform: lowercase;
+    background-color: white;
+    border-radius: 30px;
+    margin: 20px auto;
+    padding-top: 7px;
+  }
+
+  .post_button_active {
+    background-color: #ef591c;
+    color: white;
+  }
+
+  .post_button:hover {
+    box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.466);
+  }
+
+  .post_button:active {
+    background-color: white;
+    color: black;
+  }
+
+  .post_form_container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    min-height: 100%;
+    padding: 10px 0 100px;
+    overflow-y: scroll;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    margin: 0 auto;
+    background-color: #1a1a1a;
+    z-index: 98;
+  }
+
+  .form_visual_container {
+    width: 600px;
+    display: flex;
+    flex-direction: column;
+    margin: 0 auto;
+  }
+
+  .post_form_title {
+    width: 100%;
+    height: max-content;
+    color: white;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    text-align: center;
+    font-size: 20px;
+    font-weight: normal;
+    margin: 30px auto 0;
+  }
+
+  .post_form_input_title {
+    width: 100%;
+    color: white;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    text-align: start;
+    font-size: 16px;
+    font-weight: normal;
+    margin: 15px auto 0;
+  }
+
+  .post_form_rules {
+    width: 100%;
+    color: white;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    text-align: start;
+    font-size: 16px;
+    font-weight: normal;
+    margin: 15px auto 0;
+  }
+
+  .post_form_rules_checkbox {
+    width: 16px;
+    height: 16px;
+    color: white;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    text-align: start;
+    font-size: 16px;
+    font-weight: normal;
+    margin: 0 10px 0 0;
+    cursor: pointer;
+  }
+
+  .post_form_final_price {
+    width: 100%;
+    color: white;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    text-align: start;
+    font-size: 16px;
+    font-weight: normal;
+    margin: 30px auto 0;
+  }
+
+  .post_form_input {
+    width: 100%;
+    height: 30px;
+    color: black;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    text-align: start;
+    font-size: 16px;
+    font-weight: normal;
+    margin: 10px auto 0;
+    outline: none;
+    padding: 0;
+    border: 0;
+  }
+
+  .post_form_input_selector {
+    width: 98%;
+  }
+
+  .post_form_button {
+    width: 170px;
+    height: 50px;
+    text-decoration: none;
+    color: white;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    text-align: center;
+    cursor: pointer;
+    font-size: 18px;
+    font-weight: 300;
+    text-transform: lowercase;
+    border: none;
+    background-color: #ef591c;
+    border-radius: 30px;
+    margin: 30px auto;
+  }
+
+  .post_form_button:hover {
+    box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.466);
+  }
+
+  .post_form_button:active {
+    background-color: white;
+    color: black;
+  }
+
+  .basket {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    width: 70px;
+    height: 70px;
+    background-color: #ef591c;
+    border-radius: 40px;
+    cursor: pointer;
+    background-image: url('https://static.tildacdn.com/tild6335-3161-4365-a465-343565353965/shopping-basket.svg');
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: 40px 40px;
+    z-index: 100;
+  }
+
+  .post_basket {
+    position: relative;
+    width: 100%;
+    height: max-content;
+    display: flex;
+    flex-direction: column;
+    margin: 10px auto 0;
+    justify-content: flex-start;
+  }
+
+  .basket_good_element {
+    position: relative;
+    width: 100%;
+    height: max-content;
+    display: flex;
+    flex-direction: column;
+    margin: 10px auto 0;
+    justify-content: flex-start;
+  }
+  
+  .basket_good_title, .basket_good_price, .basket_good_size {
+    width: 50%;
+    color: white;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    text-align: start;
+    font-size: 16px;
+    font-weight: normal;
+    margin: 5px 0 0;
+  }
+
+  .post_form_input_title_alert {
+    width: 100%;
+    color: red;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    text-align: start;
+    font-size: 14px;
+    font-weight: normal;
+    margin: 5px 0 0;
+  }
+
+  .basket_good_delete_button {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 20%;
+    height: 30px;
+    padding-top: 5px;
+    background-color: #ef591c;
+    box-sizing: border-box;
+    border-radius: 30px;
+    color: white;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    text-align: center;
+    font-size: 16px;
+    font-weight: normal;
+    margin: 10px 0;
+    cursor: pointer;
+  }
+
+  .basket_good_delete_button:hover {
+    box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.466);
+  }
+
+  .basket_good_delete_button:active {
+    background-color: white;
+    color: black;
+  }
+
+  .basket_length {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    text-align: center;
+    font-size: 22px;
+    font-weight: normal;
+    margin: auto 0 auto 75px;
+    color: #ef591c;
+  }
+
+  .loading_container {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 100vw;
+    height: 100vh;
+    display: none;
+    flex-direction: column;
+    margin: auto;
+    background-color: #302c2d;
+    z-index: 10;
+  }
+
+
+  .loading_container_active {
+    display: flex;
+  }
+
+  .loading_gif{
+    width: 60px;
+    height: 60px;
+    display: flex;
+    flex-direction: column;
+    margin: auto;
+    background-image: url('https://static.tildacdn.com/tild3632-3433-4262-b232-376531336263/6.gif');
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: contain;
+  }
+
+  .display_none {
+    display: none;
+  }
+
+  .unselectable {  
+    -webkit-touch-callout: none; /* iOS Safari */  
+    -webkit-user-select: none;   /* Chrome/Safari/Opera */  
+    -khtml-user-select: none;    /* Konqueror */  
+    -moz-user-select: none;      /* Firefox */  
+    -ms-user-select: none;       /* Internet Explorer/Edge */  
+    user-select: none;           /* Non-prefixed version, currently not supported by any browser */
+  }
+
+  @media screen and (max-width: 1200px) {
+
+    .good_container {
+      max-height: 600px;
+    }
+
+    .point_image {
+      height: 60%;
+    }
+
+    .good_container {
+      max-height: 500px;
+    }
+
+    .post_button {
+      width: 40%;
+    }
+
+    .point_image {
+      height: 60%;
+    }
+
+    .point_title {
+      font-size: 18px;
+      margin: 10px auto 0;
+    }
+
+    .point_subtitle {
+      font-size: 16px;
+      margin: 10px auto 0;
+    }
+
+    .point_price {
+      font-size: 16px;
+      margin: 10px auto 0;
+    }
+
+    .point_size {
+      font-size: 16px;
+      margin: 10px auto 0;
+    }
+
+    .point_size_selector {
+      font-size: 16px;
+      margin: 0;
+    }
+
+    .point_button {
+      width: 80%;
+      height: 30px;
+      font-size: 16px;
+      margin: 15px auto;
+      padding-top: 12px;
+    }
+
+    .basket {
+      width: 50px;
+      height: 50px;
+      background-size: 30px 30px;
+    }
+
+    .basket_good_title, .basket_good_price, .basket_good_size {
+      font-size: 14px;
+    }
+
+    .basket_good_delete_button {
+      font-size: 14px;
+    }
+
+    .basket_length {
+      font-size: 18px;
+      margin: auto 0 auto 50px;
+      color: #ef591c;
+    }
+
+  }
+  
+  @media screen and (max-width: 900px) {
+
+    .shop {
+      grid-template-columns: repeat(3, 1fr);
+    }
+
+    .good_container {
+      max-height: 500px;
+    }
+
+    .post_button {
+      width: 40%;
+    }
+
+    .point_image {
+      height: 60%;
+    }
+
+    .point_title {
+      font-size: 16px;
+      margin: 10px auto 0;
+    }
+
+    .point_subtitle {
+      font-size: 14px;
+      margin: 10px auto 0;
+    }
+
+    .point_price {
+      font-size: 14px;
+      margin: 10px auto 0;
+    }
+
+    .point_size {
+      font-size: 14px;
+      margin: 10px auto 0;
+    }
+
+    .point_size_selector {
+      font-size: 14px;
+      margin: 0;
+    }
+
+    .point_button {
+      width: 80%;
+      height: 30px;
+      font-size: 14px;
+      margin: 15px auto;
+      padding-top: 12px;
+    }
+
+    .basket {
+      width: 50px;
+      height: 50px;
+      background-size: 30px 30px;
+    }
+
+    .basket_good_title, .basket_good_price, .basket_good_size {
+      font-size: 14px;
+    }
+
+    .basket_good_delete_button {
+      font-size: 14px;
+    }
+
+    .basket_length {
+      font-size: 18px;
+      margin: auto 0 auto 50px;
+      color: #ef591c;
+    }
+
+  }
+
+  @media screen and (max-width: 600px) {
+    
+    .form_visual_container {
+      width: 85%;
+    }
+
+    .post_button {
+      width: 40%;
+    }
+
+    .shop {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .good_container {
+      max-height: 400px;
+    }
+
+    .point_image {
+      height: 50%;
+    }
+
+    .point_title {
+      font-size: 14px;
+      margin: 10px auto 0;
+    }
+
+    .point_subtitle {
+      font-size: 12px;
+      margin: 5px auto 0;
+    }
+
+    .point_price {
+      font-size: 12px;
+      margin: 5px auto 0;
+    }
+
+    .point_size {
+      font-size: 12px;
+      margin: 5px auto 0;
+    }
+
+    .point_size_selector {
+      font-size: 12px;
+      margin: 0;
+    }
+
+    .point_button {
+      width: 80%;
+      height: 30px;
+      font-size: 14px;
+      margin: 15px auto;
+    }
+
+    .basket {
+      width: 50px;
+      height: 50px;
+      background-size: 30px 30px;
+    }
+
+    .basket_good_title, .basket_good_price, .basket_good_size {
+      font-size: 14px;
+    }
+
+    .basket_good_delete_button {
+      font-size: 14px;
+    }
+
+    .basket_length {
+      font-size: 18px;
+      margin: auto 0 auto 50px;
+      color: #ef591c;
+    }
+  }
+
+</style>
+
+<section class="shop_body">
+  <main class="main">
+    <section class="shop">
+      <!-- Тестовый магазин -->
+    </section>
+    <section class="post_form_container display_none" id="post_form_container">
+      <form class="form_visual_container" name="order_form" id="order_form">
+        <h2 class="post_form_title">Корзина</h2>
+        <div class="post_button_container">
+          <p class="post_button unselectable post_button_active" id="choose_post" onclick="choosePost()">Доставка</p>
+          <p class="post_button unselectable" id="choose_self" onclick="chooseSelf()">Самовывоз</p>
+        </div>
+        <div class="post_basket" id="post_basket">
+          <!-- Сюда полетят товары -->
+        </div>
+        <h2 class="post_form_title">Заполните поля для оплаты заявки</h2>
+        <p class="post_form_input_title">ФИО</p>
+        <p class="post_form_input_title_alert" id="name_input_alert">Заполните поле ФИО</p>
+        <input  type="text" class="post_form_input" id="post_form_name" placeholder="   Александр">
+        <p class="post_form_input_title">Телефон</p>
+        <p class="post_form_input_title_alert" id="phone_input_alert">Заполните номер телефона</p>
+        <input  type="text" class="post_form_input" id="post_form_phone" placeholder="   +77470430101">
+        <p class="post_form_input_title">Email</p>
+        <p class="post_form_input_title_alert" id="email_input_alert">Заполните E-mail</p>
+        <input  type="email" class="post_form_input" id="post_form_email" placeholder="   mymail@email.com">
+        <p class="post_form_input_title" id="contry_title">Страна</p>
+        <p class="post_form_input_title_alert" id="contry_subtitle_alert">Внимание! Доставка в города за границей Казахстана рассчитывается и оплачивается отдельно!</p>
+        <select  class="post_form_input post_form_input_selector" id="post_form_contry" onchange="createCityElement()">
+          <option value="KAZ">  Казахстан</option>
+          <option value="RUS">  Россия</option>
+          <option value="KGZ">  Кыргызстан</option>
+          <option value="UZB">  Узбекистан</option>
+          <option value="TAD">  Таджикистан</option>
+          <option value="UKR">  Украина</option>
+          <option value="AMR">  Армения</option>
+          <option value="BLR">  Белоруссия</option>
+          <option value="GRU">  Грузия</option>
+          <option value="IZR">  Израиль</option>
+          <option value="KOR">  Корея</option>
+          <option value="LAT">  Латвия</option>
+          <option value="LIT">  Литва</option>
+          <option value="OAE">  ОАЭ</option>
+          <option value="POL">  Польша</option>
+          <option value="TURKM">  Туркмения</option>
+          <option value="TUR">  Турция</option>
+          <option value="EST">  Эстония</option>
+          <option value="ABH">  Абхазия</option>
+          <option value="CHI">  Китай</option>
+          <option value="ANOTHER">  Другое</option>
+        </select>
+        <p class="post_form_input_title" id="city_title">Город</p>
+        <p class="post_form_input_title_alert" id="city_input_alert">Заполните название города</p>
+        <input type="text" class="post_form_input" id="post_form_city_input" placeholder="   Город">
+        <select type="text" class="post_form_input post_form_input_selector" id="post_form_city" onchange="checkBasket()">
+          
+        </select>
+        <p class="post_form_input_title" id="adress_title">Улица, Дом, Квартира</p>
+        <p class="post_form_input_title_alert" id="adress_input_alert">Заполните адрес</p>
+        <input  type="text" class="post_form_input" id="post_form_adress" placeholder="   Абая, 1, 1">
+        <p class="post_form_final_price">Стоимость вместе с доставкой: ... тг.</p>
+        <p class="post_form_input_title_alert" id="rules_checkbox_alert">Нужно согласиться с правилами оферты</p>
+        <p class="post_form_rules" id="post_form_rules"><input type="checkbox" class="post_form_rules_checkbox" value="rules_true" id="post_form_rules_checkbox"/>    Я согласен с <a href="https://docs.google.com/document/d/164flFtd780FlZz9w_anctS_rRKOZFDL0/edit?usp=sharing&ouid=103980450696488408000&rtpof=true&sd=true" target="_blank" style="color: #ef591c; text-decoration: none;">правилами оферты</a></p>
+        <button type="submit" class="post_form_button unselectable" id="post_form_button">заказать</button>
+      </form>
+    </section>
+    <div class="basket" onclick="showBasket()">
+      <p class="basket_length unselectable" id="basket_length">0</p>
+    </div>
+    <section class="loading_container" id="loading_container">
+      <div class="loading_gif" id="loading_gif"></div>
+    </section>
+  </main>
+</section>
+
+<script>
+
+  function showChecked(value){
+    console.log(value)
+  }
+
+  let shopList = [
+    {
+      'id': '000004',
+      'name': 'Футболка SHEKER', // название
+      'about': 'Хлопок 95%, Эластан 5%, Зелёная, Модель оверсайз', // описание
+      'price': 9000, // цена
+      'weight': 0.3, // вес
+      'width': 26, // ширина
+      'height': 3, // высота
+      'depth': 26, // глубина
+      'photo': [
+        'https://static.tildacdn.com/tild3865-3231-4335-b338-396135326130/011.jpg',
+        'https://static.tildacdn.com/tild3333-3363-4361-b862-663830316630/005.jpg',
+        'https://static.tildacdn.com/tild6233-3539-4332-b033-623137373133/004.jpg',
+        'https://static.tildacdn.com/tild3338-3561-4138-b964-356231636337/008.jpg'
+      ],
+      'size': [
+        'оверсайз',
+      ],
+    }, 
+    {
+      'id': '000005',
+      'name': 'Худи SHEKER 2', // название
+      'about': 'ПРЕДЗАКАЗ! Утеплённая, Модель оверсайз, Унисекс', // описание
+      'price': 19000, // цена
+      'weight': 0.6, // вес
+      'width': 30, // ширина
+      'height': 7, // высота
+      'depth': 30, // глубина
+      'photo': [
+        'https://static.tildacdn.com/tild6235-6663-4031-a637-383639646337/C3F82701-3926-457F-A.jpeg',
+        'https://static.tildacdn.com/tild3330-3234-4561-b338-636234613035/3028FB25-06E1-45AF-B.jpeg',
+        'https://static.tildacdn.com/tild6136-6539-4232-a536-373539613131/6ECCE351-6A7D-42CD-9.jpeg',
+        'https://static.tildacdn.com/tild6538-3766-4638-a539-663535633866/3542E94A-3B21-4BBF-B.jpeg',
+        'https://static.tildacdn.com/tild3031-6436-4237-b135-653539396363/8A3AD2DE-9238-432C-A.jpeg',
+        'https://static.tildacdn.com/tild3330-3761-4432-b762-373934626334/209B3706-93E1-4EB0-9.jpeg',
+        'https://static.tildacdn.com/tild3564-3561-4437-b264-393032643833/85222A7D-4F6B-45BE-B.jpeg',
+      ],
+      'size': [
+        'оверсайз',
+      ],
+    },
+    {
+      'id': '000001',
+      'name': 'Маска Salem Social Media', // название
+      'about': 'Хлопок 95%, Эластан 5%, черный цвет', // описание
+      'price': 1690, // цена
+      'weight': 0.1, // вес
+      'width': 15, // ширина
+      'height': 0.1, // высота
+      'depth': 10, // глубина
+      'photo': [
+        'https://static.tildacdn.com/tild3335-6666-4361-a232-633633623137/IMG_2217_2.jpg',
+      ],
+      'size': [
+        'стандартная',
+      ],
+    }, 
+    {
+      'id': '000002',
+      'name': 'Футболка Qarapaıym Qaırat', // название
+      'about': 'Хлопок 95%, Эластан 5%, черный цвет', // описание
+      'price': 6190, // цена
+      'weight': 0.3, // вес
+      'width': 26, // ширина
+      'height': 3, // высота
+      'depth': 26, // глубина
+      'photo': [
+        'https://static.tildacdn.com/tild6138-3637-4531-b165-613931316564/__2021-09-23__112149.png',
+      ],
+      'size': [
+        'M',
+        'L',
+        'XL',
+        '2XL',
+      ]
+    }, 
+  ];
+
+  let citysListKAZ = [
+    {
+      'name': 'Алматы',
+      'price': 1200,
+    },
+    {
+      'name': 'Нур-Султан',
+      'price': 1800,
+    },
+    {
+      'name': 'Каскелен',
+      'price': 1800,
+    },
+    {
+      'name': 'Талгар',
+      'price': 1800,
+    },
+    {
+      'name': 'Караганда',
+      'price': 1800,
+    },
+    {
+      'name': 'Шымкент',
+      'price': 1800,
+    },
+    {
+      'name': 'Актау',
+      'price': 1800,
+    },
+    {
+      'name': 'Атырау',
+      'price': 1800,
+    },
+    {
+      'name': 'Актобе',
+      'price': 1800,
+    },
+    {
+      'name': 'Уральск',
+      'price': 1800,
+    },
+    {
+      'name': 'Павлодар',
+      'price': 1800,
+    },
+    {
+      'name': 'Усть-Каменгорск',
+      'price': 1800,
+    },
+    {
+      'name': 'Семей',
+      'price': 1800,
+    },
+    {
+      'name': 'Петропавловск',
+      'price': 1800,
+    },
+    {
+      'name': 'Аксу',
+      'price': 1800,
+    },
+    {
+      'name': 'Аксай',
+      'price': 1800,
+    },
+    {
+      'name': 'Желказган',
+      'price': 1800,
+    },
+    {
+      'name': 'Кокшетау',
+      'price': 1800,
+    },
+    {
+      'name': 'Костанай',
+      'price': 1800,
+    },
+    {
+      'name': 'Кызылорда',
+      'price': 1800,
+    },
+    {
+      'name': 'Лисаковск',
+      'price': 1800,
+    },
+    {
+      'name': 'Рудный',
+      'price': 1800,
+    },
+    {
+      'name': 'Сатпаев',
+      'price': 1800,
+    },
+    {
+      'name': 'Талдыкорган',
+      'price': 1800,
+    },
+    {
+      'name': 'Тараз',
+      'price': 1800,
+    },
+    {
+      'name': 'Темиртау',
+      'price': 1800,
+    },
+    {
+      'name': 'Шахтинск',
+      'price': 1800,
+    },
+    {
+      'name': 'Экибастуз',
+      'price': 1800,
+    },
+  ];
+
+  let basketList = []; // Глобальный список покупок
+  const postBasketElement = document.querySelector('#post_basket'); // Корзина в форме заказа
+  const finalPriceElement = document.querySelector('.post_form_final_price'); // Сюда пишем финальную цену
+  const contryTitleElement = document.querySelector('#contry_title'); // Заголовок выбора страны
+  const contryElement = document.querySelector('#post_form_contry'); // Элемент страны
+  const cityTitleElement = document.querySelector('#city_title'); // Заголовок выбора города
+  const cityElement = document.querySelector('#post_form_city'); // Элемент города
+  const cityElementInput = document.querySelector('#post_form_city_input'); // Вводим руками город
+  const adressTitleElement = document.querySelector('#adress_title'); // Заголовок выбора адреса
+  const contryAlertElement = document.querySelector('#contry_subtitle_alert'); // Алерт про отправку в другие страны
+  const adressElement = document.querySelector('#post_form_adress'); // Сюда пишем адресс
+  const formContainer = document.querySelector('#post_form_container'); // Страница корзины
+  const basketLengthElement = document.querySelector('#basket_length'); // Количество товаров в корзине
+
+  const choosePostButton = document.querySelector('#choose_post'); // Кнопка доставки
+  const chooseSelfButton = document.querySelector('#choose_self'); // Кнопка самовывоз
+
+  const mainForm = document.querySelector('.form_visual_container'); // Форма
+
+  mainForm.reset(); // Очисти форму
+
+  let globalFinalCash = 0; // Глобавльная переменная финальной стоимости
+  let startBasketId = 0; // Сюда добавляем количество товаров в корзине
+  let chossePost = true;
+
+  /* Посчитай товары в корзину */
+  function updateBasketLength() {
+
+    basketLengthElement.textContent = 0;
+
+    let basketLengthStart = 0;
+
+    basketList.forEach((goodObj) => {
+
+      basketLengthStart += 1;
+
+    });
+
+    basketLengthElement.textContent = basketLengthStart;
+
+  }
+
+  /* Включи страницу корзины */
+  function showBasket() {
+
+    formContainer.classList.toggle('display_none');
+
+  }
+
+  /* Доставка или самовывоз */
+  function postOrSelf() {
+
+    if ( chossePost === true ) { // Выбрана доставка
+
+      contryTitleElement.classList.remove('display_none');
+      contryElement.classList.remove('display_none');
+      cityTitleElement.classList.remove('display_none');
+      cityElementInput.classList.remove('display_none');
+      cityElement.classList.remove('display_none');
+      adressTitleElement.classList.remove('display_none');
+      adressElement.classList.remove('display_none');
+
+    } else {
+
+      contryTitleElement.classList.add('display_none');
+      contryElement.classList.add('display_none');
+      cityTitleElement.classList.add('display_none');
+      cityElementInput.classList.add('display_none');
+      cityElement.classList.add('display_none');
+      adressTitleElement.classList.add('display_none');
+      adressElement.classList.add('display_none');
+      contryAlertElement.classList.add('display_none');
+
+    }
+
+  }
+
+  postOrSelf(); // Сразу проверяем включенную доставку
+
+  /* Включи доставку */
+  function choosePost() {
+
+    choosePostButton.classList.add('post_button_active');
+    chooseSelfButton.classList.remove('post_button_active');
+
+    chossePost = true;
+
+    postOrSelf();
+
+    createCityElement();
+
+    checkBasket();
+
+  }
+
+  /* Включи самовывоз */
+  function chooseSelf() {
+
+    choosePostButton.classList.remove('post_button_active');
+    chooseSelfButton.classList.add('post_button_active');
+
+    chossePost = false;
+
+    postOrSelf();
+
+    checkBasket();
+
+  }
+
+  /* Заполняем магазин товарами */
+  const shopContainer = document.querySelector('.shop');
+
+  shopList.forEach((goodObj) => {
+
+    let goodElement = document.createElement('div');
+    goodElement.classList.add('good_container');
+    goodElement.innerHTML = `
+    <image src="${goodObj.photo[0]}" class="point_image"/>
+    <p class="point_title" id="point_title">${goodObj.name}</p>
+    <p class="point_subtitle" id="point_subtitle">${goodObj.about}</p>
+    <p class="point_price" id="point_price">Цена: ${goodObj.price.toLocaleString('ru-RU')} тг.</p>
+    <p class="point_size" id="point_size">Размер: <select class="point_size_selector" id="point_size_selector"></selector></p>
+    <p class="point_button unselectable" id="${goodObj.id}">Заказать</p>
+    `;
+
+    let pointPriceSelectorElement = goodElement.querySelector('#point_size_selector');
+    goodObj.size.forEach((size) => {
+
+      let sizeElement = document.createElement('option');
+      sizeElement.classList.add('point_size_option');
+      sizeElement.value = size;
+      sizeElement.textContent = size;
+      pointPriceSelectorElement.append(sizeElement);
+
+    })
+
+    let pointButton = document.createElement('p');
+    pointButton.classList.add('point_button');
+    pointButton.id = goodObj.id;
+    pointButton.textContent = 'Заказать';
+
+    goodElement.append(pointButton);
+
+    shopContainer.append(goodElement);
+
+  });
+
+  /* Вешаем слушатели на товары для добавление в корзину */
+
+  // Отображаем список городов
+  function createCityElement() {
+
+    cityElement.innerHTML = null;
+
+    if ( contryElement.value === 'KAZ' ) {
+
+      cityElementInput.classList.add('display_none');
+      cityElement.classList.remove('display_none');
+      contryAlertElement.classList.add('display_none');
+
+      citysListKAZ.forEach((city) => {
+
+        let cityObj = document.createElement('option');
+        cityObj.value = city.name;
+        cityObj.textContent = ' ' + city.name;
+
+        cityElement.append(cityObj);
+
+      })
+
+    } else {
+
+      cityElementInput.classList.remove('display_none');
+      cityElement.classList.add('display_none');
+      contryAlertElement.classList.remove('display_none');
+
+    }
+
+    checkBasket();
+
+  }
+
+  createCityElement();
+
+  // Отобрази товары в корзине и посчитай доставку
+  function checkBasket() {
+
+    console.log(basketList);
+
+    postBasketElement.innerHTML = null;
+
+    let startID = 0; // ID товаров
+
+    let finalCash = 0; // финальный кэш
+
+    let finalWeight = 0; // финальный вес
+
+    let postFinalCash = 0; // Финальная стоимость доставки
+
+    basketList.forEach((goodObj) => {
+
+      let goodElement = document.createElement('div');
+      goodElement.classList.add('basket_good_element');
+      
+      goodElement.innerHTML = `
+      <p class="basket_good_title">${goodObj.name}</p>
+      <p class="basket_good_price">Цена: ${goodObj.price.toLocaleString('ru-RU')} тг.</p>
+      <p class="basket_good_size">Размер: ${goodObj.size}</p>
+      <p class="basket_good_delete_button unselectable" id="${goodObj.basket_id}" onclick="deleteGoodFromBasket(this)">убрать</p>
+      <p class="basket_good_price">____________________</p>
+      `;
+
+      postBasketElement.append(goodElement);
+
+      finalWeight += goodObj.weight;
+      finalCash += goodObj.price;
+      startID += 1;
+
+    })
+
+    // Считаем стоимость доставки
+    console.log(cityElement.value)
+
+    if ( finalWeight < 5 && chossePost === true ) {
+
+      let actualCity = citysListKAZ.find((city) => {
+
+        if ( city.name === cityElement.value ) {
+
+          return city;
+
+        }
+
+      })
+
+      console.log(actualCity);
+
+      postFinalCash = actualCity ? actualCity.price : 0; // стоимость доставки
+
+    } else if ( finalWeight >= 5 && finalWeight <= 10 && chossePost === true ) {
+
+      let actualCity = citysListKAZ.find((city) => {
+
+        if ( city.name === cityElement.value ) {
+
+          return city;
+
+        }
+
+      })
+
+      console.log(actualCity);
+
+      postFinalCash = cityElement.name === 'Алматы' ? Number(actualCity.price) + 300 : Number(actualCity.price) + 700; // стоимость доставки
+
+    } else if ( finalWeight > 10 && chossePost === true ) {
+
+      console.log(Math.round(finalWeight));
+
+      let actualCity = citysListKAZ.find((city) => {
+
+        if ( city.name === cityElement.value ) {
+
+          return city;
+
+        }
+
+      })
+
+      console.log(actualCity);
+
+      postFinalCash = cityElement.name === 'Алматы' ? Number(actualCity.price) + 300 + (85 * Math.round(finalWeight)) : Number(actualCity.price) + 700 + (150 * Math.round(finalWeight)); // стоимость доставки
+
+    }
+
+    globalFinalCash = finalCash > 0 ? postFinalCash + finalCash : 0;
+
+    let actualCity = cityElement.value; // Введенный город
+
+    console.log(`Финальная стоимость доставки: ${postFinalCash}`);
+    console.log(`Финальный вес: ${finalWeight.toFixed(2)}`);
+    console.log(`Финальный кэш: ${finalCash}`);
+
+    finalPriceElement.textContent = `Стоимость вместе с доставкой: ${globalFinalCash.toLocaleString('ru-RU')} тг.`;
+
+    updateBasketLength();
+
+  }
+
+  // Клади товар в корзину
+  function putGoodToBasket(evt) {
+
+    console.log(evt.target);
+
+    let id = evt.target.id;
+
+    let goodSize = evt.target.closest('.good_container').querySelector('#point_size_selector').value;
+
+    let actualGood = shopList.find((goodObj) => {
+
+      if ( goodObj.id === id ) {
+        return goodObj;
+      }
+
+    });
+
+    let actualGoodForBasket = {
+      'id': actualGood.id,
+      'name': actualGood.name,
+      'about': actualGood.about,
+      'price': actualGood.id !== '000005' ? actualGood.price : 0 ,
+      'weight': actualGood.weight,
+      'width': actualGood.width,
+      'height': actualGood.height,
+      'depth': actualGood.depth,
+      'basket_id': startBasketId,
+      'size': goodSize,
+    };
+
+    basketList.push(actualGoodForBasket);
+
+    startBasketId += 1; // Обновляем счёт количества товаров в корзине
+
+    console.log(basketList);
+
+    checkBasket(); // Считаем корзину
+
+  }
+
+  // Вешай слушатель добавления товара в корзину
+  let allGoodElements = document.querySelectorAll('.point_button');
+
+  allGoodElements.forEach((buttonElement) => {
+
+    buttonElement.addEventListener('click', putGoodToBasket);
+
+  })
+
+
+  /* Удали товар из корзины */ 
+  function deleteGoodFromBasket(element) {
+
+    let newBasketList = []; // Новая корзина
+
+    let goodObj = basketList.find((good) => { // Элемент товара из корзины
+
+      if ( +element.id === good.basket_id ) {
+
+        return good;
+
+      }
+
+    }); 
+
+    basketList.forEach((good) => {
+
+      if ( good.basket_id !== +element.id ) {
+
+        newBasketList.push(good);
+
+      }
+
+    })
+
+    basketList = newBasketList; // Обновляем список корзины
+
+    let goodElement = element.closest('.basket_good_element');
+
+    goodElement.parentNode.removeChild(goodElement);
+
+    checkBasket();
+
+  }
+
+  /* Узнаем количество заказов в базе, чтобы собрать уникальный ID */
+
+  let orderURL = 'https://maksimsalnikov.pythonanywhere.com/ssm/shop';
+
+  let orderNumber = 0;
+
+  function setOrderNumber(number) {
+    orderNumber = number + 1;
+  }
+
+  function createOrderId() {
+
+    var myHeaders = new Headers();
+    myHeaders.append("Content-Type", "application/json");
+
+    fetch(`${orderURL}/all`, {
+      method: 'GET',
+      headers: myHeaders,
+    })
+    .then((res) => {
+      if(res.ok) {
+        return res.json();
+      }
+
+      Promise.reject(res.status);
+    })
+    .then((json) => {
+      console.log(json.length);
+      setOrderNumber(json.length);
+    })
+    .catch((err) => {
+      console.log(`Ошибка: ${err}`);
+    })
+
+  }
+
+  createOrderId();
+
+  /* Формируем заказ */
+  const orderFormElement = document.querySelector('#order_form');
+  const nameInput = orderFormElement.querySelector('#post_form_name');
+  const phoneInput = orderFormElement.querySelector('#post_form_phone');
+  const emailInput = orderFormElement.querySelector('#post_form_email');
+  const rulesCheckbox = orderFormElement.querySelector('#post_form_rules_checkbox');
+  const contryInput = orderFormElement.querySelector('#post_form_contry');
+  const cityInput = orderFormElement.querySelector('#post_form_city_input');
+  const citySelector = orderFormElement.querySelector('#post_form_city');
+  const adressInput = orderFormElement.querySelector('#post_form_adress');
+
+  const nameInputAlert = orderFormElement.querySelector('#name_input_alert');
+  const phoneInputAlert = orderFormElement.querySelector('#phone_input_alert');
+  const emailInputAlert = orderFormElement.querySelector('#email_input_alert');
+  const cityInputAlert = orderFormElement.querySelector('#city_input_alert');
+  const adressInputAlert = orderFormElement.querySelector('#adress_input_alert');
+  const rulesChackboxAlert = orderFormElement.querySelector('#rules_checkbox_alert');
+
+  nameInputAlert.classList.add('display_none');
+  phoneInputAlert.classList.add('display_none');
+  emailInputAlert.classList.add('display_none');
+  cityInputAlert.classList.add('display_none');
+  adressInputAlert.classList.add('display_none');
+  rulesChackboxAlert.classList.add('display_none');
+
+  orderFormElement.addEventListener('submit', (evt) => {
+
+    evt.preventDefault();
+
+    console.log(basketList);
+
+    let inputStatusOK = false;
+
+    if ( chossePost ) {
+
+      let actualCity = null;
+
+      if ( contryInput.value === 'KAZ' ) {
+
+        actualCity = citySelector.value;
+
+      } else {
+
+        actualCity = cityInput.value;
+
+      }
+      
+      console.log(contryInput.value);
+
+      console.log(actualCity);
+
+      if ( 
+        nameInput.value !== '' && phoneInput.value !== '' && emailInput.value !== '' && actualCity !== '' && adressInput.value !== '' && rulesCheckbox.checked
+      ) {
+
+        console.log('Заполнены данные');
+
+        inputStatusOK = true;
+
+        nameInputAlert.classList.add('display_none');
+        phoneInputAlert.classList.add('display_none');
+        emailInputAlert.classList.add('display_none');
+        cityInputAlert.classList.add('display_none');
+        adressInputAlert.classList.add('display_none');
+        rulesChackboxAlert.classList.add('display_none');
+
+      } else {
+
+        console.log('Не заполнены данные');
+
+        inputStatusOK = false;
+
+        if ( nameInput.value === '' && phoneInput.value !== '' && emailInput.value !== '' && actualCity !== '' && adressInput.value !== '' && rulesCheckbox.checked ) {
+          
+          console.log('Нет имени')
+
+          nameInputAlert.classList.remove('display_none');
+          phoneInputAlert.classList.add('display_none');
+          emailInputAlert.classList.add('display_none');
+          cityInputAlert.classList.add('display_none');
+          adressInputAlert.classList.add('display_none');
+          rulesChackboxAlert.classList.add('display_none');
+
+        } else if ( phoneInput.value === '' && nameInput.value !== '' &&  emailInput.value !== '' && actualCity !== '' && adressInput.value !== '' && rulesCheckbox.checked ) {
+          
+          console.log('Нет номера')
+
+          phoneInputAlert.classList.remove('display_none');
+          nameInputAlert.classList.add('display_none');
+          emailInputAlert.classList.add('display_none');
+          cityInputAlert.classList.add('display_none');
+          adressInputAlert.classList.add('display_none');
+          rulesChackboxAlert.classList.add('display_none');
+
+        } else if ( emailInput.value === '' && nameInput.value !== '' && phoneInput.value !== '' && actualCity !== '' && adressInput.value !== '' && rulesCheckbox.checked ) {
+          
+          console.log('Нет мыла')
+
+          emailInputAlert.classList.remove('display_none');
+          nameInputAlert.classList.add('display_none');
+          phoneInputAlert.classList.add('display_none');
+          cityInputAlert.classList.add('display_none');
+          adressInputAlert.classList.add('display_none');
+          rulesChackboxAlert.classList.add('display_none');
+
+        } else if ( actualCity === '' && nameInput.value !== '' && phoneInput.value !== '' && emailInput.value !== '' && adressInput.value !== '' && rulesCheckbox.checked ) {
+          
+          console.log('Нет города')
+          console.log(actualCity);
+
+          cityInputAlert.classList.remove('display_none');
+          nameInputAlert.classList.add('display_none');
+          phoneInputAlert.classList.add('display_none');
+          emailInputAlert.classList.add('display_none');
+          adressInputAlert.classList.add('display_none');
+          rulesChackboxAlert.classList.add('display_none');
+
+        } else if ( adressInput.value === '' && nameInput.value !== '' && phoneInput.value !== '' && emailInput.value !== '' && actualCity !== '' && rulesCheckbox.checked ) {
+          
+          console.log('Нет адреса')
+
+          adressInputAlert.classList.remove('display_none');
+          nameInputAlert.classList.add('display_none');
+          phoneInputAlert.classList.add('display_none');
+          emailInputAlert.classList.add('display_none');
+          cityInputAlert.classList.add('display_none');
+          rulesChackboxAlert.classList.add('display_none');
+
+        } else if ( !rulesCheckbox.checked && nameInput.value !== '' && phoneInput.value !== '' && emailInput.value !== '' && actualCity !== '' && adressInput.value !== '' ) {
+          
+          console.log('Нет галочки')
+
+          rulesChackboxAlert.classList.remove('display_none');
+          nameInputAlert.classList.add('display_none');
+          phoneInputAlert.classList.add('display_none');
+          emailInputAlert.classList.add('display_none');
+          cityInputAlert.classList.add('display_none');
+          adressInputAlert.classList.add('display_none');
+
+        } 
+
+      }
+
+      createOrderId();
+
+      if ( !chossePost && inputStatusOK ) {
+
+        let formData = JSON.stringify({
+          'order_number': orderNumber,
+          'post_type': 'самовывоз',
+          'name': nameInput.value,
+          'phone': phoneInput.value,
+          'email': emailInput.value,
+          'full_price': globalFinalCash,
+          'rules_ok': rulesCheckbox.value,
+          'basket': basketList,
+        });
+
+        console.log(formData);
+
+        sendOrderToServer(formData);
+
+      } else if ( chossePost && inputStatusOK ){
+
+        let formData = JSON.stringify({
+          'order_number': orderNumber,
+          'post_type': 'доставка',
+          'name': nameInput.value,
+          'phone': phoneInput.value,
+          'email': emailInput.value,
+          'contry': contryInput.value,
+          'city': contryInput.value !== 'KAZ' ? cityInput.value : citySelector.value,
+          'adress': adressInput.value,
+          'full_price': globalFinalCash,
+          'rules_ok': rulesCheckbox.value,
+          'basket': basketList,
+        });
+
+        console.log(formData);
+
+        sendOrderToServer(formData);
+
+      }
+    
+    } else {
+
+      let actualCity = null;
+
+      if ( contryInput.value === 'KAZ' ) {
+
+        actualCity = citySelector.value;
+
+      } else {
+
+        actualCity = cityInput.value;
+
+      }
+      
+      console.log(contryInput.value);
+
+      console.log(actualCity);
+
+      if ( 
+        nameInput.value !== '' && phoneInput.value !== '' && emailInput.value !== '' && rulesCheckbox.checked
+      ) {
+
+        console.log('Заполнены данные');
+
+        inputStatusOK = true;
+
+        nameInputAlert.classList.add('display_none');
+        phoneInputAlert.classList.add('display_none');
+        emailInputAlert.classList.add('display_none');
+        rulesChackboxAlert.classList.add('display_none');
+
+      } else { // ИЛИ!
+
+        console.log('Не заполнены данные');
+
+        inputStatusOK = false;
+
+        if ( nameInput.value === '' && phoneInput.value !== '' && emailInput.value !== '' && rulesCheckbox.checked ) {
+          
+          console.log('Нет имени')
+
+          nameInputAlert.classList.remove('display_none');
+          phoneInputAlert.classList.add('display_none');
+          emailInputAlert.classList.add('display_none');
+          rulesChackboxAlert.classList.add('display_none');
+
+        } else if ( phoneInput.value === '' && nameInput.value !== '' &&  emailInput.value !== '' && rulesCheckbox.checked ) {
+          
+          console.log('Нет номера')
+
+          phoneInputAlert.classList.remove('display_none');
+          nameInputAlert.classList.add('display_none');
+          emailInputAlert.classList.add('display_none');
+          rulesChackboxAlert.classList.add('display_none');
+
+        } else if ( emailInput.value === '' && nameInput.value !== '' && phoneInput.value !== '' && rulesCheckbox.checked ) {
+          
+          console.log('Нет мыла')
+
+          emailInputAlert.classList.remove('display_none');
+          nameInputAlert.classList.add('display_none');
+          phoneInputAlert.classList.add('display_none');
+          rulesChackboxAlert.classList.add('display_none');
+
+        } else if ( !rulesCheckbox.checked && nameInput.value !== '' && phoneInput.value !== '' && emailInput.value !== '' && actualCity !== '' && adressInput.value !== '' ) {
+          
+          console.log('Нет галочки')
+
+          rulesChackboxAlert.classList.remove('display_none');
+          nameInputAlert.classList.add('display_none');
+          phoneInputAlert.classList.add('display_none');
+          emailInputAlert.classList.add('display_none');
+
+        } 
+
+      }
+
+      createOrderId();
+
+      if ( !chossePost && inputStatusOK ) {
+
+        let formData = JSON.stringify({
+          'order_number': orderNumber,
+          'post_type': 'самовывоз',
+          'name': nameInput.value,
+          'phone': phoneInput.value,
+          'email': emailInput.value,
+          'full_price': globalFinalCash,
+          'rules_ok': rulesCheckbox.value,
+          'basket': basketList,
+        });
+
+        console.log(formData);
+
+        sendOrderToServer(formData);
+
+      } else if ( chossePost && inputStatusOK ){
+
+        let formData = JSON.stringify({
+          'order_number': orderNumber,
+          'post_type': 'доставка',
+          'name': nameInput.value,
+          'phone': phoneInput.value,
+          'email': emailInput.value,
+          'contry': contryInput.value,
+          'city': contryInput.value !== 'KAZ' ? cityInput.value : citySelector.value,
+          'adress': adressInput.value,
+          'full_price': globalFinalCash,
+          'rules_ok': rulesCheckbox.value,
+          'basket': basketList,
+        });
+
+        console.log(formData);
+
+        sendOrderToServer(formData);
+
+      }
+
+    }
+  })
+
+  /* Переходим по ссылке для оплаты */
+  const loadingContainer = document.querySelector('#loading_container');
+  const loadingGif = document.querySelector('#loading_gif');
+
+
+  function openPayUrl(urlObj) {
+
+    window.open(urlObj.url, '_self');
+
+  }
+
+  function showLoadingContainer() {
+
+    loadingContainer.classList.add('loading_container_active');
+
+  }
+
+  /* Отправляем запрос на сервер */
+
+  function sendOrderToServer(formData) {
+
+    showLoadingContainer();
+
+    var myHeaders = new Headers();
+    myHeaders.append("Content-Type", "application/json");
+
+    fetch( orderURL, {
+      method: 'POST',
+      headers: myHeaders,
+      body: formData,
+    })
+    .then((res) => {
+
+      if( res.ok ) {
+
+        return res.json();
+
+      }
+
+      Promise.reject( res.status );
+    })
+    .then((json) => {
+      console.log(json);
+      openPayUrl(json);
+    })
+    .catch((err) => {
+      console.log(`Ошибка: ${err}`);
+    })
+
+  }
+
+</script>
