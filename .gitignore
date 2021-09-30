@@ -118,3 +118,4 @@ credentials.txt
 chromedriver.exe
 config.py
 .idea
+credentials.json

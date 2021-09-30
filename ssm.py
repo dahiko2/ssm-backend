@@ -1,7 +1,10 @@
+import base64
 import json
+import subprocess
 import time
 import flask
 import mysql.connector
+import requests
 from flask import Blueprint
 from datetime import datetime
 from urllib.parse import urlparse, parse_qs
@@ -12,19 +15,23 @@ fhost = ""
 fuser = ""
 fpass = ""
 fdbname_ssm = ""
+fkassa_login = ""
+fkassa_password = ""
 
 
 def read_creds():
     """
     Построчно считывает данные для подключения к бд из файла credentials.txt.
     """
-    global fhost, fuser, fpass, fdbname_ssm
-    with open("credentials.txt") as f:
-        fhost = f.readline().strip()
-        fuser = f.readline().strip()
-        fpass = f.readline().strip()
-        f.readline()
-        fdbname_ssm = f.readline().strip()
+    global fhost, fuser, fpass, fdbname_ssm, fkassa_login, fkassa_password
+    with open("credentials.json") as f:
+        credentials = json.load(f)
+        fhost = credentials['db_hostname']
+        fuser = credentials['db_user']
+        fpass = credentials['db_password']
+        fdbname_ssm = credentials['db_name_ssm']
+        fkassa_login = credentials['kassa24_login']
+        fkassa_password = credentials['kassa24_password']
 
 
 read_creds()  # Считывает данные для входа при запуске скрипта
@@ -182,7 +189,7 @@ def get_project_averages(project_id):
     """
     mycursor = ssm_connection()
     # Вытаскиваем среднюю длину хвоста, где значение хвоста задано, и значени хвоста у первой серии не учитывается (для этого нужна сортировка по дате и лимит 1)
-    query = "select AVG(tail) from (select EpisodesName, tail, ReleaseDate from releases where ProjectID = %s and Tail is not null ORDER BY ReleaseDate ASC LIMIT 1, 1000) as T;"
+    query = "SELECT AVG(tail) FROM (SELECT EpisodesName, tail, ReleaseDate FROM releases WHERE ProjectID = %s AND Tail IS NOT NULL ORDER BY ReleaseDate ASC LIMIT 1, 1000) AS t;"
     val = (project_id, )
     mycursor.execute(query, val)
     query_result = mycursor.fetchall()
@@ -192,7 +199,7 @@ def get_project_averages(project_id):
         if row[0] is not None:
             avg_tail = float(row[0])
     # Вытаскиваем досматриваемость, цену и переходы.
-    query = "select AudienceRetention, Price, Traffic, EpisodesName from releases where ProjectID = %s ORDER BY ReleaseDate ASC;"
+    query = "SELECT AudienceRetention, Price, Traffic, EpisodesName FROM releases WHERE ProjectID = %s ORDER BY ReleaseDate ASC;"
     val = (project_id, )
     mycursor.execute(query, val)
     query_result = mycursor.fetchall()
@@ -233,7 +240,7 @@ def get_projects():
     :return: json
     """
     mycursor = ssm_connection()
-    query = "SELECT ProjectID, ProjectName, Gender, Age, UtmName from project ORDER BY ProjectName;"
+    query = "SELECT ProjectID, ProjectName, Gender, Age, UtmName FROM project ORDER BY ProjectName;"
     mycursor.execute(query)
     query_result = mycursor.fetchall()
     itemlist = []
@@ -257,7 +264,7 @@ def get_fullinfo_by_projectid(project_id):
     :return: json(list[dict])
     """
     mycursor = ssm_connection()
-    query = "SELECT * FROM releases where projectID = %s ORDER BY ReleaseDate ASC;"
+    query = "SELECT * FROM releases WHERE projectID = %s ORDER BY ReleaseDate ASC;"
     val = (project_id,)
     mycursor.execute(query, val)
     query_result = mycursor.fetchall()
@@ -277,7 +284,7 @@ def get_fullinfo_by_projectname(project):
     """
     project = str(project) + "%"
     mycursor = ssm_connection()
-    query = "SELECT * FROM releases where projectID in (select ProjectID from project where ProjectName like %s) ORDER BY ReleaseDate ASC;"
+    query = "SELECT * FROM releases WHERE projectID IN (SELECT ProjectID FROM project WHERE ProjectName LIKE %s) ORDER BY ReleaseDate ASC;"
     val = (project,)
     mycursor.execute(query, val)
     query_result = mycursor.fetchall()
@@ -344,7 +351,7 @@ def get_releases_between(date1, date2):
     mycursor = ssm_connection()
     date1 = date1.replace(".", "/")
     date2 = date2.replace(".", "/")
-    query = "SELECT * FROM releases where ("+datetype+" between %s and %s) ORDER BY projectID DESC;"
+    query = "SELECT * FROM releases WHERE ("+datetype+" BETWEEN %s AND %s) ORDER BY projectID DESC;"
     val = (date1, date2)
     mycursor.execute(query, val)
     query_result = mycursor.fetchall()
@@ -365,7 +372,7 @@ def get_kpi_by_country_year(year, country):
     """
     country = country.upper()
     mycursor = ssm_connection()
-    query = "SELECT idkpi, value, target, month FROM kpi_mao where year = %s and country = %s;"
+    query = "SELECT idkpi, value, target, month FROM kpi_mao WHERE year = %s AND country = %s;"
     val = (year, country)
     mycursor.execute(query, val)
     query_result = mycursor.fetchall()
@@ -413,7 +420,7 @@ def update_kpi_mau():
         try:
             mycursor.execute(query, val)
         except mysql.connector.errors.IntegrityError:  # если данные по стране уже заполнены, то просто обновляет их
-            query = "UPDATE kpi_mao SET value = %s where country = %s and month = %s and year = %s and month_year = %s;"
+            query = "UPDATE kpi_mao SET value = %s WHERE country = %s AND month = %s AND year = %s AND month_year = %s;"
             mycursor.execute(query, val)
         mydb.commit()
         return_dict = dict()
@@ -446,7 +453,7 @@ def update_yt_trends():
         if youtube_channels.count(video['channel']) > 0:
             count += 1
             if today_videos.count(video['video_name']) > 0:
-                query = "UPDATE youtube_trends SET place = %s WHERE video_name = %s and DATE(date) = CURDATE();"
+                query = "UPDATE youtube_trends SET place = %s WHERE video_name = %s AND DATE(date) = CURDATE();"
                 values = (video['place'], video['video_name'])
             else:
                 query = "INSERT INTO youtube_trends (video_name, channel, views, place, date) VALUES (%s, %s, %s, %s, NOW());"
@@ -466,10 +473,10 @@ def get_yt_trends():
     :return: json
     """
     mycursor = ssm_connection()
-    query = "SELECT id, video_name, channel, views, place FROM youtube_trends WHERE DATE(date) = CURDATE() ORDER BY date DESC;"
+    query = "SELECT id, video_name, channel, views, place, youtube_id, youtube_retention, youtube_CTR, youtube_male, youtube_female, youtube_shows, youtube_AVBU, youtube_country_retention FROM youtube_trends WHERE DATE(date) = CURDATE() ORDER BY date DESC;"
     mycursor.execute(query)
     if mycursor.rowcount == 0:  # Костыль. Фиксит ошибку которая не показывает никакие видосы ночью нового дня.
-        query = "SELECT id, video_name, channel, views, place FROM youtube_trends WHERE DATE(date) = DATE_SUB(CURDATE(), INTERVAL 1 DAY) ORDER BY date DESC;"
+        query = "SELECT id, video_name, channel, views, place, youtube_id, youtube_retention, youtube_CTR, youtube_male, youtube_female, youtube_shows, youtube_AVBU, youtube_country_retention FROM youtube_trends WHERE DATE(date) = DATE_SUB(CURDATE(), INTERVAL 1 DAY) ORDER BY date DESC;"
         mycursor.execute(query)
     query_result = mycursor.fetchall()
     itemlist = []
@@ -479,6 +486,14 @@ def get_yt_trends():
         item["channel"] = row[2]
         item["views"] = row[3]
         item["place"] = row[4]
+        item["youtube_id"] = row[5]
+        item["youtube_retention"] = row[6]
+        item["youtube_CTR"] = row[7]
+        item["youtube_male"] = row[8]
+        item["youtube_female"] = row[9]
+        item["youtube_shows"] = row[10]
+        item["youtube_AVBU"] = row[11]
+        item["youtube_country_retention"] = row[12]
         itemlist.append(item)
     return json.dumps(itemlist, indent=4)
 
@@ -521,7 +536,7 @@ def get_kpi_aitu():
     :return: json(list[dict])
     """
     mycursor = ssm_connection()
-    sql = "SELECT target, `left`, top_50, top_100, quiz, releases, today, `quarter`, quarter_left from kpi_aitu;"   # Кавычки в запросе не убирать, иначе сломает запрос.
+    sql = "SELECT target, `left`, top_50, top_100, quiz, releases, today, `quarter`, quarter_left FROM kpi_aitu;"   # Кавычки в запросе не убирать, иначе сломает запрос.
     mycursor.execute(sql)
     query_result = mycursor.fetchall()
     itemlist = []
@@ -568,7 +583,7 @@ def update_kpi_aitu():
         items.append(data['quarter_left'])
     except KeyError:
         flask.abort(403)
-    query = 'UPDATE kpi_aitu set target = %s, `left` = %s, top_50 = %s, top_100 = %s, quiz = %s, releases = %s, today = %s, `quarter` = %s, quarter_left = %s WHERE id = 1'
+    query = 'UPDATE kpi_aitu SET target = %s, `left` = %s, top_50 = %s, top_100 = %s, quiz = %s, releases = %s, today = %s, `quarter` = %s, quarter_left = %s WHERE id = 1'
     # Кавычки в запросе не убирать, иначе сломает запрос.
     val = (int(items[0]), int(items[1]), int(items[2]), int(items[3]), int(items[4]), int(items[5]), int(items[6]), int(items[7]), int(items[8]))
     mycursor.execute(query, val)
@@ -660,7 +675,7 @@ def get_milestone_releases():
     """
     mycursor = ssm_connection()
     milestone_projects = "(1, 2, 3, 4, 5, 7, 9, 10, 15, 76, 115, 117, 119, 120, 121, 122, 123)"
-    query = "select * from releases where ProjectID in "+milestone_projects+" and (YouTubeViews between 950000 and 1000000) or (YouTubeViews between 1950000 and 2000000) or (YouTubeViews between 2950000 and 3000000) or (YouTubeViews between 3950000 and 4000000) or (YouTubeViews between 4950000 and 5000000) ORDER BY ReleaseDate Asc;"
+    query = "SELECT * FROM releases WHERE ProjectID IN "+milestone_projects+" AND (YouTubeViews BETWEEN 950000 AND 1000000) OR (YouTubeViews BETWEEN 1950000 AND 2000000) OR (YouTubeViews BETWEEN 2950000 AND 3000000) OR (YouTubeViews BETWEEN 3950000 AND 4000000) OR (YouTubeViews BETWEEN 4950000 AND 5000000) ORDER BY ReleaseDate ASC;"
     mycursor.execute(query)
     query_result = mycursor.fetchall()
     itemlist = []
@@ -706,28 +721,27 @@ def add_release():
         flask.abort(400)
 
 
-@ssm.route("/get_custom_data", methods=['POST'])
-def get_custom_json_data():
+@ssm.route("/get_file_<filename>.<ext>", methods=['GET'])
+def get_custom_json_data(filename, ext):
     """
-    Выводит данные из json файла, который хранится в директории проекта
-    Название файла, с которого нужно считать, передается в теле запроса как параметр type. {"type":"genesis"}
+    Выводит данные из файла, который хранится в директории data
+    Название файла, с которого нужно считать, передается в запросе как параметр.
     Возвращает json-объект, содержимое файла
     :return: json(list[dict])
     """
-    body = flask.request.get_json()
-    if body is None:
-        flask.abort(401)
-    try:
-        type_ = body["type"]
-    except KeyError:
-        flask.abort(401)
-    else:
-        with open("ssm-backend/data/"+type_+'.json') as f:
-            data = json.load(f)
-        if data is not None:
-            return data
+    with open("ssm-backend/data/"+filename+'.'+ext) as f:
+        data = f.read()
+    if data is not None:
+        if ext == 'html':
+            item = dict()
+            item['html'] = data
+            return json.dumps(item, indent=4)
+        elif ext == 'json':
+            return json.dumps(json.loads(data), indent=4)
         else:
-            flask.abort(404)
+            flask.abort(400)
+    else:
+        flask.abort(404)
 
 
 @ssm.route("/get_pr_status", methods=['GET'])
@@ -738,7 +752,7 @@ def get_pr_status():
     :return: json(list[dict])
     """
     mycursor = ssm_connection()
-    query = "select * from pr_status;"
+    query = "SELECT * FROM pr_status;"
     mycursor.execute(query)
     query_result = mycursor.fetchall()
     itemlist = []
@@ -769,11 +783,11 @@ def get_pr_mentions():
     mycursor = ssm_connection()
     if body is not None:
         year = body["year"]
-        query = "select * from pr_mentions where year(release_date) = %s;"
+        query = "SELECT * FROM pr_mentions WHERE YEAR(release_date) = %s;"
         val = (year, )
         mycursor.execute(query, val)
     else:
-        query = "select * from pr_mentions;"
+        query = "SELECT * FROM pr_mentions;"
         mycursor.execute(query)
     query_result = mycursor.fetchall()
     itemlist = []
@@ -805,7 +819,7 @@ def post_meeting():
     add_event = True
     mycursor = ssm_connection()
     # Проверка, не попадает ли новая запись в промежутки предыдущих записей
-    query = "SELECT time, time_finish from meet_schedule where room = %s and mdate = %s;"
+    query = "SELECT time, time_finish FROM meet_schedule WHERE room = %s AND mdate = %s;"
     values = (body['room'], body['date'])
     mycursor.execute(query, values)
     query_results = mycursor.fetchall()
@@ -843,7 +857,7 @@ def get_meeting_date(mdate):
     :return: json(list[dict])
     """
     mycursor = ssm_connection()
-    query = "select * from meet_schedule where mdate = %s ORDER BY `time`;"
+    query = "SELECT * FROM meet_schedule WHERE mdate = %s ORDER BY `time`;"
     value = (mdate,)
     mycursor.execute(query, value)
     query_result = mycursor.fetchall()
@@ -878,7 +892,7 @@ def delete_meeting():
     else:
         mycursor = ssm_connection()
         value = (idmeet,)
-        query = "SELECT * FROM meet_schedule where idmeet = %s"
+        query = "SELECT * FROM meet_schedule WHERE idmeet = %s"
         mycursor.execute(query, value)
         return_dict = dict()
         mycursor.fetchall()
@@ -892,7 +906,7 @@ def delete_meeting():
         return return_dict
 
 
-@ssm.route("/get_project_stats=<projectid>", methods=['GET'])
+@ssm.route("/project_stats=<projectid>", methods=['GET'])
 def get_project_stats(projectid):
     """
 
@@ -900,14 +914,14 @@ def get_project_stats(projectid):
     """
     mycursor = ssm_connection()
     query_list = [
-        {"name": "yt_sum_views", "query": "select sum(YoutubeViews) from releases where ProjectID = %s;"},
-        {"name": "yt_views_first_release", "query": "select YouTubeViews from releases where ProjectID = %s order by YoutubeReleaseDate Limit 1;"},
-        {"name": "yt_avg_views", "query": "select AVG(YouTubeViews) from releases where ProjectID = %s;"},
-        {"name": "yt_sum_comments", "query": "select SUM(YouTubeCommentsCount) from releases where ProjectID = %s;"},
-        {"name": "at_sum_views", "query": "select SUM(AitubeViews) from releases where ProjectID = %s;"},
-        {"name": "at_sum_uniqs_year", "query": "select SUM(UniqUserPerYear) from releases where ProjectID = %s;"},
-        {"name": "at_sum_traffic", "query": "select SUM(Traffic) from releases where ProjectID = %s;"},
-        {"name": "avg_uniqs_per_month", "query": "select avg(avg) from (select AVG(UniqUsersReleaseMonth) as avg from releases where ProjectID = %s group by MONTH(ReleaseDate)) as t;"}
+        {"name": "yt_sum_views", "query": "SELECT sum(YoutubeViews) FROM releases WHERE ProjectID = %s;"},
+        {"name": "yt_views_first_release", "query": "SELECT YouTubeViews FROM releases WHERE ProjectID = %s ORDER BY YoutubeReleaseDate LIMIT 1;"},
+        {"name": "yt_avg_views", "query": "SELECT AVG(YouTubeViews) FROM releases WHERE ProjectID = %s;"},
+        {"name": "yt_sum_comments", "query": "SELECT SUM(YouTubeCommentsCount) FROM releases WHERE ProjectID = %s;"},
+        {"name": "at_sum_views", "query": "SELECT SUM(AitubeViews) FROM releases WHERE ProjectID = %s;"},
+        {"name": "at_sum_uniqs_year", "query": "SELECT SUM(UniqUserPerYear) FROM releases WHERE ProjectID = %s;"},
+        {"name": "at_sum_traffic", "query": "SELECT SUM(Traffic) FROM releases WHERE ProjectID = %s;"},
+        {"name": "avg_uniqs_per_month", "query": "SELECT avg(avg) FROM (select AVG(UniqUsersReleaseMonth) AS avg FROM releases WHERE ProjectID = %s GROUP BY MONTH(ReleaseDate)) AS t;"}
         ]
     itemlist = []
     result_dict = dict()
@@ -921,4 +935,163 @@ def get_project_stats(projectid):
                 result_dict[query["name"]] = float(row[0])
             except TypeError:
                 result_dict[query["name"]] = 0
+    return json.dumps(itemlist, indent=4)
+
+
+@ssm.route("/shop", methods=['POST'])
+def post_shop():
+    body = flask.request.get_json()
+    if body is None:
+        flask.abort(400)
+    try:
+        post_type = body['post_type']
+    except KeyError:
+        flask.abort(400)
+    else:
+
+        if post_type == 'доставка':
+            query = "INSERT INTO shop " \
+                    "(id, post_type, name, phone, email, country, city, adress, full_price, rules_ok, basket, order_date) " \
+                    "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, NOW())"
+            values = (body['order_number'], body['post_type'], body['name'], body['phone'], body['email'], body['contry'], body['city'], body['adress'], body['full_price'], body['rules_ok'], str(body['basket']))
+
+        elif post_type == 'самовывоз':
+            query = "INSERT INTO shop " \
+                    "(id, post_type, name, phone, email, full_price, rules_ok, basket, order_date) " \
+                    "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, NOW())"
+            values = (body['order_number'], body['post_type'], body['name'], body['phone'], body['email'], body['full_price'], body['rules_ok'], str(body['basket']))
+
+        else:
+            flask.abort(400)
+
+        global mydb
+        mycursor = ssm_connection()
+        try:
+            mycursor.execute(query, values)
+        except mysql.connector.errors.IntegrityError:
+            return_message = "Order with id = "+str(body['order_number'])+" already present in database."
+            return flask.Response("{'error':"+return_message+"}", status=400, mimetype='application/json')
+        mydb.commit()
+        subprocess.call(['python3.8', 'ssm-backend/update_shop_gsheet.py'])
+        return kassa24_send_query(body)
+
+
+@ssm.route("/shop/<stype>", methods=['GET'])
+def get_shop(stype):
+    mycursor = ssm_connection()
+    if stype == 'all':
+        query = "SELECT * FROM shop;"
+    elif stype == 'paid':
+        query = "SELECT * FROM shop WHERE payment_status = 1;"
+    elif stype == 'unpaid':
+        query = "SELECT * FROM shop WHERE payment_status = 0;"
+    else:
+        flask.abort(400)
+    mycursor.execute(query)
+    query_result = mycursor.fetchall()
+    itemlist = []
+    for row in query_result:
+        item = dict()
+        item['order_number'] = row[0]
+        item['post_type'] = row[1]
+        item['name'] = row[2]
+        item['phone'] = row[3]
+        item['email'] = row[4]
+        item['full_price'] = row[5]
+        item['rules_ok'] = row[6]
+        item['basket'] = row[7]
+        item['payment_status'] = row[11]
+        if row[1] == 'доставка':
+            item['country'] = row[8]
+            item['city'] = row[9]
+            item['adress'] = row[10]
+        itemlist.append(item)
+    return json.dumps(itemlist, indent=4)
+
+
+@ssm.route("/shop/count", methods=['GET'])
+def get_orders_shop_count():
+    mycursor = ssm_connection()
+    query = "SELECT COUNT(*) FROM shop;"
+    mycursor.execute(query)
+    query_result = mycursor.fetchall()
+    itemlist = [dict()]
+    for row in query_result:
+        itemlist[0]["orders_count"] = row[0]
+    return json.dumps(itemlist)
+
+
+@ssm.route("/kassa24_callback", methods=['POST'])
+def kassa24_handle_callback():
+    body = flask.request.get_json()
+    ip_address = flask.request.headers['X-Real-IP']
+    kassa_ip = '35.157.105.64'
+    if ip_address != kassa_ip:
+        flask.abort(403)
+    if body['status'] == 1:
+        mycursor = ssm_connection()
+        global mydb
+        query = "UPDATE shop SET payment_status = %s WHERE id = %s;"
+        value = (1, str(body['metadata']['order_id']))
+        mycursor.execute(query, value)
+        mydb.commit()
+    else:
+        response = "Payment with order id = "+str(body['metadata']['order_id'])+" was not completed."
+        return response
+    response = "Payment with order id = "+str(body['metadata']['order_id'])+" has been completed."
+    subprocess.call(['python3.8', 'ssm-backend/update_shop_gsheet.py'])
+    return response
+
+
+def kassa24_send_query(inp):
+    return_url = 'https://salemsocial.kz/'
+    callback_url = 'https://maksimsalnikov.pythonanywhere.com/ssm/kassa24_callback'
+    kassa_request_url = "https://ecommerce.pult24.kz/payment/create"
+    description_str = "Заказ #"+str(inp['order_number'])+"\nСодержание:\n"
+    for item in inp['basket']:
+        description_str += str(item['name'])+"\n"
+    payload = {
+        "orderId": str(inp['order_number']),
+        "merchantId": fkassa_login,
+        "amount": inp['full_price']*100,
+        "returnUrl": return_url,
+        "callbackUrl": callback_url,
+        'description': description_str,
+        'metadata': {'order_id': inp['order_number']},
+        'customerData': {'email': inp['email'], 'phone': inp['phone']}
+    }
+    headers = {
+        "Authorization": "Basic "+base64.b64encode((fkassa_login+':'+fkassa_password).encode('ascii')).decode('ascii'),
+        "Content-Type": "application/json",
+        "Content-Length": str(len(payload))
+    }
+    r = requests.post(url=kassa_request_url, headers=headers, json=payload)
+    return_redirect_url = r.json()['url']
+    response = {"url": return_redirect_url}
+    if r.status_code == 201:
+        return response
+    else:
+        return flask.abort(r.status_code)
+
+
+@ssm.route("/month_traffic", methods=['GET'])
+def get_month_traffic():
+    mycursor = ssm_connection()
+    query = "SELECT * FROM main_month_traffic WHERE All_Traffic IS NOT NULL;"
+    mycursor.execute(query)
+    query_result = mycursor.fetchall()
+    itemlist = []
+    for row in query_result:
+        item = dict()
+        item['id'] = row[0]
+        item['year'] = row[1]
+        item['month'] = row[2]
+        item['all_traffic'] = row[3]
+        item['position_1_name'] = row[4]
+        item['position_1_traffic'] = row[5]
+        item['position_2_name'] = row[6]
+        item['position_2_traffic'] = row[7]
+        item['position_3_name'] = row[8]
+        item['position_3_traffic'] = row[9]
+        itemlist.append(item)
     return json.dumps(itemlist, indent=4)

@@ -15,11 +15,12 @@ def read_creds():
     Построчно считывает данные для подключения к бд из файла credentials.txt.
     """
     global fhost, fuser, fpass, fdbname_insta
-    with open("credentials.txt") as f:
-        fhost = f.readline().strip()
-        fuser = f.readline().strip()
-        fpass = f.readline().strip()
-        fdbname_insta = f.readline().strip()
+    with open("credentials.json") as f:
+        credentials = json.load(f)
+        fhost = credentials['db_hostname']
+        fuser = credentials['db_user']
+        fpass = credentials['db_password']
+        fdbname_insta = credentials['db_name_instagram']
 
 
 read_creds()  # Считывает данные для входа при запуске скрипта
