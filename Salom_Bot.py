@@ -31,7 +31,7 @@ def read_creds():
         f.readline()
         f.readline()
         fdbname = f.readline().strip()
-
+'''
 def serial_menu(message, start=False):
 
     global serialar, text
@@ -58,7 +58,7 @@ def serial_menu(message, start=False):
     except:
         pass"""
 
-
+'''
 
 
 
@@ -67,7 +67,7 @@ def receive_update():
     bot.process_new_updates([telebot.types.Update.de_json(request.stream.read().decode("utf-8"))])
     print("Message")
     return "ok", 200
-
+'''
 @bot.message_handler(commands=['start'])
 def start_message(message):
 
@@ -307,3 +307,4 @@ def query_handler(call):
         bot.delete_message(call.message.chat.id, call.message.message_id - 1)"""
 
 
+'''
