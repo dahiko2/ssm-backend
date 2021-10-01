@@ -948,9 +948,6 @@ def post_shop():
     except KeyError:
         flask.abort(400)
     else:
-        if body['full_price'] == 0:
-            response = {"url": "https://salemsocial.kz/good_status_ok"}
-            return response
         if post_type == 'доставка':
             query = "INSERT INTO shop " \
                     "(id, post_type, name, phone, email, country, city, adress, full_price, rules_ok, basket, order_date) " \
@@ -975,6 +972,9 @@ def post_shop():
             return flask.Response("{'error':"+return_message+"}", status=400, mimetype='application/json')
         mydb.commit()
         subprocess.call(['python3.8', 'ssm-backend/update_shop_gsheet.py'])
+        if body['full_price'] == 0:
+            response = {"url": "https://salemsocial.kz/good_status_ok"}
+            return response
         return kassa24_send_query(body)
 
 
