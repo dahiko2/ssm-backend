@@ -948,7 +948,9 @@ def post_shop():
     except KeyError:
         flask.abort(400)
     else:
-
+        if body['full_price'] == 0:
+            response = {"url": "https://salemsocial.kz/good_status_ok"}
+            return response
         if post_type == 'доставка':
             query = "INSERT INTO shop " \
                     "(id, post_type, name, phone, email, country, city, adress, full_price, rules_ok, basket, order_date) " \
