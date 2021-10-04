@@ -910,7 +910,7 @@ def delete_meeting():
 @ssm.route("/project_stats=<projectid>", methods=['GET'])
 def get_project_stats(projectid):
     """
-
+    todo: comms
     :return:
     """
     mycursor = ssm_connection()
@@ -928,6 +928,58 @@ def get_project_stats(projectid):
     result_dict = dict()
     itemlist.append(result_dict)
     value = (projectid, )
+    for query in query_list:
+        mycursor.execute(query['query'], value)
+        query_result = mycursor.fetchall()
+        for row in query_result:
+            try:
+                result_dict[query["name"]] = float(row[0])
+            except TypeError:
+                result_dict[query["name"]] = 0
+    return json.dumps(itemlist, indent=4)
+
+
+@ssm.route("/project_stats=<projectid>&season=<int:season>")
+def project_stats_season_handler(projectid, season):
+    """
+    todo: comms
+    :param projectid:
+    :param season:
+    :return:
+    """
+    if season is not None:
+        if season < 0:
+            flask.abort(403)
+        elif season == 0:
+            return get_project_stats(projectid)
+        else:
+            return get_project_stats_season(projectid, season)
+    else:
+        flask.abort(403)
+
+
+def get_project_stats_season(projectid, season):
+    """
+    todo: comms
+    :param projectid:
+    :param season:
+    :return:
+    """
+    mycursor = ssm_connection()
+    query_list = [
+        {"name": "yt_sum_views", "query": "SELECT sum(YoutubeViews) FROM releases WHERE ProjectID = %s AND Season = %s;"},
+        {"name": "yt_views_first_release", "query": "SELECT YouTubeViews FROM releases WHERE ProjectID = %s AND Season = %s ORDER BY YoutubeReleaseDate LIMIT 1;"},
+        {"name": "yt_avg_views", "query": "SELECT AVG(YouTubeViews) FROM releases WHERE ProjectID = %s AND Season = %s;"},
+        {"name": "yt_sum_comments", "query": "SELECT SUM(YouTubeCommentsCount) FROM releases WHERE ProjectID = %s AND Season = %s;"},
+        {"name": "at_sum_views", "query": "SELECT SUM(AitubeViews) FROM releases WHERE ProjectID = %s AND Season = %s;"},
+        {"name": "at_sum_uniqs_year", "query": "SELECT SUM(UniqUserPerYear) FROM releases WHERE ProjectID = %s AND Season = %s;"},
+        {"name": "at_sum_traffic", "query": "SELECT SUM(Traffic) FROM releases WHERE ProjectID = %s AND Season = %s;"},
+        {"name": "avg_uniqs_per_month", "query": "SELECT avg(avg) FROM (select AVG(UniqUsersReleaseMonth) AS avg FROM releases WHERE ProjectID = %s AND Season = %s GROUP BY MONTH(ReleaseDate)) AS t;"}
+        ]
+    itemlist = []
+    result_dict = dict()
+    itemlist.append(result_dict)
+    value = (projectid, season)
     for query in query_list:
         mycursor.execute(query['query'], value)
         query_result = mycursor.fetchall()
