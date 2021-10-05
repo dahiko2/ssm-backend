@@ -230,7 +230,7 @@ def query_handler(call):
 
         btn3 = telebot.types.InlineKeyboardButton('3 qism', callback_data="mak3")
         btn4 = telebot.types.InlineKeyboardButton('4 qism', callback_data="mak4")
-        start_markup.row(btn3)
+        start_markup.row(btn3, btn4)
         """
         btn5 = telebot.types.InlineKeyboardButton('5 qism', callback_data="mak5")
         btn6 = telebot.types.InlineKeyboardButton('6 qism', callback_data="mak6")
