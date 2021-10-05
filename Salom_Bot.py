@@ -32,7 +32,7 @@ def read_creds():
         f.readline()
         fdbname = f.readline().strip()
 
-def serial_menu(message, start=False):
+'''def serial_menu(message, start=False):
 
     global serialar, text
 
@@ -57,7 +57,7 @@ def serial_menu(message, start=False):
         bot.delete_message(message.chat.id, serialar)
     except:
         pass"""
-
+'''
 
 
 
@@ -67,7 +67,7 @@ def receive_update():
     bot.process_new_updates([telebot.types.Update.de_json(request.stream.read().decode("utf-8"))])
     print("Message")
     return "ok", 200
-
+'''
 @bot.message_handler(commands=['start'])
 def start_message(message):
 
@@ -84,7 +84,7 @@ def start_message(message):
     mycursor.execute(
         'SELECT chat_id from users')
     Ids = mycursor.fetchall()
-    chat_id = message.chat.id
+    #chat_id = message.chat.id
     count = 0
 
     #if not bot.get_chat_member(chat_id=-1001135809848, user_id=message.from_user.id).status in roles:
@@ -111,10 +111,10 @@ def start_message(message):
         bot.send_message(message.chat.id, 'Qaytganing bilan ' + message.chat.username + '!', reply_markup=keyboard)
 
     serial_menu(message, True)
-    try:
-        bot.delete_message(message.chat.id, message.message_id)
-    except:
-        pass
+    #try:
+        #bot.delete_message(message.chat.id, message.message_id)
+    #except:
+        #pass
 
 
 @bot.message_handler(content_types=['text'])
@@ -229,7 +229,7 @@ def query_handler(call):
         keyboard.row("Sevimlilarga qo'shing", 'Ortga')
 
         btn3 = telebot.types.InlineKeyboardButton('3 qism', callback_data="mak3")
-        #btn4 = telebot.types.InlineKeyboardButton('4 qism', callback_data="mak4")
+        btn4 = telebot.types.InlineKeyboardButton('4 qism', callback_data="mak4")
         start_markup.row(btn3)
         """
         btn5 = telebot.types.InlineKeyboardButton('5 qism', callback_data="mak5")
@@ -248,10 +248,10 @@ def query_handler(call):
         answer = Strings.qichchu_qudrat
         answer2 = Strings.series_chose
         keyboard.row("Sevimlilarga qo'shing", 'Ortga')
-        """btn1 = telebot.types.InlineKeyboardButton('1 qism', callback_data="qich_qud1")
-        btn2 = telebot.types.InlineKeyboardButton('2 qism', callback_data="qich_qud3")
-        start_markup.row(btn1, btn2)
-
+        btn1 = telebot.types.InlineKeyboardButton('1 qism', callback_data="qich_qud1")
+        #btn2 = telebot.types.InlineKeyboardButton('2 qism', callback_data="qich_qud3")
+        start_markup.row(btn1)
+        """
         btn3 = telebot.types.InlineKeyboardButton('3 qism', callback_data="qich_qud4")
         btn4 = telebot.types.InlineKeyboardButton('4 qism', callback_data="qich_qud4")
         start_markup.row(btn3, btn4)
@@ -303,12 +303,21 @@ def query_handler(call):
         answer = "https://t.me/salomserial/892"
         answer2 = "Baxtli tomosha!"
         keyboard.row('Ortga')
+    elif call.data == "mak4":
+        answer = "https://t.me/salomserial/947"
+        answer2 = "Baxtli tomosha!"
+        keyboard.row('Ortga')
+    elif call.data == "qich_qud1":
+        answer = "https://t.me/salomserial/927"
+        answer2 = "Baxtli tomosha!"
+        keyboard.row('Ortga')
+
 
 
 
     bot.send_message(call.message.chat.id, answer, reply_markup=keyboard)
     bot.send_message(call.message.chat.id, answer2, reply_markup=start_markup)
-    bot.edit_message_reply_markup(call.message.chat.id, call.message.message_id)
+    bot.edit_message_reply_markup(call.message.chat.id, call.message.message_id)'''
     """try:
         bot.delete_message(call.message.chat.id, text.message_id)
         bot.delete_message(call.message.chat.id, serialar.message_id)
