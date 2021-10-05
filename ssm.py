@@ -171,6 +171,7 @@ def form_proj_info_dict(row):
     item["male"] = row[19]
     item["female"] = row[20]
     item["retention"] = row[21]
+    item["retention_kz"] = row[28]
     gender = "M-F"
     if row[19] is not None and row[19] != '0%':
         if float(row[19]) > 60.0:
@@ -909,7 +910,7 @@ def delete_meeting():
 @ssm.route("/project_stats=<projectid>", methods=['GET'])
 def get_project_stats(projectid):
     """
-
+    todo: comms
     :return:
     """
     mycursor = ssm_connection()
@@ -938,6 +939,58 @@ def get_project_stats(projectid):
     return json.dumps(itemlist, indent=4)
 
 
+@ssm.route("/project_stats=<projectid>&season=<int:season>")
+def project_stats_season_handler(projectid, season):
+    """
+    todo: comms
+    :param projectid:
+    :param season:
+    :return:
+    """
+    if season is not None:
+        if season < 0:
+            flask.abort(403)
+        elif season == 0:
+            return get_project_stats(projectid)
+        else:
+            return get_project_stats_season(projectid, season)
+    else:
+        flask.abort(403)
+
+
+def get_project_stats_season(projectid, season):
+    """
+    todo: comms
+    :param projectid:
+    :param season:
+    :return:
+    """
+    mycursor = ssm_connection()
+    query_list = [
+        {"name": "yt_sum_views", "query": "SELECT sum(YoutubeViews) FROM releases WHERE ProjectID = %s AND Season = %s;"},
+        {"name": "yt_views_first_release", "query": "SELECT YouTubeViews FROM releases WHERE ProjectID = %s AND Season = %s ORDER BY YoutubeReleaseDate LIMIT 1;"},
+        {"name": "yt_avg_views", "query": "SELECT AVG(YouTubeViews) FROM releases WHERE ProjectID = %s AND Season = %s;"},
+        {"name": "yt_sum_comments", "query": "SELECT SUM(YouTubeCommentsCount) FROM releases WHERE ProjectID = %s AND Season = %s;"},
+        {"name": "at_sum_views", "query": "SELECT SUM(AitubeViews) FROM releases WHERE ProjectID = %s AND Season = %s;"},
+        {"name": "at_sum_uniqs_year", "query": "SELECT SUM(UniqUserPerYear) FROM releases WHERE ProjectID = %s AND Season = %s;"},
+        {"name": "at_sum_traffic", "query": "SELECT SUM(Traffic) FROM releases WHERE ProjectID = %s AND Season = %s;"},
+        {"name": "avg_uniqs_per_month", "query": "SELECT avg(avg) FROM (select AVG(UniqUsersReleaseMonth) AS avg FROM releases WHERE ProjectID = %s AND Season = %s GROUP BY MONTH(ReleaseDate)) AS t;"}
+        ]
+    itemlist = []
+    result_dict = dict()
+    itemlist.append(result_dict)
+    value = (projectid, season)
+    for query in query_list:
+        mycursor.execute(query['query'], value)
+        query_result = mycursor.fetchall()
+        for row in query_result:
+            try:
+                result_dict[query["name"]] = float(row[0])
+            except TypeError:
+                result_dict[query["name"]] = 0
+    return json.dumps(itemlist, indent=4)
+
+
 @ssm.route("/shop", methods=['POST'])
 def post_shop():
     body = flask.request.get_json()
@@ -948,7 +1001,6 @@ def post_shop():
     except KeyError:
         flask.abort(400)
     else:
-
         if post_type == 'доставка':
             query = "INSERT INTO shop " \
                     "(id, post_type, name, phone, email, country, city, adress, full_price, rules_ok, basket, order_date) " \
@@ -973,6 +1025,9 @@ def post_shop():
             return flask.Response("{'error':"+return_message+"}", status=400, mimetype='application/json')
         mydb.commit()
         subprocess.call(['python3.8', 'ssm-backend/update_shop_gsheet.py'])
+        if body['full_price'] == 0:
+            response = {"url": "https://salemsocial.kz/good_status_ok"}
+            return response
         return kassa24_send_query(body)
 
 
