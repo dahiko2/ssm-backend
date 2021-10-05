@@ -19,6 +19,7 @@ text = None
 bot.remove_webhook()
 bot.set_webhook(url="https://maksimsalnikov.pythonanywhere.com/salob/1994938654:AAHFLtVLwkog_4HK75-xTo8_-PA4vi4reuU/")
 
+
 def read_creds():
     """
     Считывает данные для входа в бд из файла
@@ -31,6 +32,7 @@ def read_creds():
         f.readline()
         f.readline()
         fdbname = f.readline().strip()
+
 
 def serial_menu(message, start=False):
 
@@ -59,14 +61,12 @@ def serial_menu(message, start=False):
         pass"""
 
 
-
-
-
 @salom_bot.route("/" + token + "/", methods=["POST"])
 def receive_update():
     bot.process_new_updates([telebot.types.Update.de_json(request.stream.read().decode("utf-8"))])
     print("Message")
     return "ok", 200
+
 
 @bot.message_handler(commands=['start'])
 def start_message(message):
@@ -312,9 +312,6 @@ def query_handler(call):
         answer2 = "Baxtli tomosha!"
         keyboard.row('Ortga')
 
-
-
-
     bot.send_message(call.message.chat.id, answer, reply_markup=keyboard)
     bot.send_message(call.message.chat.id, answer2, reply_markup=start_markup)
     bot.edit_message_reply_markup(call.message.chat.id, call.message.message_id)
@@ -325,5 +322,3 @@ def query_handler(call):
         bot.delete_message(call.message.chat.id, call.message.message_id - 1)
     except AttributeError:
         bot.delete_message(call.message.chat.id, call.message.message_id - 1)"""
-
-
