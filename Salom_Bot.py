@@ -1,12 +1,12 @@
-from flask import Flask, request, Blueprint
+import Strings
 import requests
 import telebot, json
-from telebot.apihelper import ApiTelegramException
-
 from config import token
 from telebot import types
 from mysql.connector import connect, Error
-import Strings
+from flask import Flask, request, Blueprint
+from telebot.apihelper import ApiTelegramException
+
 
 salom_bot = Blueprint("salom_bot", __name__)
 bot = telebot.TeleBot(token, threaded=False)
