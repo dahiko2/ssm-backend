@@ -1,5 +1,4 @@
 import Strings
-import requests
 import telebot, json
 from config import token
 from telebot import types
@@ -11,6 +10,10 @@ from telebot.apihelper import ApiTelegramException
 salom_bot = Blueprint("salom_bot", __name__)
 bot = telebot.TeleBot(token, threaded=False)
 list = {}
+fhost = ""
+fuser = ""
+fpass = ""
+fdbname = ""
 serialar = None
 to_delete = None
 to_delete_ser = None
@@ -44,7 +47,7 @@ def serial_menu(message, start=False):
     markup.add(telebot.types.InlineKeyboardButton(text='Shaharlik Qichloqi', callback_data="shaharlik_qichilogi"))
     serialar = bot.send_message(message.chat.id, 'Serialar',
                                 reply_markup=markup)
-    if start == False:
+    if not start:
         keyboard = telebot.types.ReplyKeyboardMarkup(True)
         keyboard.row('Sevimli')
         text = bot.send_message(message.chat.id, 'Tomosha qilish uchun serialni tanlang',
@@ -84,12 +87,12 @@ def start_message(message):
     mycursor.execute(
         'SELECT chat_id from users')
     Ids = mycursor.fetchall()
-    #chat_id = message.chat.id
+    # chat_id = message.chat.id
     count = 0
 
-    #if not bot.get_chat_member(chat_id=-1001135809848, user_id=message.from_user.id).status in roles:
+    # if not bot.get_chat_member(chat_id=-1001135809848, user_id=message.from_user.id).status in roles:
     chat_id = message.chat.id
-    bot.send_message(chat_id, "@salomserial kanaliga obuna bo'ling") #Проверка подписки, требуется админка
+    bot.send_message(chat_id, "@salomserial kanaliga obuna bo'ling")  # Проверка подписки, требуется админка
 
     for id in Ids:
         if chat_id == id[0]:
@@ -111,10 +114,10 @@ def start_message(message):
         bot.send_message(message.chat.id, 'Qaytganing bilan ' + message.chat.username + '!', reply_markup=keyboard)
 
     serial_menu(message, True)
-    #try:
-        #bot.delete_message(message.chat.id, message.message_id)
-    #except:
-        #pass
+    """try:
+        bot.delete_message(message.chat.id, message.message_id)
+    except:
+        pass"""
 
 
 @bot.message_handler(content_types=['text'])
@@ -249,7 +252,7 @@ def query_handler(call):
         answer2 = Strings.series_chose
         keyboard.row("Sevimlilarga qo'shing", 'Ortga')
         btn1 = telebot.types.InlineKeyboardButton('1 qism', callback_data="qich_qud1")
-        #btn2 = telebot.types.InlineKeyboardButton('2 qism', callback_data="qich_qud3")
+        # btn2 = telebot.types.InlineKeyboardButton('2 qism', callback_data="qich_qud3")
         start_markup.row(btn1)
         """
         btn3 = telebot.types.InlineKeyboardButton('3 qism', callback_data="qich_qud4")
