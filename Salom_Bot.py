@@ -36,7 +36,7 @@ def read_creds():
         f.readline()
         fdbname = f.readline().strip()
 
-'''
+
 def serial_menu(message, start=False):
 
     global serialar, text
@@ -62,7 +62,7 @@ def serial_menu(message, start=False):
         bot.delete_message(message.chat.id, serialar)
     except:
         pass"""
-'''
+
 
 @salom_bot.route("/" + token + "/", methods=["POST"])
 def receive_update():
@@ -70,7 +70,7 @@ def receive_update():
     print("Message")
     return "ok", 200
 
-'''
+
 @bot.message_handler(commands=['start'])
 def start_message(message):
 
@@ -325,4 +325,3 @@ def query_handler(call):
         bot.delete_message(call.message.chat.id, call.message.message_id - 1)
     except AttributeError:
         bot.delete_message(call.message.chat.id, call.message.message_id - 1)"""
-'''
