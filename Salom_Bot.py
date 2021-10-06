@@ -20,7 +20,7 @@ to_delete_ser = None
 text = None
 
 bot.remove_webhook()
-bot.set_webhook(url="https://maksimsalnikov.pythonanywhere.com/salob/1994938654:AAHFLtVLwkog_4HK75-xTo8_-PA4vi4reuU/")
+bot.set_webhook(url=f"https://maksimsalnikov.pythonanywhere.com/salob/{token}/")
 
 
 def read_creds():
@@ -317,7 +317,7 @@ def query_handler(call):
 
     bot.send_message(call.message.chat.id, answer, reply_markup=keyboard)
     bot.send_message(call.message.chat.id, answer2, reply_markup=start_markup)
-    bot.edit_message_reply_markup(call.message.chat.id, call.message.message_id)
+    #bot.edit_message_reply_markup(call.message.chat.id, call.message.message_id)
     """try:
         bot.delete_message(call.message.chat.id, text.message_id)
         bot.delete_message(call.message.chat.id, serialar.message_id)
