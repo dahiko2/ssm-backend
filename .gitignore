@@ -119,3 +119,4 @@ chromedriver.exe
 config.py
 .idea
 credentials.json
+Strings.py
