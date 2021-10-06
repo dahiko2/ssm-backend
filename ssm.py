@@ -936,6 +936,17 @@ def get_project_stats(projectid):
                 result_dict[query["name"]] = float(row[0])
             except TypeError:
                 result_dict[query["name"]] = 0
+
+    query = "SELECT AVG(Male), AVG(Female) FROM releases WHERE projectid = %s AND season = %s"  # Получаем средний пол проекта
+    mycursor.execute(query, value)
+    gender = "M-F"
+    for row in mycursor.fetchall():
+        if row[0] is not None and row[0] != '0%':
+            if float(row[0]) > 60.0:
+                gender = "M"
+            elif float(row[1]) > 60.0:
+                gender = "F"
+    result_dict["gender"] = gender
     return json.dumps(itemlist, indent=4)
 
 
@@ -988,6 +999,17 @@ def get_project_stats_season(projectid, season):
                 result_dict[query["name"]] = float(row[0])
             except TypeError:
                 result_dict[query["name"]] = 0
+
+    query = "SELECT AVG(Male), AVG(Female) FROM releases WHERE projectid = %s AND season = %s"  # Получаем средний пол проекта
+    mycursor.execute(query, value)
+    gender = "M-F"
+    for row in mycursor.fetchall():
+        if row[0] is not None and row[0] != '0%':
+            if float(row[0]) > 60.0:
+                gender = "M"
+            elif float(row[1]) > 60.0:
+                gender = "F"
+    result_dict["gender"] = gender
     return json.dumps(itemlist, indent=4)
 
 
