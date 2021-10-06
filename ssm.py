@@ -937,7 +937,7 @@ def get_project_stats(projectid):
             except TypeError:
                 result_dict[query["name"]] = 0
 
-    query = "SELECT AVG(Male), AVG(Female) FROM releases WHERE projectid = %s AND season = %s"  # Получаем средний пол проекта
+    query = "SELECT AVG(Male), AVG(Female) FROM releases WHERE projectid = %s"  # Получаем средний пол проекта
     mycursor.execute(query, value)
     gender = "M-F"
     for row in mycursor.fetchall():
