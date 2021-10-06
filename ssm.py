@@ -937,6 +937,8 @@ def get_project_stats(projectid):
                 result_dict[query["name"]] = float(row[0])
             except TypeError:
                 result_dict[query["name"]] = 0
+            except ValueError:
+                result_dict[query["name"]] = row[0]
 
     query = "SELECT AVG(Male), AVG(Female) FROM releases WHERE projectid = %s"  # Получаем средний пол проекта
     mycursor.execute(query, value)
@@ -1001,6 +1003,8 @@ def get_project_stats_season(projectid, season):
                 result_dict[query["name"]] = float(row[0])
             except TypeError:
                 result_dict[query["name"]] = 0
+            except ValueError:
+                result_dict[query["name"]] = row[0]
 
     query = "SELECT AVG(Male), AVG(Female) FROM releases WHERE projectid = %s AND season = %s"  # Получаем средний пол проекта
     mycursor.execute(query, value)
