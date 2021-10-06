@@ -457,8 +457,8 @@ def update_yt_trends():
                 query = "UPDATE youtube_trends SET place = %s WHERE video_name = %s AND DATE(date) = CURDATE();"
                 values = (video['place'], video['video_name'])
             else:
-                query = "INSERT INTO youtube_trends (video_name, channel, views, place, date) VALUES (%s, %s, %s, %s, NOW());"
-                values = (video['video_name'], video['channel'], video['views'], video['place'])
+                query = "INSERT INTO youtube_trends (video_name, channel, views, place, date, youtube_id) VALUES (%s, %s, %s, %s, NOW(), %s);"
+                values = (video['video_name'], video['channel'], video['views'], video['place'], video['youtube_id'])
             mycursor.execute(query, values)
     mydb.commit()
     return_dict = dict()
