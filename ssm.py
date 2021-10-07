@@ -1180,3 +1180,21 @@ def get_month_traffic():
         item['position_3_traffic'] = row[9]
         itemlist.append(item)
     return json.dumps(itemlist, indent=4)
+
+
+@ssm.route("/search_queries", methods=['GET'])
+def get_search_queries():
+    mycursor = ssm_connection()
+    query = "SELECT * FROM search_queries;"
+    mycursor.execute(query)
+    query_result = mycursor.fetchall()
+    itemlist = []
+    for row in query_result:
+        item = dict()
+        item['id'] = row[0]
+        item['visits'] = row[1]
+        item['users'] = row[2]
+        item['pageviews'] = row[3]
+        item['search_engine'] = row[4]
+        itemlist.append(item)
+    return json.dumps(itemlist, indent=4)
