@@ -931,7 +931,6 @@ def get_project_stats(projectid):
     itemlist.append(result_dict)
     value = (projectid, )
     for query in query_list:
-        print('exec '+str(query['name']))
         mycursor.execute(query['query'], value)
         query_result = mycursor.fetchall()
         for row in query_result:
