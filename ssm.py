@@ -923,7 +923,8 @@ def get_project_stats(projectid):
         {"name": "at_sum_uniqs_year", "query": "SELECT SUM(UniqUserPerYear) FROM releases WHERE ProjectID = %s;"},
         {"name": "at_sum_traffic", "query": "SELECT SUM(Traffic) FROM releases WHERE ProjectID = %s;"},
         {"name": "avg_uniqs_per_month", "query": "SELECT avg(avg) FROM (select AVG(UniqUsersReleaseMonth) AS avg FROM releases WHERE ProjectID = %s GROUP BY MONTH(ReleaseDate)) AS t;"},
-        {"name": "avg_age", "query": "SELECT AvgAge, COUNT(*) as count FROM releases WHERE ProjectID = %s GROUP BY AvgAge ORDER BY count DESC;"}
+        {"name": "avg_age", "query": "SELECT AvgAge, COUNT(*) as t FROM releases WHERE ProjectID = %s GROUP BY AvgAge ORDER BY t DESC;"},
+        {"name": "avg_age", "query": "SELECT SecondAvgAge, COUNT(*) as t FROM releases WHERE ProjectID = %s GROUP BY SecondAvgAge ORDER BY t DESC;"}
         ]
     itemlist = []
     result_dict = dict()
@@ -989,7 +990,8 @@ def get_project_stats_season(projectid, season):
         {"name": "at_sum_uniqs_year", "query": "SELECT SUM(UniqUserPerYear) FROM releases WHERE ProjectID = %s AND Season = %s;"},
         {"name": "at_sum_traffic", "query": "SELECT SUM(Traffic) FROM releases WHERE ProjectID = %s AND Season = %s;"},
         {"name": "avg_uniqs_per_month", "query": "SELECT avg(avg) FROM (select AVG(UniqUsersReleaseMonth) AS avg FROM releases WHERE ProjectID = %s AND Season = %s GROUP BY MONTH(ReleaseDate)) AS t;"},
-        {"name": "avg_age", "query": "SELECT AvgAge, COUNT(*) AS t FROM releases WHERE ProjectID = %s AND Season = %s GROUP BY AvgAge ORDER BY t DESC;"}
+        {"name": "avg_age", "query": "SELECT AvgAge, COUNT(*) AS t FROM releases WHERE ProjectID = %s AND Season = %s GROUP BY AvgAge ORDER BY t DESC;"},
+        {"name": "seocnd_avg_age", "query": "SELECT SecondAvgAge, COUNT(*) AS t FROM releases WHERE ProjectID = %s AND Season = %s GROUP BY SecondAvgAge ORDER BY t DESC;"}
         ]
     itemlist = []
     result_dict = dict()
