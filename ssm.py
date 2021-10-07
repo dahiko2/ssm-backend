@@ -923,8 +923,8 @@ def get_project_stats(projectid):
         {"name": "at_sum_uniqs_year", "query": "SELECT SUM(UniqUserPerYear) FROM releases WHERE ProjectID = %s;"},
         {"name": "at_sum_traffic", "query": "SELECT SUM(Traffic) FROM releases WHERE ProjectID = %s;"},
         {"name": "avg_uniqs_per_month", "query": "SELECT avg(avg) FROM (select AVG(UniqUsersReleaseMonth) AS avg FROM releases WHERE ProjectID = %s GROUP BY MONTH(ReleaseDate)) AS t;"},
+        {"name": "avg_age", "query": "SELECT AvgAge, COUNT(*) as t FROM releases WHERE ProjectID = %s GROUP BY AvgAge ORDER BY t DESC;"},
         {"name": "second_avg_age", "query": "SELECT SecondAvgAge, COUNT(*) as t FROM releases WHERE ProjectID = %s GROUP BY SecondAvgAge ORDER BY t DESC;"},
-        {"name": "avg_age", "query": "SELECT AvgAge, COUNT(*) as t FROM releases WHERE ProjectID = %s GROUP BY AvgAge ORDER BY t DESC;"}
         ]
     itemlist = []
     result_dict = dict()
