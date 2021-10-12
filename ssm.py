@@ -172,6 +172,10 @@ def form_proj_info_dict(row):
     item["female"] = row[20]
     item["retention"] = row[21]
     item["retention_kz"] = row[28]
+    item["avg_age"] = row[29]
+    item["second_avg_age"] = row[30]
+    item["aitube_comments"] = row[31]
+    item["aitube_likes"] = row[32]
     gender = "M-F"
     if row[19] is not None and row[19] != '0%':
         if float(row[19]) > 60.0:
@@ -696,10 +700,16 @@ def add_release():
     if body is not None:
         global mydb
         mycursor = ssm_connection()
+        query = "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = Database() AND TABLE_NAME = 'releases' ;"
+        mycursor.execute(query)
+        query_result = mycursor.fetchall()
+        dbtable_columns = []
+        for row in query_result:
+            dbtable_columns.append(row[0])
         keys = []
         values = []
         for item in body.keys():  # формирование массивов из ключей словаря и соответствующих значений
-            if item == "auth":
+            if item not in dbtable_columns:
                 pass
             keys.append(item)
             values.append(str(body[item]))
@@ -1023,6 +1033,10 @@ def get_project_stats_season(projectid, season):
 
 @ssm.route("/shop", methods=['POST'])
 def post_shop():
+    """
+    todo: comms
+    :return:
+    """
     body = flask.request.get_json()
     if body is None:
         flask.abort(400)
@@ -1063,6 +1077,11 @@ def post_shop():
 
 @ssm.route("/shop/<stype>", methods=['GET'])
 def get_shop(stype):
+    """
+    todo: comms
+    :param stype:
+    :return:
+    """
     mycursor = ssm_connection()
     if stype == 'all':
         query = "SELECT * FROM shop;"
@@ -1096,6 +1115,10 @@ def get_shop(stype):
 
 @ssm.route("/shop/count", methods=['GET'])
 def get_orders_shop_count():
+    """
+    todo: comms
+    :return:
+    """
     mycursor = ssm_connection()
     query = "SELECT COUNT(*) FROM shop;"
     mycursor.execute(query)
@@ -1108,6 +1131,10 @@ def get_orders_shop_count():
 
 @ssm.route("/kassa24_callback", methods=['POST'])
 def kassa24_handle_callback():
+    """
+    todo: comms
+    :return:
+    """
     body = flask.request.get_json()
     ip_address = flask.request.headers['X-Real-IP']
     kassa_ip = '35.157.105.64'
@@ -1129,6 +1156,11 @@ def kassa24_handle_callback():
 
 
 def kassa24_send_query(inp):
+    """
+    todo: comms
+    :param inp:
+    :return:
+    """
     return_url = 'https://salemsocial.kz/'
     callback_url = 'https://maksimsalnikov.pythonanywhere.com/ssm/kassa24_callback'
     kassa_request_url = "https://ecommerce.pult24.kz/payment/create"
@@ -1161,6 +1193,10 @@ def kassa24_send_query(inp):
 
 @ssm.route("/month_traffic", methods=['GET'])
 def get_month_traffic():
+    """
+    todo: comms
+    :return:
+    """
     mycursor = ssm_connection()
     query = "SELECT * FROM main_month_traffic WHERE All_Traffic IS NOT NULL;"
     mycursor.execute(query)
@@ -1184,6 +1220,10 @@ def get_month_traffic():
 
 @ssm.route("/search_queries", methods=['GET'])
 def get_search_queries():
+    """
+    todo: comms
+    :return:
+    """
     mycursor = ssm_connection()
     query = "SELECT * FROM search_queries;"
     mycursor.execute(query)
