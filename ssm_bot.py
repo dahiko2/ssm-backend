@@ -35,7 +35,7 @@ def receive_update():
 
 @bot.message_handler(commands=['utmcheck'])
 def check_utm(message):
-    bot.reply_to(message, "test")
+    bot.send_message(message.chat.id, "test")
     """parsed_url = urlparse(url)
     captured_value = parse_qs(parsed_url.query)
     if 'utm_campaign' not in captured_value:
