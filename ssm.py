@@ -1262,7 +1262,7 @@ def get_projects_top_params(param):
                 itemlist = []
                 for row in query_result:
                     item = dict()
-                    item["project_name"] = row[0]
+                    item["project_name"] = str(row[0])
                     item["count"] = row[1]
                     itemlist.append(item)
                 return json.dumps(itemlist, indent=4)
