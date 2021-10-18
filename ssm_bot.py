@@ -5,7 +5,7 @@ from urllib.parse import parse_qs
 from flask import Flask, request, Blueprint
 
 fssm_token = ""
-# https://api.telegram.org/bot2002044772:AAGUolZgDxybICVcuaDaEBCWy_0jxt--u2Y/setWebhook?url=https://maksimsalnikov.pythonanywhere.com/ssmbot/2002044772:AAGUolZgDxybICVcuaDaEBCWy_0jxt--u2Y/
+
 
 
 def read_creds():
