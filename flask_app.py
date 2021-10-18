@@ -19,6 +19,7 @@ from flask_cors import CORS
 from instagram import insta_bp
 from ssm import ssm
 from Salom_Bot import salom_bot
+from ssm_bot import ssm_bot
 
 """
 Глобальные переменные. mydb - создание пустого подключения к бд. f% - реквизиты для аутентификации и подключения к бд.
@@ -38,6 +39,7 @@ app = flask.Flask(__name__)
 app.register_blueprint(insta_bp, url_prefix='/instagram')
 app.register_blueprint(ssm, url_prefix='/ssm')
 app.register_blueprint(salom_bot, url_prefix='/salob')
+app.register_blueprint(ssm_bot, url_prefix='/ssmbot')
 cors = CORS(app, resources={
     r"/*": {
         "origins": "*"  # origins - список сайтов с которых можно делать запрос игнорируя CORS, поставить * для любых сайтов

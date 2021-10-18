@@ -24,7 +24,7 @@ read_creds()
 
 ssm_bot = Blueprint("ssm_bot", __name__)
 bot = telebot.TeleBot(fssm_token)
-bot.set_webhook("https://YOUR_PYTHONANYWHERE_USERNAME.pythonanywhere.com/{}".format(fssm_token))
+bot.set_webhook("https://maksimsalnikov.pythonanywhere.com/ssmbot/{}".format(fssm_token))
 
 
 @bot.message_handler(commands=['utmcheck'])
