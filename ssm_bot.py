@@ -5,6 +5,7 @@ from urllib.parse import parse_qs
 from flask import Flask, request, Blueprint
 
 fssm_token = ""
+# https://api.telegram.org/bot2002044772:AAGUolZgDxybICVcuaDaEBCWy_0jxt--u2Y/setWebhook?url=https://maksimsalnikov.pythonanywhere.com/ssmbot/2002044772:AAGUolZgDxybICVcuaDaEBCWy_0jxt--u2Y/
 
 
 def read_creds():
@@ -24,7 +25,6 @@ read_creds()
 
 ssm_bot = Blueprint("ssm_bot", __name__)
 bot = telebot.TeleBot(fssm_token)
-#bot.set_webhook("https://maksimsalnikov.pythonanywhere.com/ssmbot/{}".format(fssm_token))
 
 
 @ssm_bot.route("/" + fssm_token + "/", methods=["POST"])
@@ -35,7 +35,7 @@ def receive_update():
 
 @bot.message_handler(commands=['utmcheck'])
 def check_utm(message):
-    bot.reply_to(message, message.text)
+    bot.reply_to(message, "test")
     """parsed_url = urlparse(url)
     captured_value = parse_qs(parsed_url.query)
     if 'utm_campaign' not in captured_value:
