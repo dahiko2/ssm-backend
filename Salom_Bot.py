@@ -20,7 +20,7 @@ to_delete_ser = None
 text = None
 
 bot.remove_webhook()
-bot.set_webhook(url=f"https://maksimsalnikov.pythonanywhere.com/salob/{token}/")
+#bot.set_webhook(url=f"https://maksimsalnikov.pythonanywhere.com/salob/{token}/")
 
 
 def read_creds():
