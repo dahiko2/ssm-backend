@@ -25,7 +25,12 @@ read_creds()
 ssm_bot = Blueprint("ssm_bot", __name__)
 bot = telebot.TeleBot(fssm_token)
 bot.set_webhook("https://maksimsalnikov.pythonanywhere.com/ssmbot/{}".format(fssm_token))
-print('bot did job')
+
+
+@ssm_bot.route("/" + fssm_token + "/", methods=["POST"])
+def receive_update():
+    bot.process_new_updates([telebot.types.Update.de_json(request.stream.read().decode("utf-8"))])
+    return "ok", 200
 
 
 @bot.message_handler(commands=['utmcheck'])
