@@ -1239,3 +1239,31 @@ def get_search_queries():
         item['search_engine'] = row[5]
         itemlist.append(item)
     return json.dumps(itemlist, indent=4)
+
+
+@ssm.route("/projects/top/<param>", methods=['GET'])
+def get_projects_top_params(param):
+    paramlist = [
+        {"parameter": "YoutubeViews"},
+        {"parameter": "YouTubeCommentsCount"},
+        {"parameter": "AitubeViews"},
+        {"parameter": "UniqUserPerYear"},
+        {"parameter": "Traffic"}
+    ]
+    if param == 'parameter':
+        return json.dumps(paramlist, indent=4)
+    else:
+        for item in paramlist:
+            if item['parameter'] == param:
+                mycursor = ssm_connection()
+                query = "select sum("+param+") as s, ProjectName from releases, project where releases.ProjectID = project.projectID group by ProjectName order by s DESC;"
+                mycursor.execute(query)
+                query_result = mycursor.fetchall()
+                itemlist = []
+                for row in query_result:
+                    item = dict()
+                    item["project_name"] = row[0]
+                    item["count"] = row[1]
+                    itemlist.append(item)
+                return json.dumps(itemlist, indent=4)
+        flask.abort(400)
