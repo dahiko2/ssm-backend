@@ -1314,12 +1314,12 @@ def get_aitube_channels_sums():
     itemlist = []
     for row in query_result:
         item = dict()
-        item['subs'] = row[0]
-        item['views'] = row[1]
-        item['likes'] = row[2]
-        item['comments'] = row[3]
-        item['views_last_period'] = row[4]
-        item['likes_last_period'] = row[5]
-        item['comments_last_period'] = row[6]
+        item['subs'] = float(row[0])
+        item['views'] = float(row[1])
+        item['likes'] = float(row[2])
+        item['comments'] = float(row[3])
+        item['views_last_period'] = float(row[4])
+        item['likes_last_period'] = float(row[5])
+        item['comments_last_period'] = float(row[6])
         itemlist.append(item)
     return json.dumps(itemlist, indent=4)
