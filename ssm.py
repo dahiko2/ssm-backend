@@ -1297,6 +1297,7 @@ def get_aitube_channels_data():
         item['sum_views_last_period'] = row[7]
         item['sum_likes_last_period'] = row[8]
         item['sum_comments_last_period'] = row[9]
+        itemlist.append(item)
     return json.dumps(itemlist, indent=4)
 
 
@@ -1320,4 +1321,5 @@ def get_aitube_channels_sums():
         item['views_last_period'] = row[4]
         item['likes_last_period'] = row[5]
         item['comments_last_period'] = row[6]
+        itemlist.append(item)
     return json.dumps(itemlist, indent=4)
