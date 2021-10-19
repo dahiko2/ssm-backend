@@ -1243,6 +1243,11 @@ def get_search_queries():
 
 @ssm.route("/projects/top/<param>", methods=['GET'])
 def get_projects_top_params(param):
+    """
+    todo: comms
+    :param param:
+    :return:
+    """
     paramlist = [
         {"parameter": "YoutubeViews"},
         {"parameter": "YouTubeCommentsCount"},
@@ -1267,3 +1272,52 @@ def get_projects_top_params(param):
                     itemlist.append(item)
                 return json.dumps(itemlist, indent=4)
         flask.abort(400)
+
+
+@ssm.route("/aitube_channels", methods=['GET'])
+def get_aitube_channels_data():
+    """
+    todo: comms
+    :return:
+    """
+    mycursor = ssm_connection()
+    query = "SELECT * FROM aitube_channels;"
+    mycursor.execute(query)
+    query_result = mycursor.fetchall()
+    itemlist = []
+    for row in query_result:
+        item = dict()
+        item['id'] = row[0]
+        item['name'] = row[1]
+        item['link'] = row[2]
+        item['subs_count'] = row[3]
+        item['sum_views'] = row[4]
+        item['sum_likes'] = row[5]
+        item['sum_comments'] = row[6]
+        item['sum_views_last_period'] = row[7]
+        item['sum_likes_last_period'] = row[8]
+        item['sum_comments_last_period'] = row[9]
+    return json.dumps(itemlist, indent=4)
+
+
+@ssm.route("/aitube_channels/sums", methods=['GET'])
+def get_aitube_channels_sums():
+    """
+    todo: comms
+    :return:
+    """
+    mycursor = ssm_connection()
+    query = "SELECT SUM(subscribers), SUM(sum_views), SUM(sum_likes), SUM(sum_commentaries), SUM(sum_views_last_period), SUM(sum_likes_last_period), SUM(sum_comms_last_period) FROM aitube_channels;"
+    mycursor.execute(query)
+    query_result = mycursor.fetchall()
+    itemlist = []
+    for row in query_result:
+        item = dict()
+        item['subs'] = row[0]
+        item['views'] = row[1]
+        item['likes'] = row[2]
+        item['comments'] = row[3]
+        item['views_last_period'] = row[4]
+        item['likes_last_period'] = row[5]
+        item['comments_last_period'] = row[6]
+    return json.dumps(itemlist, indent=4)

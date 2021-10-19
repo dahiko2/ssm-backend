@@ -7,7 +7,6 @@ from flask import Flask, request, Blueprint
 fssm_token = ""
 
 
-
 def read_creds():
     """
     Построчно считывает данные для подключения к бд из файла credentials.txt.
