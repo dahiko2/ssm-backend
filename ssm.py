@@ -1409,3 +1409,8 @@ def get_yt_channels_sums():
         item['subs'] = float(row[0])
         itemlist.append(item)
     return json.dumps(itemlist, indent=4)
+
+
+@ssm.route("/upload_new_year", methods=['POST'])
+def post_celebration():
+    return flask.Response("ok", status=200)
