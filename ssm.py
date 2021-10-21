@@ -1421,7 +1421,7 @@ def post_celebration():
     def allowed_file(filename):
         return '.' in filename and \
                filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
-    print(request.files)
+    print('Print requst.files: '+str(request.files))
     if 'file' not in request.files:
         return flask.Response("Not ok", status=400)
     file = request.files['file']
