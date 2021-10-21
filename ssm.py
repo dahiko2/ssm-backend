@@ -5,10 +5,12 @@ import time
 import flask
 import mysql.connector
 import requests
-from flask import Blueprint
+import os
+from flask import Blueprint, request
 from datetime import datetime
 from urllib.parse import urlparse, parse_qs
 
+from werkzeug.utils import secure_filename
 
 mydb = mysql.connector.connect()
 fhost = ""
@@ -1413,4 +1415,22 @@ def get_yt_channels_sums():
 
 @ssm.route("/upload_new_year", methods=['POST'])
 def post_celebration():
-    return flask.Response("ok", status=200)
+    UPLOAD_FOLDER = '/path/to/the/uploads'
+    ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'}
+
+    def allowed_file(filename):
+        return '.' in filename and \
+               filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+    if 'file' not in request.files:
+        return flask.Response("Not ok", status=400)
+    file = request.files['file']
+
+    if file.filename == '':
+        return flask.Response("Not ok", status=400)
+
+    if file and allowed_file(file.filename):
+        filename = secure_filename(file.filename)
+        file.save(os.path.join(UPLOAD_FOLDER, filename))
+        return flask.Response("File uploaded.", status=200)
+    return flask.Response("Not ok", status=400)
