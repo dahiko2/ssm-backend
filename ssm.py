@@ -889,8 +889,8 @@ def get_meeting_date(mdate):
 def delete_meeting():
     """
     Удаляет данные из таблицы расписания брони переговорок (meet_schedule)
-    Возвращает строку с
-    :return: str
+    Возвращает словарь с сообщением о выполнении функции.
+    :return: dict
     """
     global mydb
     body = flask.request.get_json()
@@ -917,11 +917,13 @@ def delete_meeting():
         return return_dict
 
 
-@ssm.route("/project_stats=<projectid>", methods=['GET'])
+@ssm.route("/project_stats=<int:projectid>", methods=['GET'])
 def get_project_stats(projectid):
     """
-    todo: comms
-    :return:
+    Выводит статистику по проекту с id = projectid. Запросы подтягиваются из списка, так же как и ключи словаря.
+    Возвращает json-объект, список словарей
+    :param projectid: int
+    :return: json(list[dict])
     """
     mycursor = ssm_connection()
     query_list = [
@@ -935,7 +937,7 @@ def get_project_stats(projectid):
         {"name": "avg_uniqs_per_month", "query": "SELECT avg(avg) FROM (select AVG(UniqUsersReleaseMonth) AS avg FROM releases WHERE ProjectID = %s GROUP BY MONTH(ReleaseDate)) AS t;"},
         {"name": "avg_age", "query": "SELECT AvgAge, COUNT(*) as t FROM releases WHERE ProjectID = %s GROUP BY AvgAge ORDER BY t DESC;"},
         {"name": "second_avg_age", "query": "SELECT SecondAvgAge, COUNT(*) as t FROM releases WHERE ProjectID = %s GROUP BY SecondAvgAge ORDER BY t DESC;"},
-        ]
+        ]  # Список запросов для выполнения
     itemlist = []
     result_dict = dict()
     itemlist.append(result_dict)
@@ -964,31 +966,32 @@ def get_project_stats(projectid):
     return json.dumps(itemlist, indent=4)
 
 
-@ssm.route("/project_stats=<projectid>&season=<int:season>")
+@ssm.route("/project_stats=<int:projectid>&season=<int:season>")
 def project_stats_season_handler(projectid, season):
     """
-    todo: comms
-    :param projectid:
-    :param season:
-    :return:
+    Обработчик для функций выдачи статистики по проектам. В зависимости от параметров запускает функцию для выдачи данных по сезонам или всю функцию.
+    :param projectid: int
+    :param season: int
+    :return: json(list[dict])
     """
     if season is not None:
         if season < 0:
-            flask.abort(403)
+            flask.abort(400)
         elif season == 0:
             return get_project_stats(projectid)
         else:
             return get_project_stats_season(projectid, season)
     else:
-        flask.abort(403)
+        flask.abort(400)
 
 
 def get_project_stats_season(projectid, season):
     """
-    todo: comms
+    Выводит статистику по проекту с id = projectid и определенным season. Запросы подтягиваются из списка, так же как и ключи словаря.
+    Возвращает json-объект, список словарей
     :param projectid:
     :param season:
-    :return:
+    :return: json(list[dict])
     """
     mycursor = ssm_connection()
     query_list = [
@@ -1002,7 +1005,7 @@ def get_project_stats_season(projectid, season):
         {"name": "avg_uniqs_per_month", "query": "SELECT avg(avg) FROM (select AVG(UniqUsersReleaseMonth) AS avg FROM releases WHERE ProjectID = %s AND Season = %s GROUP BY MONTH(ReleaseDate)) AS t;"},
         {"name": "avg_age", "query": "SELECT AvgAge, COUNT(*) AS t FROM releases WHERE ProjectID = %s AND Season = %s GROUP BY AvgAge ORDER BY t DESC;"},
         {"name": "second_avg_age", "query": "SELECT SecondAvgAge, COUNT(*) AS t FROM releases WHERE ProjectID = %s AND Season = %s GROUP BY SecondAvgAge ORDER BY t DESC;"}
-        ]
+        ]  # Список запрос для выполнения
     itemlist = []
     result_dict = dict()
     itemlist.append(result_dict)
@@ -1034,16 +1037,20 @@ def get_project_stats_season(projectid, season):
 @ssm.route("/shop", methods=['POST'])
 def post_shop():
     """
-    todo: comms
-    :return:
+    Обрабатывает POST запросы с магазина сайта.
+    Принимает данные заказа, записывает в базу, вызывает подпроцесс обновления гугл таблички с заказами.
+    Если цена = 0, то возращает ссылку страницы предзаказа, если цена есть то вызывает функцию kassa24_send_query.
+    :return: json(dict) - ссылка для редиректа (для сайта)
     """
     body = flask.request.get_json()
     if body is None:
-        flask.abort(400)
+        return_message = "No request body."
+        return flask.Response("{'error':" + return_message + "}", status=400, mimetype='application/json')
     try:
         post_type = body['post_type']
     except KeyError:
-        flask.abort(400)
+        return_message = "No post_type parameter in request body."
+        return flask.Response("{'error':" + return_message + "}", status=400, mimetype='application/json')
     else:
         if post_type == 'доставка':
             query = "INSERT INTO shop " \
@@ -1058,7 +1065,8 @@ def post_shop():
             values = (body['order_number'], body['post_type'], body['name'], body['phone'], body['email'], body['full_price'], body['rules_ok'], str(body['basket']))
 
         else:
-            flask.abort(400)
+            return_message = "Wrong post_type."
+            return flask.Response("{'error':" + return_message + "}", status=400, mimetype='application/json')
 
         global mydb
         mycursor = ssm_connection()
@@ -1068,8 +1076,8 @@ def post_shop():
             return_message = "Order with id = "+str(body['order_number'])+" already present in database."
             return flask.Response("{'error':"+return_message+"}", status=400, mimetype='application/json')
         mydb.commit()
-        subprocess.call(['python3.8', 'ssm-backend/update_shop_gsheet.py'])
-        if body['full_price'] == 0:
+        subprocess.call(['python3.8', 'ssm-backend/update_shop_gsheet.py'])  # Вызов подпроцесса обновления гугл табличек.
+        if body['full_price'] == 0:  # Если цена = 0, то возвращает ссылка на страничку одобрения предзаказа.
             response = {"url": "https://salemsocial.kz/good_status_ok"}
             return response
         return kassa24_send_query(body)
@@ -1078,9 +1086,10 @@ def post_shop():
 @ssm.route("/shop/<stype>", methods=['GET'])
 def get_shop(stype):
     """
-    todo: comms
-    :param stype:
-    :return:
+    Получает список заказов с определенными параметрами.
+    Возвращает json-объект, список словарей.
+    :param stype: str - тип заказов (all - все, paid - оплаченные, unpaid - неоплаченные)
+    :return: json(list[dict])
     """
     mycursor = ssm_connection()
     if stype == 'all':
@@ -1090,7 +1099,8 @@ def get_shop(stype):
     elif stype == 'unpaid':
         query = "SELECT * FROM shop WHERE payment_status = 0;"
     else:
-        flask.abort(400)
+        return_message = "Wrong order output type. Must be 'all', 'paid' or 'unpaid'"
+        return flask.Response("{'error':" + return_message + "}", status=400, mimetype='application/json')
     mycursor.execute(query)
     query_result = mycursor.fetchall()
     itemlist = []
@@ -1116,8 +1126,9 @@ def get_shop(stype):
 @ssm.route("/shop/count", methods=['GET'])
 def get_orders_shop_count():
     """
-    todo: comms
-    :return:
+    Выводит кол-во заказов (всех).
+    Возвращает json-объект, список со словарем.
+    :return: json(list[dict])
     """
     mycursor = ssm_connection()
     query = "SELECT COUNT(*) FROM shop;"
@@ -1132,14 +1143,15 @@ def get_orders_shop_count():
 @ssm.route("/kassa24_callback", methods=['POST'])
 def kassa24_handle_callback():
     """
-    todo: comms
-    :return:
+    Вебхук для кассы24, обновляет статус заказа в бд. Оплаченным считается заказ, у которого status = 1.
+    :return: str
     """
     body = flask.request.get_json()
-    ip_address = flask.request.headers['X-Real-IP']
+    ip_address = flask.request.headers['X-Real-IP']  # В pythonanywhere реальный IP получается именно так, отлично от обычных серверов. Иначе приходит локальный ип.
     kassa_ip = '35.157.105.64'
     if ip_address != kassa_ip:
-        flask.abort(403)
+        return_message = "Request must be sent only from Kassa24 server IP"
+        return flask.Response("{'error':" + return_message + "}", status=400, mimetype='application/json')
     if body['status'] == 1:
         mycursor = ssm_connection()
         global mydb
@@ -1148,8 +1160,8 @@ def kassa24_handle_callback():
         mycursor.execute(query, value)
         mydb.commit()
     else:
-        response = "Payment with order id = "+str(body['metadata']['order_id'])+" was not completed."
-        return response
+        response = "Payment with order id = "+str(body['metadata']['order_id'])+" was not completed. Status from Kassa24 is "+str(body['status'])
+        return flask.Response("{'error':" + response + "}", status=400, mimetype='application/json')
     response = "Payment with order id = "+str(body['metadata']['order_id'])+" has been completed."
     subprocess.call(['python3.8', 'ssm-backend/update_shop_gsheet.py'])
     return response
@@ -1157,9 +1169,9 @@ def kassa24_handle_callback():
 
 def kassa24_send_query(inp):
     """
-    todo: comms
-    :param inp:
-    :return:
+    Формирование и отправка запроса в кассу24. Возвращает ссылку на оплату.
+    :param inp: dict
+    :return: str
     """
     return_url = 'https://salemsocial.kz/'
     callback_url = 'https://maksimsalnikov.pythonanywhere.com/ssm/kassa24_callback'
@@ -1194,8 +1206,9 @@ def kassa24_send_query(inp):
 @ssm.route("/month_traffic", methods=['GET'])
 def get_month_traffic():
     """
-    todo: comms
-    :return:
+    Выдает переходы по топ 3 проектам по стоимости. Данные из таблицы main_month_traffic.
+    Возвращает json-объект, список словарей.
+    :return: json(list[dict])
     """
     mycursor = ssm_connection()
     query = "SELECT * FROM main_month_traffic WHERE All_Traffic IS NOT NULL;"
@@ -1221,8 +1234,9 @@ def get_month_traffic():
 @ssm.route("/search_queries", methods=['GET'])
 def get_search_queries():
     """
-    todo: comms
-    :return:
+    Выдает данные по поисковым запросам в яндексе из Яндекс.Метрики.
+    Возвращает json-объект, список словарей.
+    :return: json(list[dict])
     """
     mycursor = ssm_connection()
     query = "SELECT * FROM search_queries;"
@@ -1244,9 +1258,10 @@ def get_search_queries():
 @ssm.route("/projects/top/<param>", methods=['GET'])
 def get_projects_top_params(param):
     """
-    todo: comms
-    :param param:
-    :return:
+    Выдает топ по определенному полю = param.
+    Возвращает json-объект, список словарей.
+    :param param: str - Поле, по которому выдавать топ
+    :return: json(list[dict])
     """
     paramlist = [
         {"parameter": "YoutubeViews"},
@@ -1274,11 +1289,27 @@ def get_projects_top_params(param):
         flask.abort(400)
 
 
-@ssm.route("/aitube_channels", methods=['GET'])
+@ssm.route("/channels/<platform>", methods=['GET'])
+def get_channels_data(platform):
+    """
+    Обрабатывает запрос и вызывает функцию для выдачи данным по каналам определенной платформы = platform.
+    Вызывает функцию, которая возвращают json-объект, список словарей.
+    :param platform: str
+    :return: json(list[dict])
+    """
+    if platform == 'aitube':
+        return get_aitube_channels_data()
+    elif platform == 'youtube':
+        return get_yt_channels_data()
+    else:
+        flask.abort(400)
+
+
 def get_aitube_channels_data():
     """
     todo: comms
-    :return:
+    Возвращает json-объект, список словарей.
+    :return: json(list[dict])
     """
     mycursor = ssm_connection()
     query = "SELECT * FROM aitube_channels;"
@@ -1301,11 +1332,48 @@ def get_aitube_channels_data():
     return json.dumps(itemlist, indent=4)
 
 
-@ssm.route("/aitube_channels/sums", methods=['GET'])
+def get_yt_channels_data():
+    """
+    todo: comms
+    Возвращает json-объект, список словарей.
+    :return: json(list[dict])
+    """
+    mycursor = ssm_connection()
+    query = "SELECT * FROM channels WHERE is_partner = 0;"
+    mycursor.execute(query)
+    query_result = mycursor.fetchall()
+    itemlist = []
+    for row in query_result:
+        item = dict()
+        item['id'] = row[0]
+        item['name'] = row[1]
+        item['subs_count'] = row[2]
+        item['link'] = row[3]
+        itemlist.append(item)
+    return json.dumps(itemlist, indent=4)
+
+
+@ssm.route("/channels/<platform>/sums", methods=['GET'])
+def get_channels_sums(platform):
+    """
+    Обрабатывает запрос и вызывает функцию для выдачи данным по сумме цифр канала определенной платформы = platform.
+    Вызывает функцию, которая возвращают json-объект, список словарей.
+    :param platform: str
+    :return: json(list[dict])
+    """
+    if platform == 'aitube':
+        return get_aitube_channels_sums()
+    elif platform == 'youtube':
+        return get_yt_channels_sums()
+    else:
+        flask.abort(400)
+
+
 def get_aitube_channels_sums():
     """
     todo: comms
-    :return:
+    Возвращает json-объект, список словарей.
+    :return: json(list[dict])
     """
     mycursor = ssm_connection()
     query = "SELECT SUM(subscribers), SUM(sum_views), SUM(sum_likes), SUM(sum_commentaries), SUM(sum_views_last_period), SUM(sum_likes_last_period), SUM(sum_comms_last_period) FROM aitube_channels;"
@@ -1321,5 +1389,23 @@ def get_aitube_channels_sums():
         item['views_last_period'] = float(row[4])
         item['likes_last_period'] = float(row[5])
         item['comments_last_period'] = float(row[6])
+        itemlist.append(item)
+    return json.dumps(itemlist, indent=4)
+
+
+def get_yt_channels_sums():
+    """
+    todo: comms
+    Возвращает json-объект, список словарей.
+    :return: json(list[dict])
+    """
+    mycursor = ssm_connection()
+    query = "SELECT SUM(followers) FROM channels WHERE is_partner = 0;"
+    mycursor.execute(query)
+    query_result = mycursor.fetchall()
+    itemlist = []
+    for row in query_result:
+        item = dict()
+        item['subs'] = float(row[0])
         itemlist.append(item)
     return json.dumps(itemlist, indent=4)
