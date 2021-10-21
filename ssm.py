@@ -1423,7 +1423,7 @@ def post_celebration():
                filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
     print('Print requst.files: '+str(request.files))
     if 'file' not in request.files:
-        return flask.Response("Not ok", status=400)
+        return flask.Response("Not ok", status=403)
     file = request.files['file']
 
     if file.filename == '':
