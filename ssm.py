@@ -1351,6 +1351,13 @@ def get_yt_channels_data():
         item['name'] = row[1]
         item['subs_count'] = row[2]
         item['link'] = row[3]
+        item['partner'] = row[4]
+        item['likes_count'] = row[5]
+        item['comments_count'] = row[6]
+        item['views_count'] = row[7]
+        item['quarter_likes_count'] = row[8]
+        item['quarter_comments_count'] = row[9]
+        item['quarter_views_count'] = row[10]
         itemlist.append(item)
     return json.dumps(itemlist, indent=4)
 
