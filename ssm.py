@@ -558,7 +558,7 @@ def get_kpi_aitu():
         item["today"] = row[6]
         item["quarter"] = row[7]
         item["quarter_left"] = row[8]
-        item['releases_limited '] = row[9]
+        item["releases_limited"] = row[9]
         itemlist.append(item)
     return json.dumps(itemlist, indent=4)
 
