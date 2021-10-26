@@ -1409,12 +1409,17 @@ def get_yt_channels_sums():
     :return: json(list[dict])
     """
     mycursor = ssm_connection()
-    query = "SELECT SUM(followers) FROM channels WHERE is_partner = 0;"
+    query = "SELECT SUM(followers), SUM(likes), SUM(comments), SUM(views), SUM(quarter_comments), SUM(quarter_views) FROM channels WHERE is_partner = 0;"
     mycursor.execute(query)
     query_result = mycursor.fetchall()
     itemlist = []
     for row in query_result:
         item = dict()
         item['subs'] = float(row[0])
+        item['likes_sum'] = float(row[1])
+        item['comments_sum'] = float(row[2])
+        item['views_sum'] = float(row[3])
+        item['quarter_comments_sum'] = float(row[4])
+        item['quarter_views_sum'] = float(row[5])
         itemlist.append(item)
     return json.dumps(itemlist, indent=4)
