@@ -543,7 +543,7 @@ def get_kpi_aitu():
     :return: json(list[dict])
     """
     mycursor = ssm_connection()
-    sql = "SELECT target, `left`, top_50, top_100, quiz, releases, today, `quarter`, quarter_left FROM kpi_aitu;"   # Кавычки в запросе не убирать, иначе сломает запрос.
+    sql = "SELECT target, `left`, top_50, top_100, quiz, releases, today, `quarter`, quarter_left, releases_limited FROM kpi_aitu;"   # Кавычки в запросе не убирать, иначе сломает запрос.
     mycursor.execute(sql)
     query_result = mycursor.fetchall()
     itemlist = []
@@ -558,6 +558,7 @@ def get_kpi_aitu():
         item["today"] = row[6]
         item["quarter"] = row[7]
         item["quarter_left"] = row[8]
+        item['releases_limited '] = row[9]
         itemlist.append(item)
     return json.dumps(itemlist, indent=4)
 
@@ -565,6 +566,7 @@ def get_kpi_aitu():
 @ssm.route("/update_kpi_aitu", methods=['POST'])
 def update_kpi_aitu():
     """
+    todo: refactor
     POST метод. Обновляет значения в таблице KPI Aitu
     Параметры считываются через тело запроса как json объект.
     Пример тела запроса:
@@ -588,11 +590,12 @@ def update_kpi_aitu():
         items.append(data['today'])
         items.append(data['quarter'])
         items.append(data['quarter_left'])
+        items.append(data['releases_limited'])
     except KeyError:
         flask.abort(403)
-    query = 'UPDATE kpi_aitu SET target = %s, `left` = %s, top_50 = %s, top_100 = %s, quiz = %s, releases = %s, today = %s, `quarter` = %s, quarter_left = %s WHERE id = 1'
+    query = 'UPDATE kpi_aitu SET target = %s, `left` = %s, top_50 = %s, top_100 = %s, quiz = %s, releases = %s, today = %s, `quarter` = %s, quarter_left = %s, releases_limited = %s WHERE id = 1'
     # Кавычки в запросе не убирать, иначе сломает запрос.
-    val = (int(items[0]), int(items[1]), int(items[2]), int(items[3]), int(items[4]), int(items[5]), int(items[6]), int(items[7]), int(items[8]))
+    val = (int(items[0]), int(items[1]), int(items[2]), int(items[3]), int(items[4]), int(items[5]), int(items[6]), int(items[7]), int(items[8]), int(items[9]))
     mycursor.execute(query, val)
     mydb.commit()
     return_dict = dict()
