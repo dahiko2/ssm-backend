@@ -234,15 +234,15 @@ def query_handler(call):
         btn3 = telebot.types.InlineKeyboardButton('3 qism', callback_data="mak3")
         btn4 = telebot.types.InlineKeyboardButton('4 qism', callback_data="mak4")
         start_markup.row(btn3, btn4)
-        """
+
         btn5 = telebot.types.InlineKeyboardButton('5 qism', callback_data="mak5")
         btn6 = telebot.types.InlineKeyboardButton('6 qism', callback_data="mak6")
         start_markup.row(btn5, btn6)
 
         btn7 = telebot.types.InlineKeyboardButton('7 qism', callback_data="mak7")
-        btn8 = telebot.types.InlineKeyboardButton('8 qism', callback_data="mak8")
-        start_markup.row(btn7, btn8)
-
+        #btn8 = telebot.types.InlineKeyboardButton('8 qism', callback_data="mak8")
+        start_markup.row(btn7)
+        """
         btn9 = telebot.types.InlineKeyboardButton('9 qism', callback_data="mak9")
         btn10 = telebot.types.InlineKeyboardButton('10 qism', callback_data="mak10")
         start_markup.row(btn9, btn10)"""
@@ -252,13 +252,13 @@ def query_handler(call):
         answer2 = Strings.series_chose
         keyboard.row("Sevimlilarga qo'shing", 'Ortga')
         btn1 = telebot.types.InlineKeyboardButton('1 qism', callback_data="qich_qud1")
-        # btn2 = telebot.types.InlineKeyboardButton('2 qism', callback_data="qich_qud3")
-        start_markup.row(btn1)
-        """
-        btn3 = telebot.types.InlineKeyboardButton('3 qism', callback_data="qich_qud4")
-        btn4 = telebot.types.InlineKeyboardButton('4 qism', callback_data="qich_qud4")
-        start_markup.row(btn3, btn4)
+        btn2 = telebot.types.InlineKeyboardButton('2 qism', callback_data="qich_qud3")
+        start_markup.row(btn1, btn2)
 
+        btn3 = telebot.types.InlineKeyboardButton('3 qism', callback_data="qich_qud4")
+        #btn4 = telebot.types.InlineKeyboardButton('4 qism', callback_data="qich_qud4")
+        start_markup.row(btn3)
+        """
         btn5 = telebot.types.InlineKeyboardButton('5 qism', callback_data="qich_qud5")
         btn6 = telebot.types.InlineKeyboardButton('6 qism', callback_data="qich_qud6")
         start_markup.row(btn5, btn6)
@@ -310,8 +310,28 @@ def query_handler(call):
         answer = "https://t.me/salomserial/947"
         answer2 = "Baxtli tomosha!"
         keyboard.row('Ortga')
+    elif call.data == "mak5":
+        answer = "https://t.me/salomserial/959"
+        answer2 = "Baxtli tomosha!"
+        keyboard.row('Ortga')
+    elif call.data == "mak6":
+        answer = "https://t.me/salomserial/986"
+        answer2 = "Baxtli tomosha!"
+        keyboard.row('Ortga')
+    elif call.data == "mak7":
+        answer = "https://t.me/salomserial/1001"
+        answer2 = "Baxtli tomosha!"
+        keyboard.row('Ortga')
     elif call.data == "qich_qud1":
         answer = "https://t.me/salomserial/927"
+        answer2 = "Baxtli tomosha!"
+        keyboard.row('Ortga')
+    elif call.data == "qich_qud2":
+        answer = "https://t.me/salomserial/956"
+        answer2 = "Baxtli tomosha!"
+        keyboard.row('Ortga')
+    elif call.data == "qich_qud3":
+        answer = "https://t.me/salomserial/988"
         answer2 = "Baxtli tomosha!"
         keyboard.row('Ortga')
 
