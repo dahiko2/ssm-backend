@@ -1418,26 +1418,3 @@ def get_yt_channels_sums():
         item['subs'] = float(row[0])
         itemlist.append(item)
     return json.dumps(itemlist, indent=4)
-
-
-@ssm.route("/upload_new_year", methods=['POST'])
-def post_celebration():
-    """    UPLOAD_FOLDER = '/path/to/the/uploads'
-    ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'}
-
-    def allowed_file(filename):
-        return '.' in filename and \
-               filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
-    print('Print requst.files: '+str(flask.request.files))
-    if 'file' not in request.files:
-        return flask.Response("Not ok", status=403)
-    file = request.files['file']
-
-    if file.filename == '':
-        return flask.Response("Not ok", status=400)
-
-    if file and allowed_file(file.filename):
-        filename = secure_filename(file.filename)
-        file.save(os.path.join(UPLOAD_FOLDER, filename))
-        return flask.Response("File uploaded.", status=200)"""
-    return flask.Response("Not ok", status=400)
