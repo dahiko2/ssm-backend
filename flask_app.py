@@ -120,3 +120,9 @@ def validate_auth():
                     flask.abort(401)
             else:
                 flask.abort(401)
+
+
+@app.route("/google01dd5a969f463cdb.html")
+def google_webhook_verify():
+    return flask.render_template("google01dd5a969f463cdb.html")
+

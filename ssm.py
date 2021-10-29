@@ -1426,3 +1426,4 @@ def get_yt_channels_sums():
         item['quarter_views_sum'] = float(row[5])
         itemlist.append(item)
     return json.dumps(itemlist, indent=4)
+
