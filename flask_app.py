@@ -124,5 +124,5 @@ def validate_auth():
 
 @app.route("/google01dd5a969f463cdb.html")
 def google_webhook_verify():
-    return flask.render_template("google01dd5a969f463cdb.html")
+    return flask.render_template("google16b6d70bf4da1503.html")
 
