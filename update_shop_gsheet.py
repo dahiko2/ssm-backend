@@ -1,3 +1,4 @@
+import time
 import mysql.connector
 from googleapiclient.discovery import build
 from google.oauth2 import service_account
@@ -71,8 +72,10 @@ def import_to_gsheet():
                 sheet.values().update(spreadsheetId=gsheetid,
                                       range=f"Заказы!A{rowcount}", valueInputOption="USER_ENTERED",
                                       body={"values": result}).execute()
+                time.sleep(1)
             except Exception as e:
                 print(e)
+                time.sleep(2)
             y = False
         rowcount += 1
 
