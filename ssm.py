@@ -258,7 +258,7 @@ def get_projects():
         item["gender"] = row[2]
         item["age"] = row[3]
         item["utm_name"] = row[4]
-        item["lang"]
+        item["lang"] = row[5]
         itemlist.append(item)
     return json.dumps(itemlist, indent=4)
 
