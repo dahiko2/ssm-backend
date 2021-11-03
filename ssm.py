@@ -247,7 +247,7 @@ def get_projects():
     :return: json
     """
     mycursor = ssm_connection()
-    query = "SELECT ProjectID, ProjectName, Gender, Age, UtmName FROM project ORDER BY ProjectName;"
+    query = "SELECT ProjectID, ProjectName, Gender, Age, UtmName, Language FROM project ORDER BY ProjectName;"
     mycursor.execute(query)
     query_result = mycursor.fetchall()
     itemlist = []
@@ -258,6 +258,7 @@ def get_projects():
         item["gender"] = row[2]
         item["age"] = row[3]
         item["utm_name"] = row[4]
+        item["lang"]
         itemlist.append(item)
     return json.dumps(itemlist, indent=4)
 
