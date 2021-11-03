@@ -41,7 +41,7 @@ def ssm_connection():
 
 def import_to_gsheet():
     SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
-    SERVICE_ACCOUNT_FILE = 'keys.json'
+    SERVICE_ACCOUNT_FILE = 'key_ssm_shop.json'
     gsheetid = "179sx_nEMoQvwx1BguVG-tIT2jwDxX_JsmsV5K4xMhiM"
 
     creds = service_account.Credentials.from_service_account_file(
