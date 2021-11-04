@@ -10,30 +10,22 @@ from datetime import datetime
 from urllib.parse import urlparse, parse_qs
 
 
-fhost = ""
-fuser = ""
-fpass = ""
-fdbname_ssm = ""
-fkassa_login = ""
-fkassa_password = ""
-
-
 def read_creds():
     """
     Построчно считывает данные для подключения к бд из файла credentials.txt.
     """
-    global fhost, fuser, fpass, fdbname_ssm, fkassa_login, fkassa_password
     with open("credentials.json") as f:
         credentials = json.load(f)
-        fhost = credentials['db_hostname']
-        fuser = credentials['db_user']
-        fpass = credentials['db_password']
-        fdbname_ssm = credentials['db_name_ssm']
-        fkassa_login = credentials['kassa24_login']
-        fkassa_password = credentials['kassa24_password']
+        host = credentials['db_hostname']
+        user = credentials['db_user']
+        passw = credentials['db_password']
+        dbname_ssm = credentials['db_name_ssm']
+        kassa_login = credentials['kassa24_login']
+        kassa_password = credentials['kassa24_password']
+    return host, user, passw, dbname_ssm, kassa_login, kassa_password
 
 
-read_creds()  # Считывает данные для входа при запуске скрипта
+fhost, fuser, fpass, fdbname_ssm, fkassa_login, fkassa_password = read_creds()  # Считывает данные для входа при запуске скрипта
 ssm = Blueprint('ssm', __name__)
 
 
