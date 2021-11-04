@@ -71,7 +71,7 @@ def import_to_gsheet():
     while y:
         try:
             sheet.values().update(spreadsheetId=gsheetid,
-                                  range="Заказы!A2:L124", valueInputOption="USER_ENTERED",
+                                  range="Заказы!A2:L124", valueInputOption="RAW",
                                   body={"values": result_list}).execute()
             # time.sleep(1)
         except Exception as e:
