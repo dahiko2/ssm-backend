@@ -262,7 +262,7 @@ def get_releases_by_period(n, period):
     periods = ["DAY", "WEEK", "MONTH", "YEAR"]
     period = period.upper()
     if period not in periods:
-        flask.abort(403)
+        flask.Response("{'error':'Wrong period.'}", status=400, mimetype='application/json')
     mydb, mycursor = ssm_connection()
     query = "SELECT * FROM releases " \
             "WHERE " + datetype + " > DATE_SUB(CURDATE(), INTERVAL %s " + period + ") ORDER BY projectID DESC;"
@@ -343,13 +343,13 @@ def update_kpi_mau():
     """
     body = flask.request.get_json()
     if body is None:
-        flask.abort(403)
+        flask.Response("{'error':'No data in request body'}", status=400, mimetype='application/json')
     data = json.loads(str(body).replace("'", '"'))
     try:
         value = data['value']
         country = data['country']
     except KeyError:
-        flask.abort(403)
+        return flask.Response("{'error':'No value or country in request body.'}", status=400, mimetype='application/json')
     else:
         mydb, mycursor = ssm_connection()
         months = [0, "Январь", "Февраль", "Март", "Апрель", "Май", "Июнь", "Июль", "Август", "Сентябрь", "Октябрь",
@@ -386,7 +386,7 @@ def update_yt_trends():
     """
     body = flask.request.get_json()
     if body is None:
-        flask.abort(403)
+        return flask.Response("{'error':'No data in request body.'}", status=400, mimetype='application/json')
     mydb, mycursor = ssm_connection()
     count = 0
     video_list = json.loads(str(body).replace("'", '"'))
@@ -453,12 +453,12 @@ def add_yt_channel():
     """
     body = flask.request.get_json()
     if body is None:
-        flask.abort(403)
+        return flask.Response("{'error':'No data in request body.'}", status=400, mimetype='application/json')
     body_input = json.loads(str(body).replace("'", '"'))
     try:
         channel = body_input['channel']
     except KeyError:
-        flask.abort(403)
+        return flask.Response("{'error':'No channel in request body.'}", status=400, mimetype='application/json')
     else:
         mydb, mycursor = ssm_connection()
         query = "INSERT INTO channels (name) VALUES (%s);"
@@ -510,7 +510,7 @@ def update_kpi_aitu():
     """
     body = flask.request.get_json()
     if body is None:
-        flask.abort(403)
+        return flask.Response("{'error':'No data in body request.'}", status=400, mimetype='application/json')
     data = json.loads(str(body).replace("'", '"'))
     mydb, mycursor = ssm_connection()
     items = []
@@ -526,7 +526,7 @@ def update_kpi_aitu():
         items.append(data['quarter_left'])
         items.append(data['releases_limited'])
     except KeyError:
-        flask.abort(403)
+        return flask.Response("{'error':'Partial missing  data in request body.'}", status=400, mimetype='application/json')
     query = 'UPDATE kpi_aitu SET target = %s, `left` = %s, top_50 = %s, top_100 = %s, quiz = %s, releases = %s, today = %s, `quarter` = %s, quarter_left = %s, releases_limited = %s WHERE id = 1'
     # Кавычки в запросе не убирать, иначе сломает запрос.
     val = (int(items[0]), int(items[1]), int(items[2]), int(items[3]), int(items[4]), int(items[5]), int(items[6]), int(items[7]), int(items[8]), int(items[9]))
@@ -548,7 +548,7 @@ def update_logging():
     """
     body = flask.request.get_json()
     if body is None:
-        flask.abort(403)
+        return flask.Response("{'error':'No data in request body.'}", status=400, mimetype='application/json')
     data = json.loads(str(body).replace("'", '"'))
     try:
         query = "UPDATE log SET date = NOW() WHERE name = %s"
@@ -560,7 +560,7 @@ def update_logging():
         return_dict["message"] = data["type"] + " log updated."
         return return_dict
     except KeyError:
-        flask.abort(403)
+        return flask.Response("{'error':'No type in request body.'}", status=400, mimetype='application/json')
 
 
 @ssm.route("/get_logs", methods=['GET'])
@@ -585,7 +585,7 @@ def get_logs():
             itemlist.append(item)
         return json.dumps(itemlist, indent=4)
     except KeyError:
-        flask.abort(403)
+        return flask.Response("{'error':'Wrong request body.'}", status=400, mimetype='application/json')
 
 
 @ssm.route("/get_dashb_params", methods=['GET'])
@@ -649,7 +649,7 @@ def add_release():
             if item not in dbtable_columns:
                 pass
             keys.append(item)
-            values.append(str(body[item]))
+            values.append(str(body[item]))  # todo: escape bad characters
         delimeter = ", "
         key_string = delimeter.join(keys)  # формирование строки для вставки в поля запроса. Как поля используются ключи словаря.
         placeholder = '%s'
@@ -661,12 +661,12 @@ def add_release():
             mydb.commit()
         except mysql.connector.errors.Error as e:
             print("Error: "+e.msg)
-            flask.abort(400)
+            return flask.Response("{'error':'Wrong request.'}", status=403, mimetype='application/json')
         return_dict = dict()
         return_dict["message"] = "Release added."
         return return_dict
     else:
-        flask.abort(400)
+        return flask.Response("{'error':'No data in request body.'}", status=400, mimetype='application/json')
 
 
 @ssm.route("/get_file_<filename>.<ext>", methods=['GET'])
@@ -687,9 +687,9 @@ def get_custom_json_data(filename, ext):
         elif ext == 'json':
             return json.dumps(json.loads(data), indent=4)
         else:
-            flask.abort(400)
+            return flask.Response("{'error':'Banned file type.'}", status=403, mimetype='application/json')
     else:
-        flask.abort(404)
+        return flask.Response("{'error':File not found.'}", status=404, mimetype='application/json')
 
 
 @ssm.route("/get_pr_status", methods=['GET'])
@@ -762,7 +762,7 @@ def post_meeting():
     """
     body = flask.request.get_json()
     if body is None:
-        flask.abort(400)
+        return flask.Response("{'error':'No data in request body.'}", status=400, mimetype='application/json')
     add_event = True
     mydb, mycursor = ssm_connection()
     # Проверка, не попадает ли новая запись в промежутки предыдущих записей
@@ -785,7 +785,7 @@ def post_meeting():
         try:
             values = (body["author"], body["time"], body["room"], body["finish"], body["date"])
         except KeyError:
-            flask.abort(400)
+            return flask.Response("{'error':'Wrong request body.'}", status=400, mimetype='application/json')
         else:
             mycursor.execute(query, values)
             mydb.commit()
@@ -793,7 +793,7 @@ def post_meeting():
             return_dict["message"] = "Meet event added."
             return return_dict
     else:
-        flask.abort(403)
+        return flask.Response("{'error':'Meet time is already busy.'}", status=403, mimetype='application/json')
 
 
 @ssm.route("/meet/<mdate>", methods=['GET'])
@@ -830,11 +830,11 @@ def delete_meeting():
     """
     body = flask.request.get_json()
     if body is None:
-        flask.abort(400)
+        return flask.Response("{'error':'No data in request body.'}", status=400, mimetype='application/json')
     try:
         idmeet = body["id"]
     except KeyError:
-        flask.abort(400)
+        return flask.Response("{'error':'No id in request body.'}", status=400, mimetype='application/json')
     else:
         mydb, mycursor = ssm_connection()
         value = (idmeet,)
@@ -911,13 +911,13 @@ def project_stats_season_handler(projectid, season):
     """
     if season is not None:
         if season < 0:
-            flask.abort(400)
+            return flask.Response("{'error':'Season can't be less than zero.'}", status=403, mimetype='application/json')
         elif season == 0:
             return get_project_stats(projectid)
         else:
             return get_project_stats_season(projectid, season)
     else:
-        flask.abort(400)
+        return flask.Response("{'error':'No season in request parameters.'}", status=400, mimetype='application/json')
 
 
 def get_project_stats_season(projectid, season):
@@ -979,12 +979,12 @@ def post_shop():
     body = flask.request.get_json()
     if body is None:
         return_message = "No request body."
-        return flask.Response("{'error':" + return_message + "}", status=400, mimetype='application/json')
+        return flask.Response("{'error':'" + return_message + "'}", status=400, mimetype='application/json')
     try:
         post_type = body['post_type']
     except KeyError:
         return_message = "No post_type parameter in request body."
-        return flask.Response("{'error':" + return_message + "}", status=400, mimetype='application/json')
+        return flask.Response("{'error':'" + return_message + "'}", status=400, mimetype='application/json')
     else:
         if post_type == 'доставка':
             query = "INSERT INTO shop " \
@@ -1000,14 +1000,14 @@ def post_shop():
 
         else:
             return_message = "Wrong post_type."
-            return flask.Response("{'error':" + return_message + "}", status=400, mimetype='application/json')
+            return flask.Response("{'error':'" + return_message + "'}", status=400, mimetype='application/json')
 
         mydb, mycursor = ssm_connection()
         try:
             mycursor.execute(query, values)
         except mysql.connector.errors.IntegrityError:
             return_message = "Order with id = "+str(body['order_number'])+" already present in database."
-            return flask.Response("{'error':"+return_message+"}", status=400, mimetype='application/json')
+            return flask.Response("{'error':'"+return_message+"'}", status=400, mimetype='application/json')
         mydb.commit()
         subprocess.call(['python3.8', 'ssm-backend/update_shop_gsheet.py'])  # Вызов подпроцесса обновления гугл табличек.
         if body['full_price'] == 0:  # Если цена = 0, то возвращает ссылка на страничку одобрения предзаказа.
@@ -1033,7 +1033,7 @@ def get_shop(stype):
         query = "SELECT * FROM shop WHERE payment_status = 0;"
     else:
         return_message = "Wrong order output type. Must be 'all', 'paid' or 'unpaid'"
-        return flask.Response("{'error':" + return_message + "}", status=400, mimetype='application/json')
+        return flask.Response("{'error':'" + return_message + "'}", status=400, mimetype='application/json')
     mycursor.execute(query)
     query_result = mycursor.fetchall()
     itemlist = []
@@ -1082,7 +1082,7 @@ def kassa24_handle_callback():
     kassa_ip = '35.157.105.64'
     if ip_address != kassa_ip:
         return_message = "Request must be sent only from Kassa24 server IP"
-        return flask.Response("{'error':" + return_message + "}", status=400, mimetype='application/json')
+        return flask.Response("{'error':'" + return_message + "'}", status=400, mimetype='application/json')
     if body['status'] == 1:
         mydb, mycursor = ssm_connection()
         query = "UPDATE shop SET payment_status = %s WHERE id = %s;"
@@ -1091,7 +1091,7 @@ def kassa24_handle_callback():
         mydb.commit()
     else:
         response = "Payment with order id = "+str(body['metadata']['order_id'])+" was not completed. Status from Kassa24 is "+str(body['status'])
-        return flask.Response("{'error':" + response + "}", status=400, mimetype='application/json')
+        return flask.Response("{'error':'" + response + "'}", status=400, mimetype='application/json')
     response = "Payment with order id = "+str(body['metadata']['order_id'])+" has been completed."
     subprocess.call(['python3.8', 'ssm-backend/update_shop_gsheet.py'])
     return response
@@ -1130,7 +1130,7 @@ def kassa24_send_query(inp):
     if r.status_code == 201:
         return response
     else:
-        return flask.abort(r.status_code)
+        return flask.Response("{'error':'Response from kassa24 with status code: " + str(r.status_code) + "'}", status=r.status_code, mimetype='application/json')
 
 
 @ssm.route("/month_traffic", methods=['GET'])
@@ -1213,7 +1213,8 @@ def get_projects_top(param):
                 item["count"] = row[1]
                 itemlist.append(item)
             return json.dumps(itemlist, indent=4)
-        flask.abort(400)
+        else:
+            return flask.Response("{'error':'Wrong parameter.'}", status=400, mimetype='application/json')
 
 
 @ssm.route("/channels/<platform>", methods=['GET'])
@@ -1229,7 +1230,7 @@ def get_channels_data(platform):
     elif platform == 'youtube':
         return get_yt_channels_data()
     else:
-        flask.abort(400)
+        return flask.Response("{'error':'Wrong platform.'}", status=400, mimetype='application/json')
 
 
 def get_aitube_channels_data():
@@ -1300,7 +1301,7 @@ def get_channels_sums(platform):
     elif platform == 'youtube':
         return get_yt_channels_sums()
     else:
-        flask.abort(400)
+        return flask.Response("{'error':'Wrong platform.'}", status=400, mimetype='application/json')
 
 
 def get_aitube_channels_sums():
