@@ -5,12 +5,10 @@ import time
 import flask
 import mysql.connector
 import requests
-import os
-from flask import Blueprint, request
+from flask import Blueprint
 from datetime import datetime
 from urllib.parse import urlparse, parse_qs
 
-from werkzeug.utils import secure_filename
 
 mydb = mysql.connector.connect()
 fhost = ""
@@ -186,57 +184,6 @@ def form_proj_info_dict(row):
             gender = "F"
     item["gender"] = gender
     return item
-
-
-def get_project_averages(project_id):
-    """
-    Выводит средние значения для всего проекта по Хвосту, Досматриваемости и CPC.
-    :param project_id: int - id проекта
-    :return: float, float, float
-    """
-    mycursor = ssm_connection()
-    # Вытаскиваем среднюю длину хвоста, где значение хвоста задано, и значени хвоста у первой серии не учитывается (для этого нужна сортировка по дате и лимит 1)
-    query = "SELECT AVG(tail) FROM (SELECT EpisodesName, tail, ReleaseDate FROM releases WHERE ProjectID = %s AND Tail IS NOT NULL ORDER BY ReleaseDate ASC LIMIT 1, 1000) AS t;"
-    val = (project_id, )
-    mycursor.execute(query, val)
-    query_result = mycursor.fetchall()
-    avg_tail = 0
-    for row in query_result:
-        avg_tail = 0
-        if row[0] is not None:
-            avg_tail = float(row[0])
-    # Вытаскиваем досматриваемость, цену и переходы.
-    query = "SELECT AudienceRetention, Price, Traffic, EpisodesName FROM releases WHERE ProjectID = %s ORDER BY ReleaseDate ASC;"
-    val = (project_id, )
-    mycursor.execute(query, val)
-    query_result = mycursor.fetchall()
-    summary_retention = 0
-    count_retention = 0
-    summary_cpc = 0
-    count_cpc = 0
-    avg_cpc = 0
-    avg_retention = 0
-    first_ep = ["1 серия", "1 часть", "серия 1", "#1", "еp.1", "еp. 1", "часть 1", "ep.1", "ep. 1", "1 бөлім", "бөлім 1", "трейлер", "тизер", "анонс"]
-    # Считаем суммы для СРС и досматриваемости
-    for row in query_result:
-        # Если в названии серии нет строки из списка first_list то считаем среднее срс (Если не первая серия)
-        if not any(substring in str(row[3]).lower() for substring in first_ep):
-            count_cpc += 1
-            summary_cpc += calculate_cp(row[1], row[2])
-        # Пропускаем досматриваемость в 0% как незаполненную (условный костыль пока не пофиксим автозаполнение досматриваемости)
-        if row[0] == "0%":
-            pass
-        count_retention += 1
-        try:
-            summary_retention += float(row[0][:-1].replace(",", "."))
-        except ValueError:
-            summary_retention += 0
-    # Если досматриваемость незаполнена, ее нет, то средняя отдается как 0, в ином случае считается средняя арифметическая, тоже самое для СРС
-    if count_retention != 0:
-        avg_retention = summary_retention / count_retention
-    if count_cpc != 0:
-        avg_cpc = summary_cpc / count_cpc
-    return avg_tail, avg_retention, avg_cpc
 
 
 @ssm.route("/get_projects", methods=['GET'])
@@ -546,28 +493,27 @@ def get_kpi_aitu():
     mycursor = ssm_connection()
     sql = "SELECT target, `left`, top_50, top_100, quiz, releases, today, `quarter`, quarter_left, releases_limited FROM kpi_aitu;"   # Кавычки в запросе не убирать, иначе сломает запрос.
     mycursor.execute(sql)
-    query_result = mycursor.fetchall()
+    query_result = mycursor.fetchone()
     itemlist = []
-    for row in query_result:
-        item = dict()
-        item["target"] = row[0]
-        item["left"] = row[1]
-        item["top_50"] = row[2]
-        item["top_100"] = row[3]
-        item["quiz"] = row[4]
-        item["releases"] = row[5]
-        item["today"] = row[6]
-        item["quarter"] = row[7]
-        item["quarter_left"] = row[8]
-        item["releases_limited"] = row[9]
-        itemlist.append(item)
+    item = dict()
+    item["target"] = query_result[0]
+    item["left"] = query_result[1]
+    item["top_50"] = query_result[2]
+    item["top_100"] = query_result[3]
+    item["quiz"] = query_result[4]
+    item["releases"] = query_result[5]
+    item["today"] = query_result[6]
+    item["quarter"] = query_result[7]
+    item["quarter_left"] = query_result[8]
+    item["releases_limited"] = query_result[9]
+    itemlist.append(item)
     return json.dumps(itemlist, indent=4)
 
 
 @ssm.route("/update_kpi_aitu", methods=['POST'])
 def update_kpi_aitu():
     """
-    todo: refactor
+    todo: refactor. Добавить в базу поле год, записывать данные только за текущий год. Также поменять запрос в методе вывода.
     POST метод. Обновляет значения в таблице KPI Aitu
     Параметры считываются через тело запроса как json объект.
     Пример тела запроса:
@@ -706,7 +652,7 @@ def add_release():
     if body is not None:
         global mydb
         mycursor = ssm_connection()
-        query = "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = Database() AND TABLE_NAME = 'releases' ;"
+        query = "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = Database() AND TABLE_NAME = 'releases';"
         mycursor.execute(query)
         query_result = mycursor.fetchall()
         dbtable_columns = []
@@ -962,12 +908,12 @@ def get_project_stats(projectid):
     query = "SELECT AVG(Male), AVG(Female) FROM releases WHERE projectid = %s"  # Получаем средний пол проекта
     mycursor.execute(query, value)
     gender = "M-F"
-    for row in mycursor.fetchall():
-        if row[0] is not None and row[0] != '0%':
-            if float(row[0]) > 60.0:
-                gender = "M"
-            elif float(row[1]) > 60.0:
-                gender = "F"
+    query_result = mycursor.fetchone()
+    if query_result[0] is not None and query_result[0] != '0%':
+        if float(query_result[0]) > 60.0:
+            gender = "M"
+        elif float(query_result[1]) > 60.0:
+            gender = "F"
     result_dict["gender"] = gender
     return json.dumps(itemlist, indent=4)
 
@@ -1018,24 +964,23 @@ def get_project_stats_season(projectid, season):
     value = (projectid, season)
     for query in query_list:
         mycursor.execute(query['query'], value)
-        query_result = mycursor.fetchall()
-        for row in query_result:
-            try:
-                result_dict[query["name"]] = float(row[0])
-            except TypeError:
-                result_dict[query["name"]] = 0
-            except ValueError:
-                result_dict[query["name"]] = row[0]
+        query_result = mycursor.fetchone()
+        try:
+            result_dict[query["name"]] = float(query_result[0])
+        except TypeError:
+            result_dict[query["name"]] = 0
+        except ValueError:
+            result_dict[query["name"]] = query_result[0]
 
     query = "SELECT AVG(Male), AVG(Female) FROM releases WHERE projectid = %s AND season = %s"  # Получаем средний пол проекта
     mycursor.execute(query, value)
     gender = "M-F"
-    for row in mycursor.fetchall():
-        if row[0] is not None and row[0] != '0%':
-            if float(row[0]) > 60.0:
-                gender = "M"
-            elif float(row[1]) > 60.0:
-                gender = "F"
+    query_result = mycursor.fetchone()
+    if query_result[0] is not None and query_result[0] != '0%':
+        if float(query_result[0]) > 60.0:
+            gender = "M"
+        elif float(query_result[1]) > 60.0:
+            gender = "F"
     result_dict["gender"] = gender
     return json.dumps(itemlist, indent=4)
 
@@ -1139,10 +1084,8 @@ def get_orders_shop_count():
     mycursor = ssm_connection()
     query = "SELECT COUNT(*) FROM shop;"
     mycursor.execute(query)
-    query_result = mycursor.fetchall()
-    itemlist = [dict()]
-    for row in query_result:
-        itemlist[0]["orders_count"] = row[0]
+    query_result = mycursor.fetchone()
+    itemlist = [{"orders_count": query_result[0]}]
     return json.dumps(itemlist)
 
 
@@ -1262,7 +1205,7 @@ def get_search_queries():
 
 
 @ssm.route("/projects/top/<param>", methods=['GET'])
-def get_projects_top_params(param):
+def get_projects_top(param):
     """
     Выдает топ по определенному полю = param.
     Возвращает json-объект, список словарей.
@@ -1270,28 +1213,25 @@ def get_projects_top_params(param):
     :return: json(list[dict])
     """
     paramlist = [
-        {"parameter": "YoutubeViews"},
-        {"parameter": "YouTubeCommentsCount"},
-        {"parameter": "AitubeViews"},
-        {"parameter": "UniqUserPerYear"},
-        {"parameter": "Traffic"}
+        "YoutubeViews", "YouTubeCommentsCount", "AitubeViews", "UniqUserPerYear", "Traffic"
     ]
+
     if param == 'parameter':
-        return json.dumps(paramlist, indent=4)
+        return_list = [{"parameter": item} for item in paramlist]
+        return json.dumps(return_list, indent=4)
     else:
-        for item in paramlist:
-            if item['parameter'] == param:
-                mycursor = ssm_connection()
-                query = "select sum("+param+") as s, ProjectName from releases, project where releases.ProjectID = project.projectID group by ProjectName order by s DESC;"
-                mycursor.execute(query)
-                query_result = mycursor.fetchall()
-                itemlist = []
-                for row in query_result:
-                    item = dict()
-                    item["project_name"] = str(row[0])
-                    item["count"] = row[1]
-                    itemlist.append(item)
-                return json.dumps(itemlist, indent=4)
+        if param in paramlist:
+            mycursor = ssm_connection()
+            query = "select sum("+param+") as s, ProjectName from releases, project where releases.ProjectID = project.projectID group by ProjectName order by s DESC;"
+            mycursor.execute(query)
+            query_result = mycursor.fetchall()
+            itemlist = []
+            for row in query_result:
+                item = dict()
+                item["project_name"] = str(row[0])
+                item["count"] = row[1]
+                itemlist.append(item)
+            return json.dumps(itemlist, indent=4)
         flask.abort(400)
 
 
@@ -1427,4 +1367,3 @@ def get_yt_channels_sums():
         item['quarter_views_sum'] = float(row[5])
         itemlist.append(item)
     return json.dumps(itemlist, indent=4)
-
