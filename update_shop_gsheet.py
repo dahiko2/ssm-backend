@@ -66,18 +66,17 @@ def import_to_gsheet():
             basket_res = ""
         result = [f"{row[0]}", f"{row[1]}", f"{row[2]}", f"{row[3]}", f"{row[4]}", f"{row[5]}", f"{row[6]}", f"{basket_res}", f"{row[8]}", f"{row[9]}", f"{row[10]}", f"{status}"]
         result_list.append(result)
-    print(len(result_list)+1)
-    y = True
-    while y:
-        try:
-            sheet.values().update(spreadsheetId=gsheetid,
-                                  range="Заказы!A2", valueInputOption="RAW",
-                                  body={"values": result_list}).execute()
-            # time.sleep(1)
-        except Exception as e:
-            print(e)
-            time.sleep(2)
-        y = False
+
+    try:
+        sheet.values().update(spreadsheetId=gsheetid,
+                              range="Заказы!A2", valueInputOption="RAW",
+                              body={"values": result_list}).execute()
+    except Exception as e:
+        print(e)
+        time.sleep(2)
+        sheet.values().update(spreadsheetId=gsheetid,
+                              range="Заказы!A2", valueInputOption="RAW",
+                              body={"values": result_list}).execute()
 
 
 if __name__ == '__main__':
