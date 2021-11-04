@@ -1082,7 +1082,7 @@ def post_shop():
             return_message = "Order with id = "+str(body['order_number'])+" already present in database."
             return flask.Response("{'error':"+return_message+"}", status=400, mimetype='application/json')
         mydb.commit()
-        #subprocess.call(['python3.8', 'ssm-backend/update_shop_gsheet.py'])  # Вызов подпроцесса обновления гугл табличек.
+        subprocess.call(['python3.8', 'ssm-backend/update_shop_gsheet.py'])  # Вызов подпроцесса обновления гугл табличек.
         if body['full_price'] == 0:  # Если цена = 0, то возвращает ссылка на страничку одобрения предзаказа.
             response = {"url": "https://salemsocial.kz/good_status_ok"}
             return response
@@ -1169,7 +1169,7 @@ def kassa24_handle_callback():
         response = "Payment with order id = "+str(body['metadata']['order_id'])+" was not completed. Status from Kassa24 is "+str(body['status'])
         return flask.Response("{'error':" + response + "}", status=400, mimetype='application/json')
     response = "Payment with order id = "+str(body['metadata']['order_id'])+" has been completed."
-    #subprocess.call(['python3.8', 'ssm-backend/update_shop_gsheet.py'])
+    subprocess.call(['python3.8', 'ssm-backend/update_shop_gsheet.py'])
     return response
 
 
