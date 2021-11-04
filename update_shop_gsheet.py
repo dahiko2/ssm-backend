@@ -54,7 +54,7 @@ def import_to_gsheet():
     query = "SELECT * FROM shop ORDER BY order_date ASC;"
     mycursor.execute(query)
     query_res = mycursor.fetchall()
-    rowcount = 2
+    result_list = []
     for row in query_res:
         status = "Оплачено" if row[11] else "Не оплачено"
         if row[7] is not None:
@@ -65,19 +65,19 @@ def import_to_gsheet():
         else:
             basket_res = ""
         result = [[f"{row[0]}", f"{row[1]}", f"{row[2]}", f"{row[3]}", f"{row[4]}", f"{row[5]}", f"{row[6]}", f"{basket_res}", f"{row[8]}", f"{row[9]}", f"{row[10]}", f"{status}"]]
+        result_list.append(result)
 
-        y = True
-        while y:
-            try:
-                sheet.values().update(spreadsheetId=gsheetid,
-                                      range=f"Заказы!A{rowcount}", valueInputOption="USER_ENTERED",
-                                      body={"values": result}).execute()
-                # time.sleep(1)
-            except Exception as e:
-                print(e)
-                time.sleep(2)
-            y = False
-        rowcount += 1
+    y = True
+    while y:
+        try:
+            sheet.values().update(spreadsheetId=gsheetid,
+                                  range="Заказы!A2", valueInputOption="USER_ENTERED",
+                                  body={"values": result_list}).execute()
+            # time.sleep(1)
+        except Exception as e:
+            print(e)
+            time.sleep(2)
+        y = False
 
 
 if __name__ == '__main__':
