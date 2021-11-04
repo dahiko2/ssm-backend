@@ -51,7 +51,7 @@ def ssm_connection():
         database=fdbname_ssm
     )
     mydb.time_zone = "+06:00"
-    return mydb.cursor()
+    return mydb.cursor(buffered=True)
 
 
 def calculate_cp(price, metric):
