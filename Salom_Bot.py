@@ -240,8 +240,8 @@ def query_handler(call):
         start_markup.row(btn5, btn6)
 
         btn7 = telebot.types.InlineKeyboardButton('7 qism', callback_data="mak7")
-        #btn8 = telebot.types.InlineKeyboardButton('8 qism', callback_data="mak8")
-        start_markup.row(btn7)
+        btn8 = telebot.types.InlineKeyboardButton('8 qism', callback_data="mak8")
+        start_markup.row(btn7, btn8)
         """
         btn9 = telebot.types.InlineKeyboardButton('9 qism', callback_data="mak9")
         btn10 = telebot.types.InlineKeyboardButton('10 qism', callback_data="mak10")
@@ -322,6 +322,11 @@ def query_handler(call):
         answer = "https://t.me/salomserial/1001"
         answer2 = "Baxtli tomosha!"
         keyboard.row('Ortga')
+    elif call.data == "mak8":
+        answer = "https://t.me/salomserial/1017"
+        answer2 = "Baxtli tomosha!"
+        keyboard.row('Ortga')
+
     elif call.data == "qich_qud1":
         answer = "https://t.me/salomserial/927"
         answer2 = "Baxtli tomosha!"
