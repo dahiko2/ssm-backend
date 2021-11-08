@@ -1136,7 +1136,7 @@ def kassa24_send_query(inp):
 @ssm.route("/month_traffic", methods=['GET'])
 def get_month_traffic():
     """
-    Выдает переходы по топ 3 проектам по стоимости. Данные из таблицы main_month_traffic.
+    Выдает переходы по топ 3 проектам по трафику. Данные из таблицы main_month_traffic.
     Возвращает json-объект, список словарей.
     :return: json(list[dict])
     """
