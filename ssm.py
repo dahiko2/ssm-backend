@@ -525,11 +525,12 @@ def update_kpi_aitu():
         items.append(data['quarter'])
         items.append(data['quarter_left'])
         items.append(data['releases_limited'])
+        items.append(data['year'])
     except KeyError:
         return flask.Response("{'error':'Partial missing  data in request body.'}", status=400, mimetype='application/json')
-    query = 'UPDATE kpi_aitu SET target = %s, `left` = %s, top_50 = %s, top_100 = %s, quiz = %s, releases = %s, today = %s, `quarter` = %s, quarter_left = %s, releases_limited = %s WHERE id = 1'
+    query = 'UPDATE kpi_aitu SET target = %s, `left` = %s, top_50 = %s, top_100 = %s, quiz = %s, releases = %s, today = %s, `quarter` = %s, quarter_left = %s, releases_limited = %s WHERE year = %s'
     # Кавычки в запросе не убирать, иначе сломает запрос.
-    val = (int(items[0]), int(items[1]), int(items[2]), int(items[3]), int(items[4]), int(items[5]), int(items[6]), int(items[7]), int(items[8]), int(items[9]))
+    val = (int(items[0]), int(items[1]), int(items[2]), int(items[3]), int(items[4]), int(items[5]), int(items[6]), int(items[7]), int(items[8]), int(items[9]), int(items[10]))
     mycursor.execute(query, val)
     mydb.commit()
     return_dict = dict()
@@ -649,7 +650,7 @@ def add_release():
             if item not in dbtable_columns:
                 pass
             keys.append(item)
-            values.append(str(body[item]))  # todo: escape bad characters
+            values.append(str(body[item]))
         delimeter = ", "
         key_string = delimeter.join(keys)  # формирование строки для вставки в поля запроса. Как поля используются ключи словаря.
         placeholder = '%s'
