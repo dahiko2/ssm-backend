@@ -473,13 +473,15 @@ def add_yt_channel():
 @ssm.route("/get_kpi_aitu", methods=['GET'])
 def get_kpi_aitu():
     """
+    todo: По возможности переделать метод для возможности выбора года
     Получает значения KPI Aitu.
     Возвращает json-объект, список словарей.
     :return: json(list[dict])
     """
     mydb, mycursor = ssm_connection()
-    sql = "SELECT target, `left`, top_50, top_100, quiz, releases, today, `quarter`, quarter_left, releases_limited FROM kpi_aitu;"   # Кавычки в запросе не убирать, иначе сломает запрос.
-    mycursor.execute(sql)
+    query = "SELECT target, `left`, top_50, top_100, quiz, releases, today, `quarter`, quarter_left, releases_limited FROM kpi_aitu WHERE year = %s;"   # Кавычки в запросе не убирать, иначе сломает запрос.
+    value = (datetime.today().year, )
+    mycursor.execute(query, value)
     query_result = mycursor.fetchone()
     itemlist = []
     item = dict()
@@ -500,7 +502,6 @@ def get_kpi_aitu():
 @ssm.route("/update_kpi_aitu", methods=['POST'])
 def update_kpi_aitu():
     """
-    todo: refactor. Добавить в базу поле год, записывать данные только за текущий год. Также поменять запрос в методе вывода.
     POST метод. Обновляет значения в таблице KPI Aitu
     Параметры считываются через тело запроса как json объект.
     Пример тела запроса:
