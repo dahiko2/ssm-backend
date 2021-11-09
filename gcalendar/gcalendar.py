@@ -50,9 +50,10 @@ def get_last_calendar_events(creds, start=None, end=None):
                     #releases_list.append({"name":item['summary'].strip(), "date": item['start']['dateTime']})
                     pass
             else:
-                releases_list.append({"name":item['summary'].strip(), "date": dateutil.parser.isoparse(item['end']['dateTime']).replace(tzinfo=None)})
+                releases_list.append({"name": item['summary'].strip(), "date": str(dateutil.parser.isoparse(item['end']['dateTime']).replace(tzinfo=None))})
 
     return releases_list
+
 
 def get_releases_from_calendar(startdate=None, enddate=None):
     credentials = get_creds()
