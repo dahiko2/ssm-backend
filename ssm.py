@@ -6,7 +6,7 @@ import flask
 import mysql.connector
 import requests
 from flask import Blueprint
-from datetime import datetime
+from datetime import datetime, timezone
 from urllib.parse import urlparse, parse_qs
 from gcalendar import gcalendar
 
@@ -1359,10 +1359,12 @@ def get_calendar_releases():
     try:
         # date format is yyyy.mm.dd
         date_start_i = flask.request.args.get('start')
+        start = datetime.strptime(date_start_i, "%Y.%m.%d").replace(tzinfo=timezone.utc)
     except KeyError:
-        date_start_i = None
+        start = None
     try:
         date_end_i = flask.request.args.get('end')
+        end = datetime.strptime(date_end_i, "")
     except KeyError:
-        date_end_i = None
-    return json.dumps(gcalendar.get_releases_from_calendar(date_start_i, date_end_i), indent=4)
+        end = None
+    return json.dumps(gcalendar.get_releases_from_calendar(start, end), indent=4)
