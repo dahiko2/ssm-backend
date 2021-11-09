@@ -8,6 +8,7 @@ import requests
 from flask import Blueprint
 from datetime import datetime
 from urllib.parse import urlparse, parse_qs
+from gcalendar import gcalendar
 
 
 def read_creds():
@@ -1364,4 +1365,4 @@ def get_calendar_releases():
         date_end_i = flask.request.args.get('end')
     except KeyError:
         date_end_i = None
-    return flask.Response("ok", status=200)
+    return gcalendar.get_releases_from_calendar(date_start_i, date_end_i)
