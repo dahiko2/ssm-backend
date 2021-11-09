@@ -1351,3 +1351,17 @@ def get_yt_channels_sums():
         item['quarter_views_sum'] = float(row[5])
         itemlist.append(item)
     return json.dumps(itemlist, indent=4)
+
+
+@ssm.route("/calendar_releases")
+def get_calendar_releases():
+    try:
+        # date format is yyyy.mm.dd
+        date_start_i = flask.request.args.get('start')
+    except KeyError:
+        date_start_i = None
+    try:
+        date_end_i = flask.request.args.get('end')
+    except KeyError:
+        date_end_i = None
+    return flask.Response("ok", status=200)
