@@ -1356,8 +1356,14 @@ def get_yt_channels_sums():
 
 @ssm.route("/calendar_releases")
 def get_calendar_releases():
+    """
+    todo: comms
+    Формат даты в параметрах - yyyy.mm.dd
+    Возвращает json-объект, список словарей.
+    :return: json(list[dict])
+    """
     try:
-        # date format is yyyy.mm.dd
+
         date_start_i = flask.request.args.get('start')
         start = datetime.strptime(date_start_i, "%Y.%m.%d").replace(tzinfo=timezone.utc)
     except KeyError:
@@ -1367,4 +1373,6 @@ def get_calendar_releases():
         end = datetime.strptime(date_end_i, "%Y.%m.%d").replace(tzinfo=timezone.utc)
     except KeyError:
         end = None
+    if start is not None and end is not None and end < start:
+        flask.Response("{'error':'Start date can't be later than end date.'}", status=400, mimetype='application/json')
     return json.dumps(gcalendar.get_releases_from_calendar(start, end), indent=4)
