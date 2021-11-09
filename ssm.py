@@ -1365,4 +1365,4 @@ def get_calendar_releases():
         date_end_i = flask.request.args.get('end')
     except KeyError:
         date_end_i = None
-    return gcalendar.get_releases_from_calendar(date_start_i, date_end_i)
+    return json.dumps(gcalendar.get_releases_from_calendar(date_start_i, date_end_i), indent=4)
