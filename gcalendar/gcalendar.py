@@ -30,6 +30,8 @@ def get_creds():
 
 
 def get_last_calendar_events(creds, start=None, end=None):
+    print(start)
+    print(datetime.datetime.now(datetime.timezone.utc))
     calendar_id = "ssmedia.kz_7i86em8m8i9gjm6ggdi6tgour0@group.calendar.google.com"
     service = build('calendar', 'v3', credentials=creds)
     if start is None:
