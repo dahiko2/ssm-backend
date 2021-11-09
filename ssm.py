@@ -1364,7 +1364,7 @@ def get_calendar_releases():
         start = None
     try:
         date_end_i = flask.request.args.get('end')
-        end = datetime.strptime(date_end_i, "")
+        end = datetime.strptime(date_end_i, "%Y.%m.%d")
     except KeyError:
         end = None
     return json.dumps(gcalendar.get_releases_from_calendar(start, end), indent=4)
