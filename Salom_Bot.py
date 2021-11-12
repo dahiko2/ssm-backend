@@ -25,7 +25,7 @@ bot.set_webhook(url=f"https://maksimsalnikov.pythonanywhere.com/salob/{token}/")
 
 def read_creds():
     """
-    Считывает данные для входа в бд из файла
+    Считывает данные для  входа в бд из файла
     """
     global fhost, fuser, fpass, fdbname
     with open("credentials.txt") as f:
